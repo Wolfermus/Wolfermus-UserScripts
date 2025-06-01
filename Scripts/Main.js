@@ -61,6 +61,8 @@ async () => {
         });
     }
 
+    debugger;
+
     const bypassScriptPolicyScripts = trustedTypes.createPolicy("bypassScriptScripts", {
         createScript: (string) => string,
         createScriptURL: (string) => string

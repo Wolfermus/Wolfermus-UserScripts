@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.16
+// @version      1.0.18
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
 // @supportURL   https://github.com/Wolfermus/Wolfermus-UserScripts/issues
 // @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Main.user.js
-// @downloadURL  https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Main.user.js
 // @license      GPLv3
 // @match        *
 // @match        *://*/*
@@ -151,6 +150,8 @@
         return true;
     }
 
+    if (WolfermusCheckModuleLoaded("MainMenu")) return;
+
     console.log("Wolfermus Main Menu Loading...");
 
     let wolfermusLoadLoopCounter = 0;
@@ -190,6 +191,8 @@
     // }
 
     debugger;
+    if (!mainWindow["Wolfermus"]["MainMenu"]) mainWindow["Wolfermus"]["MainMenu"] = {};
+    mainWindow["Wolfermus"]["MainMenu"]["Loaded"] = false;
 
     const bypassScriptPolicyMainMenuMain = trustedTypes.createPolicy("bypassScriptMainMenuMain", {
         createScript: (string) => string,
@@ -224,4 +227,6 @@
     console.log("Scripts/Main.js - 5");
 
     console.log("Wolfermus Loaded Scripts/Main.js");
+
+    mainWindow["Wolfermus"]["MainMenu"]["Loaded"] = true;
 })();

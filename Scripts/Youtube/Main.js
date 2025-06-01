@@ -61,6 +61,9 @@ async () => {
         });
     }
 
+
+    debugger;
+
     const bypassScriptPolicyYoutube = trustedTypes.createPolicy("bypassScriptYoutube", {
         createScript: (string) => string,
         createScriptURL: (string) => string

@@ -249,6 +249,9 @@ async () => {
         });
     }
 
+
+    debugger;
+
     if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
         await AttemptLoadChangeFrostedGlassStyle();
     }
