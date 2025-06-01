@@ -68,8 +68,14 @@ async () => {
 
     async function LoadScript(name) {
         const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${name}/Main.js`));
-        await eval(script)();
+        return eval(script)();
     }
 
-    await LoadScript("Youtube");
+    async function AttemptLoadScript() {
+        await Sleep(100);
+        LoadScript("Youtube").then(async () => {
+            return resolve();
+        }).catch(AttemptLoadScript);
+    }
+    await AttemptLoadScript();
 };

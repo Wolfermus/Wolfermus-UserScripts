@@ -200,29 +200,50 @@ async () => {
 
     let ChangeFrostedGlassStyle;
     let RestoreFrostedGlassBackgroundColor;
-    if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
-        if (ChangeFrostedGlassStyle === undefined || ChangeFrostedGlassStyle === null) {
-            const gottenScript = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/ChangeFrostedGlassStyle.js"));
-            ChangeFrostedGlassStyle = eval(gottenScript);
+
+    async function LoadChangeFrostedGlassStyle() {
+        if (ChangeFrostedGlassStyle !== undefined && ChangeFrostedGlassStyle !== null) {
+            return;
         }
-        ChangeFrostedGlassStyle();
+        const groupName = "Youtube";
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/ChangeFrostedGlassStyle.js"));
+        ChangeFrostedGlassStyle = eval(script);
+    }
+
+    async function LoadRestoreFrostedGlassBackgroundColor() {
+        if (RestoreFrostedGlassBackgroundColor !== undefined && RestoreFrostedGlassBackgroundColor !== null) {
+            return;
+        }
+        const groupName = "Youtube";
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/RestoreFrostedGlassBackgroundColor.js"));
+        RestoreFrostedGlassBackgroundColor = eval(script);
+    }
+
+    async function AttemptLoadChangeFrostedGlassStyle() {
+        await Sleep(100);
+        LoadChangeFrostedGlassStyle().then(async () => {
+            return await ChangeFrostedGlassStyle();
+        }).catch(AttemptLoadChangeFrostedGlassStyle);
+    }
+
+    async function AttemptRestoreFrostedGlassBackgroundColor() {
+        await Sleep(100);
+        LoadRestoreFrostedGlassBackgroundColor().then(async () => {
+            return await RestoreFrostedGlassBackgroundColor();
+        }).catch(AttemptRestoreFrostedGlassBackgroundColor);
+    }
+
+    if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
+        await AttemptLoadChangeFrostedGlassStyle();
     }
 
     SetMenuItem("Main Page Scroll Frosted Glass", async () => {
         WolfermusCSSTogglesSettings["FrostedGlass"] = !WolfermusCSSTogglesSettings["FrostedGlass"];
 
         if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
-            if (ChangeFrostedGlassStyle === undefined || ChangeFrostedGlassStyle === null) {
-                const gottenScript = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/ChangeFrostedGlassStyle.js"));
-                ChangeFrostedGlassStyle = eval(gottenScript);
-            }
-            ChangeFrostedGlassStyle();
+            await AttemptLoadChangeFrostedGlassStyle();
         } else {
-            if (RestoreFrostedGlassBackgroundColor === undefined || RestoreFrostedGlassBackgroundColor === null) {
-                const gottenScript = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/RestoreFrostedGlassBackgroundColor.js"));
-                RestoreFrostedGlassBackgroundColor = eval(gottenScript);
-            }
-            RestoreFrostedGlassBackgroundColor();
+            await AttemptRestoreFrostedGlassBackgroundColor();
         }
 
         SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.4
+// @version      1.0.5
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -171,23 +171,41 @@
 
     /**
      * Update Main Menu Items
-     * @type {() => {}}
+     * @async
+     * @type {() => Promise<void>}
      */
     const UpdateMenuItems = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateMenuItems"];
 
     /**
      * Updates the Main Menu Style
-     * @type {() => {}}
+     * @type {() => void}
      */
     const UpdateWolfermusMainMenuStyle = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateWolfermusMainMenuStyle"];
 
-    async function LoadScript() {
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`));
-        await eval(script)();
+    // async function LoadScript() {
+    //     MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`).then((result) => {
+    //         const script = bypassScriptPolicy.createScript(result);
+    //         return eval(script)().then(() => {
+    //             resolve();
+    //         }).catch(() => {
+    //             Sleep(200);
+    //             return LoadScript();
+    //         });
+    //     })
+    // }
+
+    async function LoadScript(name) {
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${name}/Main.js`));
+        return eval(script)();
     }
 
-    await LoadScript();
-
-    UpdateMenuItems();
-    UpdateWolfermusMainMenuStyle();
+    async function AttemptLoadScript() {
+        await Sleep(100);
+        LoadScript().then(async () => {
+            await UpdateMenuItems();
+            UpdateWolfermusMainMenuStyle();
+            return resolve();
+        }).catch(AttemptLoadScript);
+    }
+    await AttemptLoadScript();
 })();

@@ -41,7 +41,7 @@ async () => {
     }
 
     while (parts[0] === "0" && parts[1] === "0" && parts[2] === "0") {
-        await Sleep(500);
+        await Sleep(200);
 
         parts = null;
 
