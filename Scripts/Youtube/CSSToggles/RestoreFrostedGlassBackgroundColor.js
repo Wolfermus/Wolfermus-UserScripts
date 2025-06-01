@@ -1,4 +1,4 @@
-await(async () => {
+async () => {
     /**
      * @returns {HTMLStyleElement}
      */
@@ -17,4 +17,4 @@ await(async () => {
     }
 
     WolfermusYoutubeGetSetStyleElement().textContent = ``;
-})();
+};

@@ -1,4 +1,4 @@
-await(async () => {
+async () => {
     /**
      * @param {number | undefined} ms
      */
@@ -69,4 +69,4 @@ await(async () => {
         background: rgba(${parts.join(',')});
     }
     `;
-})();
+};
