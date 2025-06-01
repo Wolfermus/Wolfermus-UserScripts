@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.18
+// @version      1.0.19
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -151,6 +151,16 @@
     }
 
     if (WolfermusCheckModuleLoaded("MainMenu")) return;
+    if (!mainWindow["Wolfermus"]["MainMenu"]) mainWindow["Wolfermus"]["MainMenu"] = {};
+
+    while (mainWindow["Wolfermus"]["MainMenu"]["Loading"] === true) {
+        await Sleep(500);
+    }
+
+    if (WolfermusCheckModuleLoaded("MainMenu")) return;
+
+    mainWindow["Wolfermus"]["MainMenu"]["Loaded"] = false;
+    mainWindow["Wolfermus"]["MainMenu"]["Loading"] = true;
 
     console.log("Wolfermus Main Menu Loading...");
 
@@ -190,43 +200,44 @@
     //     })
     // }
 
-    debugger;
-    if (!mainWindow["Wolfermus"]["MainMenu"]) mainWindow["Wolfermus"]["MainMenu"] = {};
-    mainWindow["Wolfermus"]["MainMenu"]["Loaded"] = false;
-
     const bypassScriptPolicyMainMenuMain = trustedTypes.createPolicy("bypassScriptMainMenuMain", {
         createScript: (string) => string,
         createScriptURL: (string) => string
     });
 
     async function LoadScript() {
-        console.log("Scripts/Main.js - 3");
+        //console.log("Scripts/Main.js - 3");
         const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`));
         return eval(script)();
     }
 
     await Sleep(1000);
 
+    let wolfermusPreventLoopLock1 = 5;
+
     async function AttemptLoadScript() {
-        console.log("Scripts/Main.js - 2");
+        //console.log("Scripts/Main.js - 2");
         await Sleep(100);
         await LoadScript().then(async () => {
-            console.log("Scripts/Main.js - 4");
+            //console.log("Scripts/Main.js - 4");
             await Sleep(100);
             await UpdateMenuItems();
             UpdateWolfermusMainMenuStyle();
         }).catch(async (error) => {
-            debugger;
-            console.log("Scripts/Main.js - ERROR");
-            console.log(error);
+            if (wolfermusPreventLoopLock1 <= 0) return;
+            wolfermusPreventLoopLock1--;
             await AttemptLoadScript();
         });
     }
-    console.log("Scripts/Main.js - 1");
+    //console.log("Scripts/Main.js - 1");
     await AttemptLoadScript();
-    console.log("Scripts/Main.js - 5");
+
+    if (wolfermusPreventLoopLock1 <= 0) return;
+
+    //console.log("Scripts/Main.js - 5");
 
     console.log("Wolfermus Loaded Scripts/Main.js");
 
     mainWindow["Wolfermus"]["MainMenu"]["Loaded"] = true;
+    mainWindow["Wolfermus"]["MainMenu"]["Loading"] = false;
 })();

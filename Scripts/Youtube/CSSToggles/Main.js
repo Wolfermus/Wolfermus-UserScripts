@@ -1,5 +1,5 @@
 async () => {
-    debugger;
+    //debugger;
     if (window.location.href !== "https://www.youtube.com/") return;
 
     let IsGMXmlHttpRequest1 = false;
@@ -141,8 +141,6 @@ async () => {
         return true;
     }
 
-    console.log("WolfermusMainMenu Test Loading...");
-
     {
         let wolfermusLoadLoopCounter = 0;
         while (!WolfermusCheckLibraryLoaded("StorageManager")) {
@@ -231,9 +229,9 @@ async () => {
         await LoadChangeFrostedGlassStyle().then(async () => {
             await ChangeFrostedGlassStyle();
         }).catch(async (error) => {
-            debugger;
-            console.log("CSSToggles - AttemptLoadChangeFrostedGlassStyle - ERROR");
-            console.log(error);
+            //debugger;
+            //console.log("CSSToggles - AttemptLoadChangeFrostedGlassStyle - ERROR");
+            //console.log(error);
             await AttemptLoadChangeFrostedGlassStyle();
         });
     }
@@ -243,15 +241,15 @@ async () => {
         await LoadRestoreFrostedGlassBackgroundColor().then(async () => {
             await RestoreFrostedGlassBackgroundColor();
         }).catch(async (error) => {
-            debugger;
-            console.log("CSSToggles - AttemptRestoreFrostedGlassBackgroundColor - ERROR");
-            console.log(error);
+            //debugger;
+            //console.log("CSSToggles - AttemptRestoreFrostedGlassBackgroundColor - ERROR");
+            //console.log(error);
             await AttemptRestoreFrostedGlassBackgroundColor();
         });
     }
 
 
-    debugger;
+    //debugger;
 
     if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
         await AttemptLoadChangeFrostedGlassStyle();
