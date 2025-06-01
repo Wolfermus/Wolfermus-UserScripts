@@ -75,6 +75,7 @@ async () => {
     async function AttemptLoadScript() {
         await Sleep(100);
         LoadScript("CSSToggles").then(async () => {
+            console.log("Wolfermus Loaded Scripts/Youtube/CSSToggles/Main.js");
             return resolve();
         }).catch(AttemptLoadScript);
     }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.8
+// @version      1.0.9
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -209,4 +209,6 @@
         }).catch(AttemptLoadScript);
     }
     await AttemptLoadScript();
+
+    console.log("Wolfermus Loaded Scripts/Main.js");
 })();

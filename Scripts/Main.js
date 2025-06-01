@@ -74,8 +74,10 @@ async () => {
     async function AttemptLoadScript() {
         await Sleep(100);
         LoadScript("Youtube").then(async () => {
+            console.log("Wolfermus Loaded Scripts/Youtube/Main.js");
             return resolve();
         }).catch(AttemptLoadScript);
     }
     await AttemptLoadScript();
+
 };
