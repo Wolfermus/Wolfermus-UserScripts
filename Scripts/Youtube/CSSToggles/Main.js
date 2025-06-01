@@ -207,7 +207,6 @@ async () => {
         if (ChangeFrostedGlassStyle !== undefined && ChangeFrostedGlassStyle !== null) {
             return;
         }
-        const groupName = "Youtube";
         const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/ChangeFrostedGlassStyle.js"));
         ChangeFrostedGlassStyle = eval(script);
     }
@@ -216,7 +215,6 @@ async () => {
         if (RestoreFrostedGlassBackgroundColor !== undefined && RestoreFrostedGlassBackgroundColor !== null) {
             return;
         }
-        const groupName = "Youtube";
         const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/RestoreFrostedGlassBackgroundColor.js"));
         RestoreFrostedGlassBackgroundColor = eval(script);
     }
