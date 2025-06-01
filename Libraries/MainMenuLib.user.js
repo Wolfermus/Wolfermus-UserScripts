@@ -23,6 +23,12 @@
 // @icon         https://i.imgur.com/XFeWfV0.png
 // ==/UserScript== 
 
+const bypassScriptPolicy = trustedTypes.createPolicy("bypassScript", {
+    createHTML: (string) => string,
+    createScript: (string) => string,
+    createScriptURL: (string) => string
+});
+
 /**
  * @param {number | undefined} ms
  */
@@ -107,7 +113,7 @@ function UpdateWolfermusMainMenuStyle() {
         document.head.append(mainMenuStyle);
     }
 
-    mainMenuStyle.innerHTML = `
+    const editedInnerHTML = bypassScriptPolicy.createHTML(`
 .defaultFloatingButtonCSS {
   padding: 0;
   margin: 0;
@@ -264,7 +270,9 @@ function UpdateWolfermusMainMenuStyle() {
     }
     }
     }
-    `;
+    `);
+
+    mainMenuStyle.innerHTML = editedInnerHTML;
 }
 
 const contrainedPadding = 5;
@@ -652,7 +660,7 @@ function MainMenuMouseDown(event) {
         RemoveInteractionEventsToMainMenu();
         RemoveAttachedScriptsForCurrentItems();
 
-        mainMenuRoot.innerHTML = `
+        const editedInnerHTML = bypassScriptPolicy.createHTML(`
   <div id="floating-snap-btn-wrapper" class="defaultFloatingButtonCSS ${WolfermusMainMenuSettings.Direction?.Horizontal ? WolfermusMainMenuSettings.Direction?.Horizontal : ""} ${WolfermusMainMenuSettings.Direction?.Vertical ? WolfermusMainMenuSettings.Direction?.Vertical : ""}"
     style="${WolfermusMainMenuSettings.Top ? "top: " + WolfermusMainMenuSettings.Top + "px;" : ""} ${WolfermusMainMenuSettings.Left ? "left: " + WolfermusMainMenuSettings.Left + "px;" : ""}">
     <!-- BEGIN :: Floating Button -->
@@ -668,7 +676,9 @@ function MainMenuMouseDown(event) {
     </div>
     <!-- END :: Expand Section -->
   </div>
-    `;
+    `);
+
+        mainMenuRoot.innerHTML = editedInnerHTML;
 
         if (creatingMainMenuRoot) {
             document.body.append(mainMenuRoot);
