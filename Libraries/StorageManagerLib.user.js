@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Storage Manager Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.0
+// @version      1.0.1
 // @description  This script is a storage manager that manages storage between local and GM
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -76,7 +76,7 @@
         return true;
     }
 
-    console.log("WolfermusStorageManager Loading...");
+    console.log("Wolfermus Storage Manager Library Loading...");
 
     let wlfLogoNormal = "https://i.imgur.com/nUWGXp0.png";
     let wlfLogoRounded = "https://i.imgur.com/XFeWfV0.png";

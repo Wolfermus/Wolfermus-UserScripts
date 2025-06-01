@@ -174,6 +174,8 @@ async () => {
         }
     }
 
+    console.log("Wolfermus - Adding CSSToggles");
+
     /**
      * @async
      * @type {(key: string, value: any) => void}

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.1
+// @version      1.0.2
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -479,7 +479,7 @@ function MainMenuMouseDown(event) {
         return true;
     }
 
-    console.log("WolfermusMainMenu Loading...");
+    console.log("Wolfermus Main Menu Library Loading...");
 
     let wolfermusLoadLoopCounter = 0;
     while (!WolfermusCheckLibraryLoaded("StorageManager")) {
