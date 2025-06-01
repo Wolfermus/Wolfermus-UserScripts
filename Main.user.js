@@ -1,11 +1,13 @@
 // ==UserScript==
-// @name         Wolfermus Main Menu Library
+// @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
 // @version      1.0.0
-// @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
+// @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
 // @supportURL   https://github.com/Wolfermus/Wolfermus-UserScripts/issues
+// @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Main.user.js
+// @downloadURL  https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Main.user.js
 // @license      GPLv3
 // @match        *
 // @match        *://*/*
@@ -157,7 +159,7 @@
     console.log("WolfermusMainMenu Loading...");
 
     let wolfermusLoadLoopCounter = 0;
-    while (!WolfermusCheckLibraryLoaded("StorageManager")) {
+    while (!WolfermusCheckLibraryLoaded("MainMenu")) {
         await Sleep(500);
 
         if (wolfermusLoadLoopCounter >= 100) {
@@ -167,10 +169,25 @@
         wolfermusLoadLoopCounter++;
     }
 
+    /**
+     * Update Main Menu Items
+     * @type {() => {}}
+     */
+    const UpdateMenuItems = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateMenuItems"];
+
+    /**
+     * Updates the Main Menu Style
+     * @type {() => {}}
+     */
+    const UpdateWolfermusMainMenuStyle = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateWolfermusMainMenuStyle"];
+
     async function LoadScript() {
         const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`));
         eval(script);
     }
 
     await LoadScript();
+
+    UpdateMenuItems();
+    UpdateWolfermusMainMenuStyle();
 })();
