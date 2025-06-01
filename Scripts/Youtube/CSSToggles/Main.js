@@ -54,12 +54,6 @@ async () => {
         });
     }
 
-    const bypassScriptPolicy = trustedTypes.createPolicy("bypassScript", {
-        createHTML: (string) => string,
-        createScript: (string) => string,
-        createScriptURL: (string) => string
-    });
-
     console.log("Wolfermus: Youtube - CSSToggles Running");
 
     /**
@@ -209,6 +203,11 @@ async () => {
         if (ChangeFrostedGlassStyle !== undefined && ChangeFrostedGlassStyle !== null) {
             return;
         }
+        const bypassScriptPolicy = trustedTypes.createPolicy("bypassScriptChangeFrostedGlassStyle", {
+            createScript: (string) => string,
+            createScriptURL: (string) => string
+        });
+
         const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/ChangeFrostedGlassStyle.js"));
         ChangeFrostedGlassStyle = eval(script);
     }
@@ -217,6 +216,11 @@ async () => {
         if (RestoreFrostedGlassBackgroundColor !== undefined && RestoreFrostedGlassBackgroundColor !== null) {
             return;
         }
+        const bypassScriptPolicy = trustedTypes.createPolicy("bypassScriptRestoreFrostedGlassBackgroundColor", {
+            createScript: (string) => string,
+            createScriptURL: (string) => string
+        });
+
         const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/RestoreFrostedGlassBackgroundColor.js"));
         RestoreFrostedGlassBackgroundColor = eval(script);
     }

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.15
+// @version      1.0.16
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -91,11 +91,6 @@
             });
         });
     }
-
-    const bypassScriptPolicy = trustedTypes.createPolicy("bypassScript", {
-        createScript: (string) => string,
-        createScriptURL: (string) => string
-    });
 
     let wolfermusAntiStuckLoop1 = 100;
     while (window === undefined || window === null) {
@@ -196,9 +191,14 @@
 
     debugger;
 
+    const bypassScriptPolicyMainMenuMain = trustedTypes.createPolicy("bypassScriptMainMenuMain", {
+        createScript: (string) => string,
+        createScriptURL: (string) => string
+    });
+
     async function LoadScript() {
         console.log("Scripts/Main.js - 3");
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`));
+        const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`));
         return eval(script)();
     }
 

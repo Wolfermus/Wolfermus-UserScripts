@@ -52,11 +52,6 @@ async () => {
         });
     }
 
-    const bypassScriptPolicy = trustedTypes.createPolicy("bypassScript", {
-        createScript: (string) => string,
-        createScriptURL: (string) => string
-    });
-
     /**
      * @param {number | undefined} ms
      */
@@ -66,9 +61,14 @@ async () => {
         });
     }
 
+    const bypassScriptPolicyScripts = trustedTypes.createPolicy("bypassScriptScripts", {
+        createScript: (string) => string,
+        createScriptURL: (string) => string
+    });
+
     async function LoadScript(name) {
         console.log("Scripts/Youtube/Main.js - 3");
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${name}/Main.js`));
+        const script = bypassScriptPolicyScripts.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${name}/Main.js`));
         return eval(script)();
     }
 
