@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.13
+// @version      1.0.14
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -207,7 +207,7 @@
     async function AttemptLoadScript() {
         console.log("1");
         await Sleep(100);
-        LoadScript().then(async () => {
+        LoadScript().then(async (resolve, reject) => {
             console.log("3");
             await Sleep(100);
             await UpdateMenuItems();
@@ -216,7 +216,7 @@
         }).catch(async (error) => {
             debugger;
             console.log(error);
-            return AttemptLoadScript();
+            return await AttemptLoadScript();
         });
     }
     await AttemptLoadScript();
