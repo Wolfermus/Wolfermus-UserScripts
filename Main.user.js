@@ -183,7 +183,7 @@
 
     async function LoadScript() {
         const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`));
-        eval(script);
+        await eval(script);
     }
 
     await LoadScript();

@@ -69,7 +69,7 @@
     async function LoadScript(name) {
         const groupName = "Youtube";
         const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${groupName}/${name}/Main.js`));
-        eval(script);
+        await eval(script);
     }
 
     await LoadScript("CSSToggles");
