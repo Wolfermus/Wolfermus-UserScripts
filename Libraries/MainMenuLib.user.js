@@ -11,6 +11,7 @@
 // @match        *://*/*
 // @match        http://*/*
 // @match        https://*/*
+// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Libraries/StorageManagerLib.user.js
 // @grant        GM_getValue
 // @grant        GM.getValue
 // @grant        GM_setValue
