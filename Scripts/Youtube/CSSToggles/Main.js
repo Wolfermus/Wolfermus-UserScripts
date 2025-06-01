@@ -53,6 +53,7 @@
     }
 
     const bypassScriptPolicy = trustedTypes.createPolicy("bypassScript", {
+        createHTML: (string) => string,
         createScript: (string) => string,
         createScriptURL: (string) => string
     });
@@ -197,7 +198,6 @@
         WolfermusCSSTogglesSettings["FrostedGlass"] = false;
     }
 
-    debugger;
     let ChangeFrostedGlassStyle;
     let RestoreFrostedGlassBackgroundColor;
     if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
