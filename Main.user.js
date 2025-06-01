@@ -195,6 +195,7 @@
     // }
 
     async function LoadScript() {
+        console.log("2");
         const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`));
         return eval(script)();
     }
@@ -202,8 +203,10 @@
     await Sleep(1000);
 
     async function AttemptLoadScript() {
+        console.log("1");
         await Sleep(100);
         LoadScript().then(async () => {
+            console.log("3");
             await Sleep(100);
             await UpdateMenuItems();
             UpdateWolfermusMainMenuStyle();

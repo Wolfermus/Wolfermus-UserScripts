@@ -66,21 +66,21 @@ async () => {
         });
     }
 
-    async function LoadScript(name) {
-        const groupName = "Youtube";
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${groupName}/${name}/Main.js`));
-        return eval(script)();
-    }
+    // async function LoadScript(name) {
+    //     const groupName = "Youtube";
+    //     const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${groupName}/${name}/Main.js`));
+    //     return eval(script)();
+    // }
 
-    await Sleep(1000);
+    // await Sleep(1000);
 
-    async function AttemptLoadScript() {
-        await Sleep(100);
-        LoadScript("CSSToggles").then(async () => {
-            return resolve();
-        }).catch(AttemptLoadScript);
-    }
-    await AttemptLoadScript();
+    // async function AttemptLoadScript() {
+    //     await Sleep(100);
+    //     LoadScript("CSSToggles").then(async () => {
+    //         return resolve();
+    //     }).catch(AttemptLoadScript);
+    // }
+    // await AttemptLoadScript();
 
     console.log("Wolfermus Loaded Scripts/Youtube/CSSToggles/Main.js");
 };

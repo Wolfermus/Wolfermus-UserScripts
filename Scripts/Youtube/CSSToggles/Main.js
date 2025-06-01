@@ -205,49 +205,49 @@ async () => {
     let ChangeFrostedGlassStyle;
     let RestoreFrostedGlassBackgroundColor;
 
-    async function LoadChangeFrostedGlassStyle() {
-        if (ChangeFrostedGlassStyle !== undefined && ChangeFrostedGlassStyle !== null) {
-            return;
-        }
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/ChangeFrostedGlassStyle.js"));
-        ChangeFrostedGlassStyle = eval(script);
-    }
+    // async function LoadChangeFrostedGlassStyle() {
+    //     if (ChangeFrostedGlassStyle !== undefined && ChangeFrostedGlassStyle !== null) {
+    //         return;
+    //     }
+    //     const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/ChangeFrostedGlassStyle.js"));
+    //     ChangeFrostedGlassStyle = eval(script);
+    // }
 
-    async function LoadRestoreFrostedGlassBackgroundColor() {
-        if (RestoreFrostedGlassBackgroundColor !== undefined && RestoreFrostedGlassBackgroundColor !== null) {
-            return;
-        }
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/RestoreFrostedGlassBackgroundColor.js"));
-        RestoreFrostedGlassBackgroundColor = eval(script);
-    }
+    // async function LoadRestoreFrostedGlassBackgroundColor() {
+    //     if (RestoreFrostedGlassBackgroundColor !== undefined && RestoreFrostedGlassBackgroundColor !== null) {
+    //         return;
+    //     }
+    //     const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/RestoreFrostedGlassBackgroundColor.js"));
+    //     RestoreFrostedGlassBackgroundColor = eval(script);
+    // }
 
-    async function AttemptLoadChangeFrostedGlassStyle() {
-        await Sleep(100);
-        LoadChangeFrostedGlassStyle().then(async () => {
-            return await ChangeFrostedGlassStyle();
-        }).catch(AttemptLoadChangeFrostedGlassStyle);
-    }
+    // async function AttemptLoadChangeFrostedGlassStyle() {
+    //     await Sleep(100);
+    //     LoadChangeFrostedGlassStyle().then(async () => {
+    //         return await ChangeFrostedGlassStyle();
+    //     }).catch(AttemptLoadChangeFrostedGlassStyle);
+    // }
 
-    async function AttemptRestoreFrostedGlassBackgroundColor() {
-        await Sleep(100);
-        LoadRestoreFrostedGlassBackgroundColor().then(async () => {
-            return await RestoreFrostedGlassBackgroundColor();
-        }).catch(AttemptRestoreFrostedGlassBackgroundColor);
-    }
+    // async function AttemptRestoreFrostedGlassBackgroundColor() {
+    //     await Sleep(100);
+    //     LoadRestoreFrostedGlassBackgroundColor().then(async () => {
+    //         return await RestoreFrostedGlassBackgroundColor();
+    //     }).catch(AttemptRestoreFrostedGlassBackgroundColor);
+    // }
 
-    if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
-        await AttemptLoadChangeFrostedGlassStyle();
-    }
+    // if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
+    //     await AttemptLoadChangeFrostedGlassStyle();
+    // }
 
-    SetMenuItem("Main Page Scroll Frosted Glass", async () => {
-        WolfermusCSSTogglesSettings["FrostedGlass"] = !WolfermusCSSTogglesSettings["FrostedGlass"];
+    // SetMenuItem("Main Page Scroll Frosted Glass", async () => {
+    //     WolfermusCSSTogglesSettings["FrostedGlass"] = !WolfermusCSSTogglesSettings["FrostedGlass"];
 
-        if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
-            await AttemptLoadChangeFrostedGlassStyle();
-        } else {
-            await AttemptRestoreFrostedGlassBackgroundColor();
-        }
+    //     if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
+    //         await AttemptLoadChangeFrostedGlassStyle();
+    //     } else {
+    //         await AttemptRestoreFrostedGlassBackgroundColor();
+    //     }
 
-        SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));
-    });
+    //     SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));
+    // });
 };
