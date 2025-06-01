@@ -1,4 +1,4 @@
-await(async () => {
+async () => {
     let IsGMXmlHttpRequest1 = false;
     // @ts-ignore
     if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;
@@ -68,8 +68,8 @@ await(async () => {
 
     async function LoadScript(name) {
         const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${name}/Main.js`));
-        await eval(script);
+        await eval(script)();
     }
 
     await LoadScript("Youtube");
-})();
+};
