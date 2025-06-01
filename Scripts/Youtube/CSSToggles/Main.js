@@ -1,6 +1,6 @@
 async () => {
     debugger;
-    if (window.location.href !== "https://www.youtube.com") return;
+    if (window.location.href !== "https://www.youtube.com/") return;
 
     let IsGMXmlHttpRequest1 = false;
     // @ts-ignore
