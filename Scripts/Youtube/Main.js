@@ -66,21 +66,28 @@ async () => {
         });
     }
 
-    // async function LoadScript(name) {
-    //     const groupName = "Youtube";
-    //     const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${groupName}/${name}/Main.js`));
-    //     return eval(script)();
-    // }
+    async function LoadScript(name) {
+        console.log("Scripts/Youtube/CSSToggles/Main.js - 3");
+        const groupName = "Youtube";
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${groupName}/${name}/Main.js`));
+        return eval(script)();
+    }
 
-    // await Sleep(1000);
+    await Sleep(1000);
 
-    // async function AttemptLoadScript() {
-    //     await Sleep(100);
-    //     LoadScript("CSSToggles").then(async () => {
-    //         return resolve();
-    //     }).catch(AttemptLoadScript);
-    // }
-    // await AttemptLoadScript();
+    async function AttemptLoadScript() {
+        console.log("Scripts/Youtube/CSSToggles/Main.js - 2");
+        await Sleep(100);
+        await LoadScript("CSSToggles").catch(async (error) => {
+            debugger;
+            console.log("Scripts/Youtube/CSSToggles/Main.js - ERROR");
+            console.log(error);
+            await AttemptLoadScript();
+        });
+    }
+    console.log("Scripts/Youtube/CSSToggles/Main.js - 1");
+    await AttemptLoadScript();
+    console.log("Scripts/Youtube/CSSToggles/Main.js - 4");
 
     console.log("Wolfermus Loaded Scripts/Youtube/CSSToggles/Main.js");
 };

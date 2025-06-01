@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.14
+// @version      1.0.15
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -197,7 +197,7 @@
     debugger;
 
     async function LoadScript() {
-        console.log("2");
+        console.log("Scripts/Main.js - 3");
         const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`));
         return eval(script)();
     }
@@ -205,21 +205,23 @@
     await Sleep(1000);
 
     async function AttemptLoadScript() {
-        console.log("1");
+        console.log("Scripts/Main.js - 2");
         await Sleep(100);
-        LoadScript().then(async (resolve, reject) => {
-            console.log("3");
+        await LoadScript().then(async () => {
+            console.log("Scripts/Main.js - 4");
             await Sleep(100);
             await UpdateMenuItems();
             UpdateWolfermusMainMenuStyle();
-            resolve();
         }).catch(async (error) => {
             debugger;
+            console.log("Scripts/Main.js - ERROR");
             console.log(error);
-            return await AttemptLoadScript();
+            await AttemptLoadScript();
         });
     }
+    console.log("Scripts/Main.js - 1");
     await AttemptLoadScript();
+    console.log("Scripts/Main.js - 5");
 
     console.log("Wolfermus Loaded Scripts/Main.js");
 })();
