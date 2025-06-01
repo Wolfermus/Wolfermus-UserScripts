@@ -1,4 +1,4 @@
-(async () => {
+await(async () => {
     let IsGMXmlHttpRequest1 = false;
     // @ts-ignore
     if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;

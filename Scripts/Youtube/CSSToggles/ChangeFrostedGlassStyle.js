@@ -1,21 +1,4 @@
-/**
- * @returns {HTMLStyleElement}
- */
-function WolfermusYoutubeGetSetStyleElement() {
-    const wlfYoutubeStyleElementIDName = "wlf-youtube-style-overrides";
-
-    let wlfYoutubeStyleElement = document.getElementById(wlfYoutubeStyleElementIDName);
-
-    if (wlfYoutubeStyleElement === null) {
-        wlfYoutubeStyleElement = document.createElement('style');
-        wlfYoutubeStyleElement.id = wlfYoutubeStyleElementIDName;
-        document.head.append(wlfYoutubeStyleElement);
-    }
-
-    return wlfYoutubeStyleElement;
-}
-
-async function WolfermusYoutubeChangeFrostedGlassStyle() {
+await(async () => {
     /**
      * @param {number | undefined} ms
      */
@@ -23,6 +6,23 @@ async function WolfermusYoutubeChangeFrostedGlassStyle() {
         return new Promise(resolve => {
             setTimeout(resolve, ms)
         });
+    }
+
+    /**
+     * @returns {HTMLStyleElement}
+     */
+    function WolfermusYoutubeGetSetStyleElement() {
+        const wlfYoutubeStyleElementIDName = "wlf-youtube-style-overrides";
+
+        let wlfYoutubeStyleElement = document.getElementById(wlfYoutubeStyleElementIDName);
+
+        if (wlfYoutubeStyleElement === null) {
+            wlfYoutubeStyleElement = document.createElement('style');
+            wlfYoutubeStyleElement.id = wlfYoutubeStyleElementIDName;
+            document.head.append(wlfYoutubeStyleElement);
+        }
+
+        return wlfYoutubeStyleElement;
     }
 
     let gottenElement = document.getElementById("frosted-glass");
@@ -69,6 +69,4 @@ async function WolfermusYoutubeChangeFrostedGlassStyle() {
         background: rgba(${parts.join(',')});
     }
     `;
-}
-
-WolfermusYoutubeChangeFrostedGlassStyle();
+})();
