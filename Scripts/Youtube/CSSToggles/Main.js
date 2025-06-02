@@ -261,8 +261,6 @@ async () => {
 
     //debugger;
 
-    await Sleep(1000);
-
     if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
         await AttemptLoadChangeFrostedGlassStyle();
     }

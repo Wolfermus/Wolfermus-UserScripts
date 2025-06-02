@@ -74,8 +74,6 @@ async () => {
         return eval(script)();
     }
 
-    await Sleep(1000);
-
     let wolfermusPreventLoopLock1 = 10;
 
     async function AttemptLoadScript() {
