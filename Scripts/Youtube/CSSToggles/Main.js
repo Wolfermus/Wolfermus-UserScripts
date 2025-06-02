@@ -224,32 +224,44 @@ async () => {
         RestoreFrostedGlassBackgroundColor = eval(script);
     }
 
+    let wolfermusPreventLoopLock1 = 10;
+
     async function AttemptLoadChangeFrostedGlassStyle() {
         await Sleep(100);
         await LoadChangeFrostedGlassStyle().then(async () => {
+            wolfermusPreventLoopLock1 = 10;
             await ChangeFrostedGlassStyle();
         }).catch(async (error) => {
             //debugger;
             //console.log("CSSToggles - AttemptLoadChangeFrostedGlassStyle - ERROR");
             //console.log(error);
+            if (wolfermusPreventLoopLock1 <= 0) return;
+            wolfermusPreventLoopLock1--;
             await AttemptLoadChangeFrostedGlassStyle();
         });
     }
 
+    let wolfermusPreventLoopLock2 = 10;
+
     async function AttemptRestoreFrostedGlassBackgroundColor() {
         await Sleep(100);
         await LoadRestoreFrostedGlassBackgroundColor().then(async () => {
+            wolfermusPreventLoopLock2 = 10;
             await RestoreFrostedGlassBackgroundColor();
         }).catch(async (error) => {
             //debugger;
             //console.log("CSSToggles - AttemptRestoreFrostedGlassBackgroundColor - ERROR");
             //console.log(error);
+            if (wolfermusPreventLoopLock2 <= 0) return;
+            wolfermusPreventLoopLock2--;
             await AttemptRestoreFrostedGlassBackgroundColor();
         });
     }
 
 
     //debugger;
+
+    await Sleep(1000);
 
     if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
         await AttemptLoadChangeFrostedGlassStyle();

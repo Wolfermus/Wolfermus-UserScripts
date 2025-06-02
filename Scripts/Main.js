@@ -76,19 +76,25 @@ async () => {
 
     await Sleep(1000);
 
+    let wolfermusPreventLoopLock1 = 10;
+
     async function AttemptLoadScript() {
         //console.log("Scripts/Youtube/Main.js - 2");
-        await Sleep(100);
+        await Sleep(500);
         await LoadScript("Youtube").catch(async (error) => {
             //debugger;
             //console.log("Scripts/Youtube/Main.js - ERROR");
             //console.log(error);
+            if (wolfermusPreventLoopLock1 <= 0) return;
+            wolfermusPreventLoopLock1--;
             await AttemptLoadScript();
         });
     }
     //console.log("Scripts/Youtube/Main.js - 1");
     await AttemptLoadScript();
     //console.log("Scripts/Youtube/Main.js - 4");
+
+    if (wolfermusPreventLoopLock1 <= 0) return;
 
     console.log("Wolfermus Loaded Scripts/Youtube/Main.js");
 };

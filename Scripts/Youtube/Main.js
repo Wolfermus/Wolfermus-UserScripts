@@ -78,6 +78,8 @@ async () => {
 
     await Sleep(1000);
 
+    let wolfermusPreventLoopLock1 = 10;
+
     async function AttemptLoadScript() {
         //console.log("Scripts/Youtube/CSSToggles/Main.js - 2");
         await Sleep(100);
@@ -85,12 +87,16 @@ async () => {
             //debugger;
             //console.log("Scripts/Youtube/CSSToggles/Main.js - ERROR");
             //console.log(error);
+            if (wolfermusPreventLoopLock1 <= 0) return;
+            wolfermusPreventLoopLock1--;
             await AttemptLoadScript();
         });
     }
     //console.log("Scripts/Youtube/CSSToggles/Main.js - 1");
     await AttemptLoadScript();
     //console.log("Scripts/Youtube/CSSToggles/Main.js - 4");
+
+    if (wolfermusPreventLoopLock1 <= 0) return;
 
     console.log("Wolfermus Loaded Scripts/Youtube/CSSToggles/Main.js");
 };
