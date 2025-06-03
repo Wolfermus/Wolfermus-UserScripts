@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.4
+// @version      1.0.5
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -74,7 +74,7 @@ function GenerateMenuItems() {
     let wolfermusMenuItemsConverted = "";
     for (const key of Object.keys(wolfermusMenuItems)) {
         wolfermusMenuItemsConverted += `
-        <li id="WolfermusMenuItem${key}" class="defaultFloatingButtonCSS">
+        <li id="WolfermusMenuItem${key}" class="wlfDefaultFloatingButtonCSS">
           <a>${key}</a>
         </li>`;
     }
@@ -118,13 +118,13 @@ function UpdateWolfermusMainMenuStyle() {
     }
 
     const editedInnerHTML = bypassScriptPolicy.createHTML(`
-.defaultFloatingButtonCSS {
+.wlfDefaultFloatingButtonCSS {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
 }
 
-#main-wrapper {
+#wlfMainMenuWrapper {
   -khtml-user-select: none;
   -o-user-select: none;
   -moz-user-select: none;
@@ -136,7 +136,7 @@ function UpdateWolfermusMainMenuStyle() {
   height: 100vh;
   overflow: hidden;
   z-index: 8000;
-  #floating-snap-btn-wrapper {
+  #wlfFloatingSnapBtnWrapper {
     z-index: 0;
     -khtml-user-select: none;
     -o-user-select: none;
@@ -151,7 +151,7 @@ function UpdateWolfermusMainMenuStyle() {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    .fab-btn {
+    .wlfFabBtn {
       img {
         -khtml-user-select: none;
         -o-user-select: none;
@@ -180,7 +180,7 @@ function UpdateWolfermusMainMenuStyle() {
       box-shadow: 0px 2px 17px -1px rgba(0, 0, 0, 0.3);
       z-index: 9000;
     }
-    .activatedWindow {
+    .wlfActivatedMainMenuWindow {
       pointer-events: all;
       display: none;
       position: relative;
@@ -197,26 +197,26 @@ function UpdateWolfermusMainMenuStyle() {
       z-index: 8500;
       box-shadow: 0px 2px 17px -1px rgba(0, 0, 0, 0.3);
     }
-    &.left {
-      .activatedWindow {
+    &.wlfLeftPosition {
+      .wlfActivatedMainMenuWindow {
         left: 110%;
         transition-delay: 0s;
       }
     }
-    &.right {
-      .activatedWindow {
+    &.wlfRightPosition {
+      .wlfActivatedMainMenuWindow {
         left: -610%;
         transition-delay: 0s;
       }
     }
-    &.up {
-      .activatedWindow {
+    &.wlfUpPosition {
+      .wlfActivatedMainMenuWindow {
         top: -700%;
         transition-delay: 0s;
       }
     }
-    &.down {
-      .activatedWindow {
+    &.wlfDownPosition {
+      .wlfActivatedMainMenuWindow {
         top: 0%;
         transition-delay: 0s;
       }
@@ -261,14 +261,14 @@ function UpdateWolfermusMainMenuStyle() {
         }
       }
     }
-    &.fab-active {
+    &.wlfFabActive {
       li:hover {
         background-color: #3d3d3d;
       }
       li:active {
         background-color: #505050;
       }
-      .activatedWindow {
+      .wlfActivatedMainMenuWindow {
         display: block;
       }
     }
@@ -298,8 +298,8 @@ class Position {
 async function ContrainMainMenuViaPosition(position) {
     if (Object.keys(currentWolfermusMenuItems).length <= 0) return;
 
-    const mainMenuRoot = document.getElementById("main-wrapper");
-    const fabElement = document.getElementById("floating-snap-btn-wrapper");
+    const mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
+    const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
 
     if (mainMenuRoot === undefined || mainMenuRoot === null) return;
     if (fabElement === undefined || fabElement === null) return;
@@ -339,8 +339,8 @@ let oldWindowWidth, oldWindowHeight;
 function ContrainMainMenu() {
     if (Object.keys(currentWolfermusMenuItems).length <= 0) return;
 
-    const mainMenuRoot = document.getElementById("main-wrapper");
-    const fabElement = document.getElementById("floating-snap-btn-wrapper");
+    const mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
+    const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
     if (mainMenuRoot === undefined || mainMenuRoot === null) return;
     if (fabElement === undefined || fabElement === null) return;
 
@@ -370,8 +370,8 @@ function ContrainMainMenu() {
  * @param {PointerEvent} event 
  */
 function MainMenuMove(event) {
-    const mainMenuRoot = document.getElementById("main-wrapper");
-    const fabElement = document.getElementById("floating-snap-btn-wrapper");
+    const mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
+    const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
     if (mainMenuRoot === undefined || mainMenuRoot === null) return;
     if (fabElement === undefined || fabElement === null) return;
 
@@ -391,19 +391,19 @@ function MainMenuMove(event) {
     ContrainMainMenuViaPosition(currentPosition);
 
     if (currentPosition.x < windowWidth / 2) {
-        fabElement.classList.remove("right");
-        fabElement.classList.add("left");
+        fabElement.classList.remove("wlfRightPosition");
+        fabElement.classList.add("wlfLeftPosition");
     } else {
-        fabElement.classList.remove("left");
-        fabElement.classList.add("right");
+        fabElement.classList.remove("wlfLeftPosition");
+        fabElement.classList.add("wlfRightPosition");
     }
 
     if (currentPosition.y < windowHeight / 2) {
-        fabElement.classList.remove("up");
-        fabElement.classList.add("down");
+        fabElement.classList.remove("wlfUpPosition");
+        fabElement.classList.add("wlfDownPosition");
     } else {
-        fabElement.classList.remove("down");
-        fabElement.classList.add("up");
+        fabElement.classList.remove("wlfDownPosition");
+        fabElement.classList.add("wlfUpPosition");
     }
 }
 
@@ -411,8 +411,8 @@ function MainMenuMove(event) {
  * @param {PointerEvent} event 
  */
 function MainMenuMouseDown(event) {
-    const fabElement = document.getElementById("floating-snap-btn-wrapper");
-    const fabElementBtn = document.getElementById("floating-snap-btn");
+    const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
+    const fabElementBtn = document.getElementById("wlfFloatingSnapBtn");
     if (fabElement === undefined || fabElement === null) return;
     if (fabElementBtn === undefined || fabElementBtn === null) return;
 
@@ -562,8 +562,8 @@ function MainMenuMouseDown(event) {
      * @param {PointerEvent} event 
      */
     async function MainMenuMouseUp(event) {
-        const fabElement = document.getElementById("floating-snap-btn-wrapper");
-        const fabElementBtn = document.getElementById("floating-snap-btn");
+        const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
+        const fabElementBtn = document.getElementById("wlfFloatingSnapBtn");
         if (fabElement === undefined || fabElement === null) return;
         if (fabElementBtn === undefined || fabElementBtn === null) return;
 
@@ -598,13 +598,13 @@ function MainMenuMouseDown(event) {
 
         if (!WolfermusMainMenuSettings.Direction) WolfermusMainMenuSettings.Direction = {};
 
-        WolfermusMainMenuSettings.Direction.Vertical = "down";
-        WolfermusMainMenuSettings.Direction.Horizontal = "left";
-        if (fabElement.classList.contains("up")) {
-            WolfermusMainMenuSettings.Direction.Vertical = "up";
+        WolfermusMainMenuSettings.Direction.Vertical = "wlfDownPosition";
+        WolfermusMainMenuSettings.Direction.Horizontal = "wlfLeftPosition";
+        if (fabElement.classList.contains("wlfUpPosition")) {
+            WolfermusMainMenuSettings.Direction.Vertical = "wlfUpPosition";
         }
-        if (fabElement.classList.contains("right")) {
-            WolfermusMainMenuSettings.Direction.Horizontal = "right";
+        if (fabElement.classList.contains("wlfRightPosition")) {
+            WolfermusMainMenuSettings.Direction.Horizontal = "wlfRightPosition";
         }
 
         // TODO: Update StorageManagerLib to handly localStorage only options.
@@ -614,19 +614,19 @@ function MainMenuMouseDown(event) {
     }
 
     function MainMenuClick(event) {
-        const fabElement = document.getElementById("floating-snap-btn-wrapper");
+        const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
         if (fabElement === undefined || fabElement === null) return;
 
         if (
             oldPositionY === fabElement.style.top &&
             oldPositionX === fabElement.style.left
         ) {
-            fabElement.classList.toggle("fab-active");
+            fabElement.classList.toggle("wlfFabActive");
         }
     }
 
     function AttachInteractionEventsToMainMenu() {
-        const fabElementBtn = document.getElementById("floating-snap-btn");
+        const fabElementBtn = document.getElementById("wlfFloatingSnapBtn");
         if (fabElementBtn === undefined || fabElementBtn === null) return;
 
         fabElementBtn.addEventListener("pointerdown", MainMenuMouseDown);
@@ -642,7 +642,7 @@ function MainMenuMouseDown(event) {
     }
 
     function RemoveInteractionEventsToMainMenu() {
-        const fabElementBtn = document.getElementById("floating-snap-btn");
+        const fabElementBtn = document.getElementById("wlfFloatingSnapBtn");
         if (fabElementBtn === undefined || fabElementBtn === null) return;
 
         fabElementBtn.removeEventListener("pointerdown", MainMenuMouseDown);
@@ -660,7 +660,7 @@ function MainMenuMouseDown(event) {
     function FullscreenChangeMainMenu() {
         if (Object.keys(currentWolfermusMenuItems).length <= 0) return;
 
-        let mainMenuRoot = document.getElementById("main-wrapper");
+        let mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
         if (mainMenuRoot === undefined || mainMenuRoot === null) return;
 
         if (document.fullscreenElement !== null) {
@@ -674,14 +674,14 @@ function MainMenuMouseDown(event) {
      * Update Main Menu Items
      */
     async function UpdateMenuItems() {
-        let mainMenuRoot = document.getElementById("main-wrapper");
+        let mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
         let creatingMainMenuRoot = false;
         if (mainMenuRoot === undefined || mainMenuRoot === null) {
             if (Object.keys(wolfermusMenuItems).length <= 0) return;
 
             mainMenuRoot = document.createElement("div");
-            mainMenuRoot.id = "main-wrapper";
-            mainMenuRoot.classList = "defaultFloatingButtonCSS";
+            mainMenuRoot.id = "wlfMainMenuWrapper";
+            mainMenuRoot.classList = "wlfDefaultFloatingButtonCSS";
             mainMenuRoot.style.display = "none";
 
             creatingMainMenuRoot = true;
@@ -701,17 +701,22 @@ function MainMenuMouseDown(event) {
             return;
         }
 
+        let imgSrc = "";
+        if (!mainWindow["Wolfermus"]["Logo"] || !mainWindow["Wolfermus"]["Logo"]["Rounded"]) {
+            console.log("Unable to locate logo");
+        } else imgSrc = mainWindow["Wolfermus"]["Logo"]["Rounded"];
+
         const editedInnerHTML = bypassScriptPolicy.createHTML(`
-  <div id="floating-snap-btn-wrapper" class="defaultFloatingButtonCSS ${WolfermusMainMenuSettings.Direction?.Horizontal ? WolfermusMainMenuSettings.Direction?.Horizontal : ""} ${WolfermusMainMenuSettings.Direction?.Vertical ? WolfermusMainMenuSettings.Direction?.Vertical : ""}"
+  <div id="wlfFloatingSnapBtnWrapper" class="wlfDefaultFloatingButtonCSS ${WolfermusMainMenuSettings.Direction?.Horizontal ? WolfermusMainMenuSettings.Direction?.Horizontal : ""} ${WolfermusMainMenuSettings.Direction?.Vertical ? WolfermusMainMenuSettings.Direction?.Vertical : ""}"
     style="${WolfermusMainMenuSettings.Top ? "top: " + WolfermusMainMenuSettings.Top + "px;" : ""} ${WolfermusMainMenuSettings.Left ? "left: " + WolfermusMainMenuSettings.Left + "px;" : ""}">
     <!-- BEGIN :: Floating Button -->
-    <div id="floating-snap-btn" class="fab-btn defaultFloatingButtonCSS">
-      <img src="https://i.imgur.com/XFeWfV0.png" class="defaultFloatingButtonCSS"></img>
+    <div id="wlfFloatingSnapBtn" class="wlfFabBtn wlfDefaultFloatingButtonCSS">
+      <img src="${imgSrc}" class="wlfDefaultFloatingButtonCSS"></img>
     </div>
     <!-- END :: Floating Button -->
     <!-- BEGIN :: Expand Section -->
-    <div class="activatedWindow defaultFloatingButtonCSS">
-      <ul class="defaultFloatingButtonCSS">
+    <div class="wlfActivatedMainMenuWindow wlfDefaultFloatingButtonCSS">
+      <ul class="wlfDefaultFloatingButtonCSS">
         ${GenerateMenuItems()}
       </ul>
     </div>
