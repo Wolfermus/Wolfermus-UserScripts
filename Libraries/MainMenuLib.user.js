@@ -568,6 +568,8 @@ function MainMenuMouseDown(event) {
         if (fabElementBtn === undefined || fabElementBtn === null) return;
 
         //const GUIGotten = await GetValue("MainMenu", "{}");
+
+        // TODO: Update StorageManagerLib to handly localStorage only options.
         if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
         let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
@@ -605,6 +607,7 @@ function MainMenuMouseDown(event) {
             WolfermusMainMenuSettings.Direction.Horizontal = "right";
         }
 
+        // TODO: Update StorageManagerLib to handly localStorage only options.
         localStorage["WolfermusMainMenu"] = JSON.stringify(WolfermusMainMenuSettings);
 
         // SetValue("MainMenu", JSON.stringify(WolfermusMainMenuSettings));
@@ -685,6 +688,8 @@ function MainMenuMouseDown(event) {
         }
 
         //const GUIGotten = await GetValue("MainMenu", "{}");
+
+        // TODO: Update StorageManagerLib to handly localStorage only options.
         if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
         let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
