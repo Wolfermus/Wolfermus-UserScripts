@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.1.0
+// @version      1.1.1
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -347,16 +347,18 @@ function UpdateWolfermusMainMenuStyle() {
   box-shadow: 0px 2px 17px -1px rgba(0, 0, 0, 0.3);
   color: #fff;
   text-align: center;
-  padding: 5px 0;
+  padding: 10px;
+
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
  
   /* Position the tooltip text - see examples below! */
   position: absolute;
   z-index: 9500;
 
   width: 120px;
-  top: 100%;
-  left: 50%;
-  margin-left: -55px;
+  margin-left: -65px;
   margin-top: 30px;
 }
 
