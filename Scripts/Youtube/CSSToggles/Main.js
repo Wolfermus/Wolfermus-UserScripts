@@ -274,7 +274,7 @@ async () => {
         await AttemptLoadChangeFrostedGlassStyle();
     }
 
-    let ToggleFrostedGlassMenuItem = new WolfermusMenuItem("MainPageScrollFrostedGlass", "Toggle Scroll Frosted Glass", "This script toggles the top bar from a frosted transparent<br>look into solid color");
+    let ToggleFrostedGlassMenuItem = new WolfermusMenuItem("MainPageScrollFrostedGlass", "Toggle Scroll Frosted Glass", "This script toggles the top bar from a frosted transparent\nlook into solid color");
     ToggleFrostedGlassMenuItem.clickCallback = async () => {
         WolfermusCSSTogglesSettings["FrostedGlass"] = !WolfermusCSSTogglesSettings["FrostedGlass"];
 
