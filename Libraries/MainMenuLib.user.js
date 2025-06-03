@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.5
+// @version      1.1.0
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -38,33 +38,252 @@ function Sleep(ms) {
     });
 }
 
-let wolfermusMenuItems = {};
-let currentWolfermusMenuItems = {};
+class WolfermusMenuItem {
+    /**
+     * @param {string} name 
+     * @param {string} title 
+     * @param {string | undefined} tooltip 
+     */
+    constructor(name, title, tooltip = undefined) {
+        this.name = name;
+        this.title = title;
+        this.tooltip = tooltip;
+    }
+    /**
+     * @type {string}
+     */
+    name;
+    /**
+     * @type {string}
+     */
+    title;
+    /**
+     * @type {string}
+     */
+    tooltip = undefined;
+    /**
+     * @type {number}
+     */
+    tooltipTimeOut = 400;
+
+    #tooltipTimeoutID = undefined;
+
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    clickCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    doubleClickCallback = undefined;
+    /**
+     * 
+     * @param {PointerEvent} event 
+     * @type {(PointerEvent) => void}
+     */
+    pointerEnterCallback = (event) => {
+        const toolTips = document.getElementById("WolfermusMenuItemToolTip");
+        if (toolTips === undefined || toolTips === null) return;
+
+        toolTips.innerText = this.tooltip;
+
+        toolTips.classList.add("wlfToolTipSetActive");
+
+        const x = event.clientX;
+        const y = event.clientY;
+        toolTips.style.top = (y) + 'px';
+        toolTips.style.left = (x) + 'px';
+
+        this.#tooltipTimeoutID = setTimeout(() => {
+            const toolTips = document.getElementById("WolfermusMenuItemToolTip");
+            if (toolTips === undefined || toolTips === null) return;
+
+            toolTips.classList.add("wlfToolTipActive");
+            toolTips.classList.remove("wlfToolTipSetActive");
+
+        }, this.tooltipTimeOut);
+    };
+    /**
+     * 
+     * @param {PointerEvent} event 
+     * @type {(PointerEvent) => void}
+     */
+    pointerLeaveCallback = (event) => {
+        if (this.#tooltipTimeoutID !== undefined) {
+            clearTimeout(this.#tooltipTimeoutID);
+            this.#tooltipTimeoutID = undefined;
+        }
+        const toolTips = document.getElementById("WolfermusMenuItemToolTip");
+        if (toolTips === undefined || toolTips === null) return;
+
+        toolTips.innerText = "";
+
+        toolTips.classList.remove("wlfToolTipSetActive");
+        toolTips.classList.remove("wlfToolTipActive");
+    };
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    pointerDownCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    pointerUpCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    pointerMoveCallback = undefined;
+    /**
+     * 
+     * @param {PointerEvent} event 
+     * @type {(PointerEvent) => void}
+     */
+    pointerCancelCallback = (event) => {
+        if (this.#tooltipTimeoutID !== undefined) {
+            clearTimeout(this.#tooltipTimeoutID);
+            this.#tooltipTimeoutID = undefined;
+        }
+        const toolTips = document.getElementById("WolfermusMenuItemToolTip");
+        if (toolTips === undefined || toolTips === null) return;
+
+        toolTips.innerText = "";
+
+        toolTips.classList.remove("wlfToolTipSetActive");
+        toolTips.classList.remove("wlfToolTipActive");
+    };
+
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #currentClickCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #currentDoubleClickCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #currentPointerEnterCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #currentPointerLeaveCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #currentPointerDownCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #currentPointerUpCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #currentPointerMoveCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #currentPointerCancelCallback = undefined;
+
+    /**
+     * @returns {string}
+     */
+    Generate() {
+        return `
+        <li id="WolfermusMenuItem${this.name}" class="wlfDefaultFloatingButtonCSS">
+            <a>${this.title}</a>
+        </li>`
+    }
+    /**
+     * @returns {Boolean}
+     */
+    SetupScripts() {
+        let gottenElement = document.getElementById(`WolfermusMenuItem${this.name}`);
+        if (gottenElement === undefined || gottenElement === null) return false;
+
+        this.RemoveScripts();
+
+        this.#currentClickCallback = this.clickCallback;
+        this.#currentDoubleClickCallback = this.doubleClickCallback;
+        this.#currentPointerEnterCallback = this.pointerEnterCallback;
+        this.#currentPointerLeaveCallback = this.pointerLeaveCallback;
+        this.#currentPointerDownCallback = this.pointerDownCallback;
+        this.#currentPointerUpCallback = this.pointerUpCallback;
+        this.#currentPointerMoveCallback = this.pointerMoveCallback;
+        this.#currentPointerCancelCallback = this.pointerCancelCallback;
+
+        if (this.#currentClickCallback !== undefined) gottenElement.addEventListener("click", this.#currentClickCallback);
+        if (this.#currentDoubleClickCallback !== undefined) gottenElement.addEventListener("dblclick", this.#currentDoubleClickCallback);
+        if (this.#currentPointerEnterCallback !== undefined) gottenElement.addEventListener("pointerenter", this.#currentPointerEnterCallback);
+        if (this.#currentPointerLeaveCallback !== undefined) gottenElement.addEventListener("pointerleave", this.#currentPointerLeaveCallback);
+        if (this.#currentPointerDownCallback !== undefined) gottenElement.addEventListener("pointerdown", this.#currentPointerDownCallback);
+        if (this.#currentPointerUpCallback !== undefined) gottenElement.addEventListener("pointerup", this.#currentPointerUpCallback);
+        if (this.#currentPointerMoveCallback !== undefined) gottenElement.addEventListener("pointermove", this.#currentPointerMoveCallback);
+        if (this.#currentPointerCancelCallback !== undefined) gottenElement.addEventListener("pointercancel", this.#currentPointerCancelCallback);
+
+        return true;
+    }
+    RemoveScripts() {
+        let gottenElement = document.getElementById(`WolfermusMenuItem${this.name}`);
+
+        if (gottenElement !== undefined && gottenElement !== null) {
+            if (this.#currentClickCallback !== undefined) gottenElement.removeEventListener("click", this.#currentClickCallback);
+            if (this.#currentDoubleClickCallback !== undefined) gottenElement.removeEventListener("dblclick", this.#currentDoubleClickCallback);
+            if (this.#currentPointerEnterCallback !== undefined) gottenElement.removeEventListener("pointerenter", this.#currentPointerEnterCallback);
+            if (this.#currentPointerLeaveCallback !== undefined) gottenElement.removeEventListener("pointerleave", this.#currentPointerLeaveCallback);
+            if (this.#currentPointerDownCallback !== undefined) gottenElement.removeEventListener("pointerdown", this.#currentPointerDownCallback);
+            if (this.#currentPointerUpCallback !== undefined) gottenElement.removeEventListener("pointerup", this.#currentPointerUpCallback);
+            if (this.#currentPointerMoveCallback !== undefined) gottenElement.removeEventListener("pointermove", this.#currentPointerMoveCallback);
+            if (this.#currentPointerCancelCallback !== undefined) gottenElement.removeEventListener("pointercancel", this.#currentPointerCancelCallback);
+        }
+
+        this.#currentClickCallback = undefined;
+        this.#currentDoubleClickCallback = undefined;
+        this.#currentPointerEnterCallback = undefined;
+        this.#currentPointerLeaveCallback = undefined;
+        this.#currentPointerDownCallback = undefined;
+        this.#currentPointerUpCallback = undefined;
+        this.#currentPointerMoveCallback = undefined;
+        this.#currentPointerCancelCallback = undefined;
+    }
+}
+
+/**
+ * @type {Array<WolfermusMenuItem>}
+ */
+let wolfermusMenuItems = [];
+/**
+ * @type {Array<WolfermusMenuItem>}
+ */
+let currentWolfermusMenuItems = [];
+
 
 /**
  * Add/Set a Menu Item to Main Menu
- * 
- * @param {string} itemName 
- * @param {() => void} callback 
+ * @param {WolfermusMenuItem} item
  */
-function SetMenuItem(itemName, callback) {
-    wolfermusMenuItems[itemName] = callback;
+function SetMenuItem(item) {
+    if (wolfermusMenuItems.find((menuItem) => menuItem.name === item.name) !== undefined) return;
+    wolfermusMenuItems.push(item);
 }
 
 /**
  * Remove a Menu Item from Main Menu
  * 
- * @param {string} itemName 
+ * @param {string} itemName
  */
 function RemoveMenuItem(itemName) {
-    delete wolfermusMenuItems[itemName];
+    let foundIndex = wolfermusMenuItems.findIndex((menuItem) => menuItem.name === itemName);
+    if (foundIndex === -1) return;
+
+    wolfermusMenuItems.splice(foundIndex, 1);
 }
 
 /**
  * Clear all Menu Items from Main Menu
  */
 function ClearMenuItems() {
-    wolfermusMenuItems = {};
+    wolfermusMenuItems = [];
 }
 
 /**
@@ -72,11 +291,8 @@ function ClearMenuItems() {
  */
 function GenerateMenuItems() {
     let wolfermusMenuItemsConverted = "";
-    for (const key of Object.keys(wolfermusMenuItems)) {
-        wolfermusMenuItemsConverted += `
-        <li id="WolfermusMenuItem${key}" class="wlfDefaultFloatingButtonCSS">
-          <a>${key}</a>
-        </li>`;
+    for (const menuItem of wolfermusMenuItems) {
+        wolfermusMenuItemsConverted += menuItem.Generate();
     }
     return wolfermusMenuItemsConverted;
 }
@@ -85,11 +301,8 @@ function GenerateMenuItems() {
  * Only run after appending new Menu Items to document.
  */
 function AttachScriptsForItems() {
-    for (const [key, value] of Object.entries(wolfermusMenuItems)) {
-        let gottenElement = document.getElementById(`WolfermusMenuItem${key}`);
-        if (gottenElement === undefined || gottenElement === null) continue;
-        gottenElement.addEventListener("click", value);
-        currentWolfermusMenuItems[key] = value;
+    for (const menuItem of wolfermusMenuItems) {
+        if (menuItem.SetupScripts()) currentWolfermusMenuItems.push(menuItem);
     }
 }
 
@@ -97,12 +310,10 @@ function AttachScriptsForItems() {
  * Removes all Event Listeners currently rendered from menu items
  */
 function RemoveAttachedScriptsForCurrentItems() {
-    for (const [key, value] of Object.entries(currentWolfermusMenuItems)) {
-        let gottenElement = document.getElementById(`WolfermusMenuItem${key}`);
-        if (gottenElement === undefined || gottenElement === null) continue;
-        gottenElement.removeEventListener("click", value);
+    for (const menuItem of currentWolfermusMenuItems) {
+        menuItem.RemoveScripts();
     }
-    currentWolfermusMenuItems = {};
+    currentWolfermusMenuItems = [];
 }
 
 /**
@@ -122,6 +333,36 @@ function UpdateWolfermusMainMenuStyle() {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+}
+
+/* Tooltip text */
+.wlfToolTipText {
+  visibility: hidden;
+  width: 120px;
+  background-color: #0f0f0f;
+  border-radius: 20px;
+  border-color: #272727;
+  border-width: 4px;
+  border-style: solid;
+  box-shadow: 0px 2px 17px -1px rgba(0, 0, 0, 0.3);
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+ 
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 9500;
+
+  width: 120px;
+  top: 100%;
+  left: 50%;
+  margin-left: -55px;
+  margin-top: 30px;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.wlfToolTipText.wlfToolTipActive {
+  visibility: visible;
 }
 
 #wlfMainMenuWrapper {
@@ -296,7 +537,7 @@ class Position {
  * @param {Position} position 
  */
 async function ContrainMainMenuViaPosition(position) {
-    if (Object.keys(currentWolfermusMenuItems).length <= 0) return;
+    if (currentWolfermusMenuItems.length <= 0) return;
 
     const mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
     const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
@@ -337,7 +578,7 @@ async function ContrainMainMenuViaPosition(position) {
 let oldFabElementLeft, oldFabElementTop;
 let oldWindowWidth, oldWindowHeight;
 function ContrainMainMenu() {
-    if (Object.keys(currentWolfermusMenuItems).length <= 0) return;
+    if (currentWolfermusMenuItems.length <= 0) return;
 
     const mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
     const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
@@ -625,6 +866,25 @@ function MainMenuMouseDown(event) {
         }
     }
 
+    let wlfToolTipsElement = undefined;
+    /**
+     * @param {PointerEvent} event 
+     */
+    function ToolTipPointerMove(event) {
+        if (currentWolfermusMenuItems.length <= 0) return;
+
+        if (wlfToolTipsElement === undefined || wlfToolTipsElement === null) {
+            wlfToolTipsElement = document.getElementById("WolfermusMenuItemToolTip");
+            if (wlfToolTipsElement === undefined || wlfToolTipsElement === null) return;
+        }
+        if (!wlfToolTipsElement.classList.contains("wlfToolTipActive") && !wlfToolTipsElement.classList.contains("wlfToolTipSetActive")) return;
+
+        const x = event.clientX;
+        const y = event.clientY;
+        wlfToolTipsElement.style.top = (y) + 'px';
+        wlfToolTipsElement.style.left = (x) + 'px';
+    }
+
     function AttachInteractionEventsToMainMenu() {
         const fabElementBtn = document.getElementById("wlfFloatingSnapBtn");
         if (fabElementBtn === undefined || fabElementBtn === null) return;
@@ -639,6 +899,8 @@ function MainMenuMouseDown(event) {
         //fabElementBtn.addEventListener("touchend", MainMenuMouseUp);
 
         fabElementBtn.addEventListener("click", MainMenuClick);
+
+        window.addEventListener('pointermove', ToolTipPointerMove);
     }
 
     function RemoveInteractionEventsToMainMenu() {
@@ -655,10 +917,13 @@ function MainMenuMouseDown(event) {
         //fabElementBtn.removeEventListener("touchend", MainMenuMouseUp);
 
         fabElementBtn.removeEventListener("click", MainMenuClick);
+
+        window.removeEventListener('pointermove', ToolTipPointerMove);
+        wlfToolTipsElement = undefined;
     }
 
     function FullscreenChangeMainMenu() {
-        if (Object.keys(currentWolfermusMenuItems).length <= 0) return;
+        if (currentWolfermusMenuItems.length <= 0) return;
 
         let mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
         if (mainMenuRoot === undefined || mainMenuRoot === null) return;
@@ -677,7 +942,7 @@ function MainMenuMouseDown(event) {
         let mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
         let creatingMainMenuRoot = false;
         if (mainMenuRoot === undefined || mainMenuRoot === null) {
-            if (Object.keys(wolfermusMenuItems).length <= 0) return;
+            if (wolfermusMenuItems.length <= 0) return;
 
             mainMenuRoot = document.createElement("div");
             mainMenuRoot.id = "wlfMainMenuWrapper";
@@ -696,7 +961,7 @@ function MainMenuMouseDown(event) {
         RemoveInteractionEventsToMainMenu();
         RemoveAttachedScriptsForCurrentItems();
 
-        if (Object.keys(wolfermusMenuItems).length <= 0) {
+        if (wolfermusMenuItems.length <= 0) {
             mainMenuRoot.style.display = "none";
             return;
         }
@@ -707,6 +972,7 @@ function MainMenuMouseDown(event) {
         } else imgSrc = mainWindow["Wolfermus"]["Logo"]["Rounded"];
 
         const editedInnerHTML = bypassScriptPolicy.createHTML(`
+  <span id="WolfermusMenuItemToolTip" class="wlfToolTipText"></span>
   <div id="wlfFloatingSnapBtnWrapper" class="wlfDefaultFloatingButtonCSS ${WolfermusMainMenuSettings.Direction?.Horizontal ? WolfermusMainMenuSettings.Direction?.Horizontal : ""} ${WolfermusMainMenuSettings.Direction?.Vertical ? WolfermusMainMenuSettings.Direction?.Vertical : ""}"
     style="${WolfermusMainMenuSettings.Top ? "top: " + WolfermusMainMenuSettings.Top + "px;" : ""} ${WolfermusMainMenuSettings.Left ? "left: " + WolfermusMainMenuSettings.Left + "px;" : ""}">
     <!-- BEGIN :: Floating Button -->
@@ -750,6 +1016,7 @@ function MainMenuMouseDown(event) {
 
     mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["Loaded"] = false;
 
+    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["WolfermusMenuItem"] = WolfermusMenuItem;
 
     mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["SetMenuItem"] = SetMenuItem;
     mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["RemoveMenuItem"] = RemoveMenuItem;
