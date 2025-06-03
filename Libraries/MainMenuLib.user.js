@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.2
+// @version      1.0.3
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -57,7 +57,7 @@ function SetMenuItem(itemName, callback) {
  * @param {string} itemName 
  */
 function RemoveMenuItem(itemName) {
-    wolfermusMenuItems.remove(itemName)
+    delete wolfermusMenuItems[itemName];
 }
 
 /**
@@ -86,7 +86,9 @@ function GenerateMenuItems() {
  */
 function AttachScriptsForItems() {
     for (const [key, value] of Object.entries(wolfermusMenuItems)) {
-        document.getElementById(`WolfermusMenuItem${key}`).addEventListener("click", value);
+        let gottenElement = document.getElementById(`WolfermusMenuItem${key}`);
+        if (gottenElement === undefined || gottenElement === null) continue;
+        gottenElement.addEventListener("click", value);
         currentWolfermusMenuItems[key] = value;
     }
 }
@@ -96,7 +98,9 @@ function AttachScriptsForItems() {
  */
 function RemoveAttachedScriptsForCurrentItems() {
     for (const [key, value] of Object.entries(currentWolfermusMenuItems)) {
-        document.getElementById(`WolfermusMenuItem${key}`).removeEventListener("click", value);
+        let gottenElement = document.getElementById(`WolfermusMenuItem${key}`);
+        if (gottenElement === undefined || gottenElement === null) continue;
+        gottenElement.removeEventListener("click", value);
     }
     currentWolfermusMenuItems = {};
 }
@@ -107,7 +111,7 @@ function RemoveAttachedScriptsForCurrentItems() {
 function UpdateWolfermusMainMenuStyle() {
     let mainMenuStyle = document.getElementById("WolfermusMainMenuStyle");
 
-    if (!mainMenuStyle) {
+    if (mainMenuStyle === undefined || mainMenuStyle === null) {
         mainMenuStyle = document.createElement("style");
         mainMenuStyle.id = "WolfermusMainMenuStyle";
         document.head.append(mainMenuStyle);
@@ -292,8 +296,13 @@ class Position {
  * @param {Position} position 
  */
 async function ContrainMainMenuViaPosition(position) {
+    if (Object.keys(currentWolfermusMenuItems).length <= 0) return;
+
     const mainMenuRoot = document.getElementById("main-wrapper");
     const fabElement = document.getElementById("floating-snap-btn-wrapper");
+
+    if (mainMenuRoot === undefined || mainMenuRoot === null) return;
+    if (fabElement === undefined || fabElement === null) return;
 
     while (mainMenuRoot.getBoundingClientRect().width === 0 && mainMenuRoot.getBoundingClientRect().height === 0) {
         await Sleep(100);
@@ -328,8 +337,11 @@ async function ContrainMainMenuViaPosition(position) {
 let oldFabElementLeft, oldFabElementTop;
 let oldWindowWidth, oldWindowHeight;
 function ContrainMainMenu() {
+    if (Object.keys(currentWolfermusMenuItems).length <= 0) return;
+
     const mainMenuRoot = document.getElementById("main-wrapper");
     const fabElement = document.getElementById("floating-snap-btn-wrapper");
+    if (mainMenuRoot === undefined || mainMenuRoot === null) return;
     if (fabElement === undefined || fabElement === null) return;
 
     if (fabElement.style.left === undefined || fabElement.style.left === null) return;
@@ -360,6 +372,8 @@ function ContrainMainMenu() {
 function MainMenuMove(event) {
     const mainMenuRoot = document.getElementById("main-wrapper");
     const fabElement = document.getElementById("floating-snap-btn-wrapper");
+    if (mainMenuRoot === undefined || mainMenuRoot === null) return;
+    if (fabElement === undefined || fabElement === null) return;
 
     const windowWidth = mainMenuRoot.getBoundingClientRect().width;
     const windowHeight = mainMenuRoot.getBoundingClientRect().height;
@@ -399,9 +413,8 @@ function MainMenuMove(event) {
 function MainMenuMouseDown(event) {
     const fabElement = document.getElementById("floating-snap-btn-wrapper");
     const fabElementBtn = document.getElementById("floating-snap-btn");
-
-    if (!fabElement) return;
-    if (!fabElementBtn) return;
+    if (fabElement === undefined || fabElement === null) return;
+    if (fabElementBtn === undefined || fabElementBtn === null) return;
 
     fabElementBtn.setPointerCapture(event.pointerId);
 
@@ -551,9 +564,8 @@ function MainMenuMouseDown(event) {
     async function MainMenuMouseUp(event) {
         const fabElement = document.getElementById("floating-snap-btn-wrapper");
         const fabElementBtn = document.getElementById("floating-snap-btn");
-
-        if (!fabElement) return;
-        if (!fabElementBtn) return;
+        if (fabElement === undefined || fabElement === null) return;
+        if (fabElementBtn === undefined || fabElementBtn === null) return;
 
         const GUIGotten = await GetValue("MainMenu", "{}");
         let WolfermusMainMenuSettings = JSON.parse(GUIGotten);
@@ -597,7 +609,7 @@ function MainMenuMouseDown(event) {
 
     function MainMenuClick(event) {
         const fabElement = document.getElementById("floating-snap-btn-wrapper");
-        if (!fabElement) return;
+        if (fabElement === undefined || fabElement === null) return;
 
         if (
             oldPositionY === fabElement.style.top &&
@@ -609,7 +621,7 @@ function MainMenuMouseDown(event) {
 
     function AttachInteractionEventsToMainMenu() {
         const fabElementBtn = document.getElementById("floating-snap-btn");
-        if (!fabElementBtn) return;
+        if (fabElementBtn === undefined || fabElementBtn === null) return;
 
         fabElementBtn.addEventListener("pointerdown", MainMenuMouseDown);
         fabElementBtn.addEventListener("pointerup", MainMenuMouseUp);
@@ -625,7 +637,7 @@ function MainMenuMouseDown(event) {
 
     function RemoveInteractionEventsToMainMenu() {
         const fabElementBtn = document.getElementById("floating-snap-btn");
-        if (!fabElementBtn) return;
+        if (fabElementBtn === undefined || fabElementBtn === null) return;
 
         fabElementBtn.removeEventListener("pointerdown", MainMenuMouseDown);
         fabElementBtn.removeEventListener("pointerup", MainMenuMouseUp);
@@ -639,13 +651,28 @@ function MainMenuMouseDown(event) {
         fabElementBtn.removeEventListener("click", MainMenuClick);
     }
 
+    function FullscreenChangeMainMenu() {
+        if (Object.keys(currentWolfermusMenuItems).length <= 0) return;
+
+        let mainMenuRoot = document.getElementById("main-wrapper");
+        if (mainMenuRoot === undefined || mainMenuRoot === null) return;
+
+        if (document.fullscreenElement !== null) {
+            mainMenuRoot.style.display = "none";
+        } else {
+            mainMenuRoot.style.display = "block";
+        }
+    }
+
     /**
      * Update Main Menu Items
      */
     async function UpdateMenuItems() {
         let mainMenuRoot = document.getElementById("main-wrapper");
         let creatingMainMenuRoot = false;
-        if (!mainMenuRoot) {
+        if (mainMenuRoot === undefined || mainMenuRoot === null) {
+            if (Object.keys(wolfermusMenuItems).length <= 0) return;
+
             mainMenuRoot = document.createElement("div");
             mainMenuRoot.id = "main-wrapper";
             mainMenuRoot.classList = "defaultFloatingButtonCSS";
@@ -659,6 +686,11 @@ function MainMenuMouseDown(event) {
 
         RemoveInteractionEventsToMainMenu();
         RemoveAttachedScriptsForCurrentItems();
+
+        if (Object.keys(wolfermusMenuItems).length <= 0) {
+            mainMenuRoot.style.display = "none";
+            return;
+        }
 
         const editedInnerHTML = bypassScriptPolicy.createHTML(`
   <div id="floating-snap-btn-wrapper" class="defaultFloatingButtonCSS ${WolfermusMainMenuSettings.Direction?.Horizontal ? WolfermusMainMenuSettings.Direction?.Horizontal : ""} ${WolfermusMainMenuSettings.Direction?.Vertical ? WolfermusMainMenuSettings.Direction?.Vertical : ""}"
@@ -690,18 +722,11 @@ function MainMenuMouseDown(event) {
         AttachInteractionEventsToMainMenu();
         if (creatingMainMenuRoot) {
             // Event listener for fullscreen changes
-            document.addEventListener('fullscreenchange', () => {
-                if (document.fullscreenElement !== null) {
-                    mainMenuRoot.style.display = "none";
-                } else {
-                    mainMenuRoot.style.display = "block";
-                }
-            });
+            document.addEventListener('fullscreenchange', FullscreenChangeMainMenu);
             window.addEventListener('resize', ContrainMainMenu);
         }
 
         ContrainMainMenuViaPosition(new Position(WolfermusMainMenuSettings.Left, WolfermusMainMenuSettings.Top));
-
         if (document.fullscreenElement !== null) {
             mainMenuRoot.style.display = "none";
         } else {
