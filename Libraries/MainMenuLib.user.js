@@ -567,8 +567,9 @@ function MainMenuMouseDown(event) {
         if (fabElement === undefined || fabElement === null) return;
         if (fabElementBtn === undefined || fabElementBtn === null) return;
 
-        const GUIGotten = await GetValue("MainMenu", "{}");
-        let WolfermusMainMenuSettings = JSON.parse(GUIGotten);
+        //const GUIGotten = await GetValue("MainMenu", "{}");
+        if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
+        let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
         fabElementBtn.removeEventListener("pointermove", MainMenuMove);
 
@@ -604,7 +605,9 @@ function MainMenuMouseDown(event) {
             WolfermusMainMenuSettings.Direction.Horizontal = "right";
         }
 
-        SetValue("MainMenu", JSON.stringify(WolfermusMainMenuSettings));
+        localStorage["WolfermusMainMenu"] = JSON.stringify(WolfermusMainMenuSettings);
+
+        // SetValue("MainMenu", JSON.stringify(WolfermusMainMenuSettings));
     }
 
     function MainMenuClick(event) {
@@ -681,8 +684,9 @@ function MainMenuMouseDown(event) {
             creatingMainMenuRoot = true;
         }
 
-        const GUIGotten = await GetValue("MainMenu", "{}");
-        let WolfermusMainMenuSettings = JSON.parse(GUIGotten);
+        //const GUIGotten = await GetValue("MainMenu", "{}");
+        if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
+        let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
         RemoveInteractionEventsToMainMenu();
         RemoveAttachedScriptsForCurrentItems();
