@@ -182,9 +182,18 @@ async () => {
     const GetValue = mainWindow["Wolfermus"]["Libraries"]["StorageManager"]["GetValue"];
 
     /**
+     * @import {WolfermusMenuItem} from "../Libraries/MainMenuLib.user.js"
+     */
+
+    /**
+     * @type {WolfermusMenuItem}
+     */
+    const WolfermusMenuItemClass = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["WolfermusMenuItem"];
+
+    /**
      * Add/Set a Menu Item to Main Menu
      * 
-     * @type {(itemName: string, callback: () => void) => void}
+     * @type {(item: WolfermusMenuItem) => void}
      */
     const SetMenuItem = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["SetMenuItem"];
 
@@ -265,7 +274,8 @@ async () => {
         await AttemptLoadChangeFrostedGlassStyle();
     }
 
-    SetMenuItem("Main Page Scroll Frosted Glass", async () => {
+    let ToggleFrostedGlassMenuItem = new WolfermusMenuItem("MainPageScrollFrostedGlass", "Toggle Scroll Frosted Glass", "This script toggles the top bar from a frosted transparent<br>look into solid color");
+    ToggleFrostedGlassMenuItem.clickCallback = async () => {
         WolfermusCSSTogglesSettings["FrostedGlass"] = !WolfermusCSSTogglesSettings["FrostedGlass"];
 
         if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
@@ -275,5 +285,7 @@ async () => {
         }
 
         SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));
-    });
+    };
+
+    SetMenuItem(ToggleFrostedGlassMenuItem);
 };
