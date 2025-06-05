@@ -193,6 +193,15 @@ class WolfermusMenuItem {
     #currentPointerCancelCallback = undefined;
 
     /**
+     * @returns {HTMLElement | null}
+     */
+    GetElement() {
+        let gottenElement = document.getElementById(`WolfermusMenuItem${this.name}`);
+        if (gottenElement === undefined || gottenElement === null) return null;
+        return gottenElement;
+    }
+
+    /**
      * @returns {string}
      */
     Generate() {
@@ -205,8 +214,8 @@ class WolfermusMenuItem {
      * @returns {Boolean}
      */
     SetupScripts() {
-        let gottenElement = document.getElementById(`WolfermusMenuItem${this.name}`);
-        if (gottenElement === undefined || gottenElement === null) return false;
+        let gottenElement = this.GetElement();
+        if (gottenElement === null) return false;
 
         this.RemoveScripts();
 
@@ -231,9 +240,14 @@ class WolfermusMenuItem {
         return true;
     }
     RemoveScripts() {
-        let gottenElement = document.getElementById(`WolfermusMenuItem${this.name}`);
+        let gottenElement = this.GetElement();
 
-        if (gottenElement !== undefined && gottenElement !== null) {
+        if (this.#tooltipTimeoutID !== undefined) {
+            clearTimeout(this.#tooltipTimeoutID);
+            this.#tooltipTimeoutID = undefined;
+        }
+
+        if (gottenElement !== null) {
             if (this.#currentClickCallback !== undefined) gottenElement.removeEventListener("click", this.#currentClickCallback);
             if (this.#currentDoubleClickCallback !== undefined) gottenElement.removeEventListener("dblclick", this.#currentDoubleClickCallback);
             if (this.#currentPointerEnterCallback !== undefined) gottenElement.removeEventListener("pointerenter", this.#currentPointerEnterCallback);
@@ -242,6 +256,11 @@ class WolfermusMenuItem {
             if (this.#currentPointerUpCallback !== undefined) gottenElement.removeEventListener("pointerup", this.#currentPointerUpCallback);
             if (this.#currentPointerMoveCallback !== undefined) gottenElement.removeEventListener("pointermove", this.#currentPointerMoveCallback);
             if (this.#currentPointerCancelCallback !== undefined) gottenElement.removeEventListener("pointercancel", this.#currentPointerCancelCallback);
+        }
+
+        if (this.#tooltipTimeoutID !== undefined) {
+            clearTimeout(this.#tooltipTimeoutID);
+            this.#tooltipTimeoutID = undefined;
         }
 
         this.#currentClickCallback = undefined;
