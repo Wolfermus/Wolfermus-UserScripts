@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.2.0
+// @version      1.2.1
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -71,6 +71,23 @@ class WolfermusMenuItem {
 
     #tooltipTimeoutID = undefined;
 
+    HideToolTip() {
+        if (this.#tooltipTimeoutID !== undefined) {
+            clearTimeout(this.#tooltipTimeoutID);
+            this.#tooltipTimeoutID = undefined;
+        }
+
+        const toolTips = document.getElementById("WolfermusMenuItemToolTip");
+        const toolTipsText = document.getElementById("WolfermusToolTipText");
+        if (toolTips === undefined || toolTips === null) return;
+        if (toolTipsText === undefined || toolTipsText === null) return;
+
+        toolTipsText.innerText = "";
+
+        toolTips.classList.remove("WolfermusToolTipSetActive");
+        toolTips.classList.remove("WolfermusActive");
+    }
+
     /**
      * @type {(PointerEvent) => void}
      */
@@ -114,22 +131,7 @@ class WolfermusMenuItem {
      * @param {PointerEvent} event 
      * @type {(PointerEvent) => void}
      */
-    pointerLeaveCallback = (event) => {
-        if (this.#tooltipTimeoutID !== undefined) {
-            clearTimeout(this.#tooltipTimeoutID);
-            this.#tooltipTimeoutID = undefined;
-        }
-
-        const toolTips = document.getElementById("WolfermusMenuItemToolTip");
-        const toolTipsText = document.getElementById("WolfermusToolTipText");
-        if (toolTips === undefined || toolTips === null) return;
-        if (toolTipsText === undefined || toolTipsText === null) return;
-
-        toolTipsText.innerText = "";
-
-        toolTips.classList.remove("WolfermusToolTipSetActive");
-        toolTips.classList.remove("WolfermusActive");
-    };
+    pointerLeaveCallback = (event) => { this.HideToolTip(); };
     /**
      * @type {(PointerEvent) => void}
      */
@@ -147,21 +149,7 @@ class WolfermusMenuItem {
      * @param {PointerEvent} event 
      * @type {(PointerEvent) => void}
      */
-    pointerCancelCallback = (event) => {
-        if (this.#tooltipTimeoutID !== undefined) {
-            clearTimeout(this.#tooltipTimeoutID);
-            this.#tooltipTimeoutID = undefined;
-        }
-        const toolTips = document.getElementById("WolfermusMenuItemToolTip");
-        const toolTipsText = document.getElementById("WolfermusToolTipText");
-        if (toolTips === undefined || toolTips === null) return;
-        if (toolTipsText === undefined || toolTipsText === null) return;
-
-        toolTipsText.innerText = "";
-
-        toolTips.classList.remove("WolfermusToolTipSetActive");
-        toolTips.classList.remove("WolfermusActive");
-    };
+    pointerCancelCallback = (event) => { this.HideToolTip(); };
 
     /**
      * @type {(PointerEvent) => void}
@@ -1096,6 +1084,8 @@ function ContextMenuCallback(event) {
         if (contextMenu === undefined || contextMenu === null) return;
 
         contextMenu.classList.remove("WolfermusActive");
+
+        updateWolfermusMainMenuStyleContextMenuItem.HideToolTip();
     };
 
     SetContextMenuItem(updateMenuItemsContextMenuItem);
