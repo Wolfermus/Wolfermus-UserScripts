@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Wolfermus Storage Manager Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.0.1
+// @version      1.0.2
 // @description  This script is a storage manager that manages storage between local and GM
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
 // @supportURL   https://github.com/Wolfermus/Wolfermus-UserScripts/issues
 // @license      GPLv3
+// @noframes
 // @match        *
 // @match        *://*/*
 // @match        http://*/*
