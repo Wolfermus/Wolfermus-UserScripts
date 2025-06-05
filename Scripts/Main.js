@@ -78,13 +78,13 @@ async () => {
 
     async function AttemptLoadScript() {
         //console.log("Scripts/Youtube/Main.js - 2");
-        await Sleep(500);
         await LoadScript("Youtube").catch(async (error) => {
             //debugger;
             //console.log("Scripts/Youtube/Main.js - ERROR");
             //console.log(error);
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
+            await Sleep(500);
             await AttemptLoadScript();
         });
     }

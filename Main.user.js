@@ -218,7 +218,6 @@
 
     async function AttemptLoadScript() {
         //console.log("Scripts/Main.js - 2");
-        await Sleep(500);
         await LoadScript().then(async () => {
             //console.log("Scripts/Main.js - 4");
             await UpdateWolfermusMainMenuStyle();
@@ -226,6 +225,7 @@
         }).catch(async (error) => {
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
+            await Sleep(500);
             await AttemptLoadScript();
         });
     }

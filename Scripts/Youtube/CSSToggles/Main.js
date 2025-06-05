@@ -236,7 +236,6 @@ async () => {
     let wolfermusPreventLoopLock1 = 10;
 
     async function AttemptLoadChangeFrostedGlassStyle() {
-        await Sleep(100);
         await LoadChangeFrostedGlassStyle().then(async () => {
             wolfermusPreventLoopLock1 = 10;
             await ChangeFrostedGlassStyle();
@@ -246,6 +245,7 @@ async () => {
             //console.log(error);
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
+            await Sleep(100);
             await AttemptLoadChangeFrostedGlassStyle();
         });
     }
@@ -253,7 +253,6 @@ async () => {
     let wolfermusPreventLoopLock2 = 10;
 
     async function AttemptRestoreFrostedGlassBackgroundColor() {
-        await Sleep(100);
         await LoadRestoreFrostedGlassBackgroundColor().then(async () => {
             wolfermusPreventLoopLock2 = 10;
             await RestoreFrostedGlassBackgroundColor();
@@ -263,6 +262,7 @@ async () => {
             //console.log(error);
             if (wolfermusPreventLoopLock2 <= 0) return;
             wolfermusPreventLoopLock2--;
+            await Sleep(100);
             await AttemptRestoreFrostedGlassBackgroundColor();
         });
     }
