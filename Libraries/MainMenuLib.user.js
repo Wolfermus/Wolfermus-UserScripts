@@ -83,16 +83,18 @@ class WolfermusMenuItem {
      */
     pointerEnterCallback = (event) => {
         const toolTips = document.getElementById("WolfermusMenuItemToolTip");
+        const toolTipsText = document.getElementById("WolfermusToolTipText");
         if (toolTips === undefined || toolTips === null) return;
+        if (toolTipsText === undefined || toolTipsText === null) return;
 
-        toolTips.innerText = this.tooltip;
+        toolTipsText.innerText = this.tooltip;
 
         toolTips.classList.add("wlfToolTipSetActive");
 
         const x = event.clientX;
-        const y = event.clientY;
-        toolTips.style.top = (y) + 'px';
-        toolTips.style.left = (x) + 'px';
+        const y = (event.clientY) + 30;
+
+        ContrainElementViaPosition(toolTips, new Position(x, y), true, false);
 
         this.#tooltipTimeoutID = setTimeout(() => {
             const toolTips = document.getElementById("WolfermusMenuItemToolTip");
@@ -113,10 +115,13 @@ class WolfermusMenuItem {
             clearTimeout(this.#tooltipTimeoutID);
             this.#tooltipTimeoutID = undefined;
         }
-        const toolTips = document.getElementById("WolfermusMenuItemToolTip");
-        if (toolTips === undefined || toolTips === null) return;
 
-        toolTips.innerText = "";
+        const toolTips = document.getElementById("WolfermusMenuItemToolTip");
+        const toolTipsText = document.getElementById("WolfermusToolTipText");
+        if (toolTips === undefined || toolTips === null) return;
+        if (toolTipsText === undefined || toolTipsText === null) return;
+
+        toolTipsText.innerText = "";
 
         toolTips.classList.remove("wlfToolTipSetActive");
         toolTips.classList.remove("wlfToolTipActive");
@@ -144,9 +149,11 @@ class WolfermusMenuItem {
             this.#tooltipTimeoutID = undefined;
         }
         const toolTips = document.getElementById("WolfermusMenuItemToolTip");
+        const toolTipsText = document.getElementById("WolfermusToolTipText");
         if (toolTips === undefined || toolTips === null) return;
+        if (toolTipsText === undefined || toolTipsText === null) return;
 
-        toolTips.innerText = "";
+        toolTipsText.innerText = "";
 
         toolTips.classList.remove("wlfToolTipSetActive");
         toolTips.classList.remove("wlfToolTipActive");
