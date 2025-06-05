@@ -19,7 +19,6 @@
     <!-- END :: Floating Button -->
     <!-- BEGIN :: Expand Section -->
     <div class="WolfermusActivatedMainMenuWindow WolfermusDefaultCSS WolfermusPopUpMenu WolfermusText">
-        <a>Bruh Test</a>
         <ul class="WolfermusDefaultCSS">
             ${GenerateMenuItems()}
         </ul>
