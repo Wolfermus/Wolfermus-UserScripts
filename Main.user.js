@@ -184,7 +184,8 @@
 
     /**
      * Updates the Main Menu Style
-     * @type {() => void}
+     * @async
+     * @type {() => Promise<void>}
      */
     const UpdateWolfermusMainMenuStyle = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateWolfermusMainMenuStyle"];
 
@@ -220,8 +221,8 @@
         await Sleep(500);
         await LoadScript().then(async () => {
             //console.log("Scripts/Main.js - 4");
+            await UpdateWolfermusMainMenuStyle();
             await UpdateMenuItems();
-            UpdateWolfermusMainMenuStyle();
         }).catch(async (error) => {
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
