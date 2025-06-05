@@ -1,0 +1,212 @@
+.WolfermusDefaultCSS {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.WolfermusActive {
+    display: block !important;
+}
+
+.WolfermusPopUpMenu {
+    pointer-events: all;
+    background-color: #0f0f0f;
+    border-radius: 20px;
+    border-color: #272727;
+    border-width: 4px;
+    border-style: solid;
+    box-shadow: 0px 2px 17px -1px rgba(0, 0, 0, 0.3);
+
+    ul {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        padding-top: 2%;
+        padding-bottom: 2%;
+        overflow: auto;
+        border-radius: 15px;
+
+        li {
+            &:hover {
+                background-color: #3d3d3d;
+            }
+
+            &:active {
+                background-color: #505050;
+            }
+
+            cursor: pointer;
+            position: relative;
+            top: 0;
+            left: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #272727;
+            list-style-type: none;
+            transform: scale(0.95);
+            transition: 0.5s;
+            margin: 1%;
+            border-radius: 20px;
+
+            a {
+                pointer-events: none;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 6px 12px;
+                min-width: 12px;
+                font-size: 14px;
+                line-height: 20px;
+                text-align: center;
+            }
+        }
+    }
+}
+
+.WolfermusText {
+    font-family: "Roboto", "Arial", sans-serif;
+    color: #ececec;
+    font-weight: 500;
+}
+
+#WolfermusMainMenuContextMenu {
+    display: none;
+    position: absolute;
+    z-index: 8700;
+    width: 140px;
+
+    a {
+        font-size: 10px;
+        line-height: 12px;
+        letter-spacing: 0.5px;
+    }
+}
+
+#WolfermusMenuItemToolTip {
+    display: none;
+    width: 120px;
+    text-align: center;
+
+    padding: 10px;
+
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 8800;
+
+    transform: translateX(-50%);
+}
+
+#WolfermusToolTipText {
+    font-size: 10px;
+    line-height: 12px;
+    letter-spacing: 0.5px;
+    overflow-wrap: break-word;
+}
+
+#WolfermusMainMenuWrapper {
+    -khtml-user-select: none;
+    -o-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: none;
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 8000;
+    left: 0;
+    top: 0;
+
+    #WolfermusFloatingSnapBtnWrapper {
+        z-index: 0;
+        -khtml-user-select: none;
+        -o-user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        user-select: none;
+        pointer-events: none;
+        position: absolute;
+        transform: translate(-50%, -50%);
+        top: 30px;
+        left: 86%;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+
+        .WolfermusFabBtn {
+            img {
+                -khtml-user-select: none;
+                -o-user-select: none;
+                -moz-user-select: none;
+                -webkit-user-select: none;
+                user-select: none;
+                pointer-events: none;
+                width: 100%;
+                height: 100%;
+                z-index: 0;
+            }
+
+            pointer-events: all;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            color: white;
+            z-index: 9000;
+        }
+
+        .WolfermusActivatedMainMenuWindow {
+            display: none;
+            position: relative;
+            width: 300px;
+            height: 400px;
+            top: 0;
+            left: 0;
+            transition: 0.5s;
+            z-index: 8500;
+        }
+
+        &.WolfermusLeftPosition {
+            .WolfermusActivatedMainMenuWindow {
+                left: 110%;
+                transition-delay: 0s;
+            }
+        }
+
+        &.WolfermusRightPosition {
+            .WolfermusActivatedMainMenuWindow {
+                left: -610%;
+                transition-delay: 0s;
+            }
+        }
+
+        &.WolfermusUpPosition {
+            .WolfermusActivatedMainMenuWindow {
+                top: -700%;
+                transition-delay: 0s;
+            }
+        }
+
+        &.WolfermusDownPosition {
+            .WolfermusActivatedMainMenuWindow {
+                top: 0%;
+                transition-delay: 0s;
+            }
+        }
+
+        &.WolfermusActive {
+            .WolfermusActivatedMainMenuWindow {
+                display: block;
+            }
+        }
+    }
+}
