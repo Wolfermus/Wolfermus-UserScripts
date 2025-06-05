@@ -195,7 +195,7 @@ async () => {
      * 
      * @type {(item: WolfermusMenuItem) => void}
      */
-    const SetMenuItem = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["SetMenuItem"];
+    const SetMainMenuItem = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["SetMainMenuItem"];
 
     const GUIGotten = await GetValue("CSSToggles", "{}");
     let WolfermusCSSTogglesSettings = JSON.parse(GUIGotten);
@@ -287,5 +287,5 @@ async () => {
         SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));
     };
 
-    SetMenuItem(ToggleFrostedGlassMenuItem);
+    SetMainMenuItem(ToggleFrostedGlassMenuItem);
 };
