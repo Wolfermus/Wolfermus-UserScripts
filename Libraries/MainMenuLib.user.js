@@ -12,6 +12,7 @@
 // @match        http://*/*
 // @match        https://*/*
 // @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Libraries/StorageManagerLib.user.js
+// @connect      raw.githubusercontent.com
 // @grant        GM_getValue
 // @grant        GM.getValue
 // @grant        GM_setValue
@@ -20,6 +21,8 @@
 // @grant        GM.addValueChangeListener
 // @grant        GM_notification
 // @grant        GM.notification
+// @grant        GM.xmlHttpRequest
+// @grant        GM_xmlHttpRequest
 // @icon         https://i.imgur.com/XFeWfV0.png
 // ==/UserScript== 
 
@@ -89,7 +92,7 @@ class WolfermusMenuItem {
 
         toolTipsText.innerText = this.tooltip;
 
-        toolTips.classList.add("wlfToolTipSetActive");
+        toolTips.classList.add("WolfermusToolTipSetActive");
 
         const x = event.clientX;
         const y = (event.clientY) + 30;
@@ -100,11 +103,12 @@ class WolfermusMenuItem {
             const toolTips = document.getElementById("WolfermusMenuItemToolTip");
             if (toolTips === undefined || toolTips === null) return;
 
-            toolTips.classList.add("wlfToolTipActive");
-            toolTips.classList.remove("wlfToolTipSetActive");
+            toolTips.classList.add("WolfermusActive");
+            toolTips.classList.remove("WolfermusToolTipSetActive");
 
         }, this.tooltipTimeOut);
     };
+
     /**
      * 
      * @param {PointerEvent} event 
@@ -123,8 +127,8 @@ class WolfermusMenuItem {
 
         toolTipsText.innerText = "";
 
-        toolTips.classList.remove("wlfToolTipSetActive");
-        toolTips.classList.remove("wlfToolTipActive");
+        toolTips.classList.remove("WolfermusToolTipSetActive");
+        toolTips.classList.remove("WolfermusActive");
     };
     /**
      * @type {(PointerEvent) => void}
@@ -155,8 +159,8 @@ class WolfermusMenuItem {
 
         toolTipsText.innerText = "";
 
-        toolTips.classList.remove("wlfToolTipSetActive");
-        toolTips.classList.remove("wlfToolTipActive");
+        toolTips.classList.remove("WolfermusToolTipSetActive");
+        toolTips.classList.remove("WolfermusActive");
     };
 
     /**
@@ -206,7 +210,7 @@ class WolfermusMenuItem {
      */
     Generate() {
         return `
-        <li id="WolfermusMenuItem${this.name}" class="wlfDefaultFloatingButtonCSS">
+        <li id="WolfermusMenuItem${this.name}" class="WolfermusDefaultCSS">
             <a>${this.title}</a>
         </li>`
     }
@@ -283,12 +287,20 @@ let wolfermusMenuItems = [];
  */
 let currentWolfermusMenuItems = [];
 
+/**
+ * @type {Array<WolfermusMenuItem>}
+ */
+let wolfermusContextMenuItems = [];
+/**
+ * @type {Array<WolfermusMenuItem>}
+ */
+let currentWolfermusContextMenuItems = [];
 
 /**
  * Add/Set a Menu Item to Main Menu
  * @param {WolfermusMenuItem} item
  */
-function SetMenuItem(item) {
+function SetMainMenuItem(item) {
     if (wolfermusMenuItems.find((menuItem) => menuItem.name === item.name) !== undefined) return;
     wolfermusMenuItems.push(item);
 }
@@ -298,7 +310,7 @@ function SetMenuItem(item) {
  * 
  * @param {string} itemName
  */
-function RemoveMenuItem(itemName) {
+function RemoveMainMenuItem(itemName) {
     let foundIndex = wolfermusMenuItems.findIndex((menuItem) => menuItem.name === itemName);
     if (foundIndex === -1) return;
 
@@ -308,8 +320,36 @@ function RemoveMenuItem(itemName) {
 /**
  * Clear all Menu Items from Main Menu
  */
-function ClearMenuItems() {
+function ClearMainMenuItems() {
     wolfermusMenuItems = [];
+}
+
+/**
+ * Add/Set a Menu Item to Context Menu
+ * @param {WolfermusMenuItem} item
+ */
+function SetContextMenuItem(item) {
+    if (wolfermusContextMenuItems.find((menuItem) => menuItem.name === item.name) !== undefined) return;
+    wolfermusContextMenuItems.push(item);
+}
+
+/**
+ * Remove a Menu Item from Context Menu
+ * 
+ * @param {string} itemName
+ */
+function RemoveContextMenuItem(itemName) {
+    let foundIndex = wolfermusContextMenuItems.findIndex((menuItem) => menuItem.name === itemName);
+    if (foundIndex === -1) return;
+
+    wolfermusContextMenuItems.splice(foundIndex, 1);
+}
+
+/**
+ * Clear all Menu Items from Context Menu
+ */
+function ClearContextMenuItems() {
+    wolfermusContextMenuItems = [];
 }
 
 /**
@@ -326,226 +366,29 @@ function GenerateMenuItems() {
 /**
  * Only run after appending new Menu Items to document.
  */
-function AttachScriptsForItems() {
+function SetupScriptsForItems() {
     for (const menuItem of wolfermusMenuItems) {
         if (menuItem.SetupScripts()) currentWolfermusMenuItems.push(menuItem);
+    }
+
+    for (const menuItem of wolfermusContextMenuItems) {
+        if (menuItem.SetupScripts()) currentWolfermusContextMenuItems.push(menuItem);
     }
 }
 
 /**
  * Removes all Event Listeners currently rendered from menu items
  */
-function RemoveAttachedScriptsForCurrentItems() {
+function RemoveScriptsForCurrentItems() {
     for (const menuItem of currentWolfermusMenuItems) {
         menuItem.RemoveScripts();
     }
     currentWolfermusMenuItems = [];
-}
 
-/**
- * Updates the Main Menu Style
- */
-function UpdateWolfermusMainMenuStyle() {
-    let mainMenuStyle = document.getElementById("WolfermusMainMenuStyle");
-
-    if (mainMenuStyle === undefined || mainMenuStyle === null) {
-        mainMenuStyle = document.createElement("style");
-        mainMenuStyle.id = "WolfermusMainMenuStyle";
-        document.head.append(mainMenuStyle);
+    for (const menuItem of currentWolfermusContextMenuItems) {
+        menuItem.RemoveScripts();
     }
-
-    const editedInnerHTML = bypassScriptPolicy.createHTML(`
-.wlfDefaultFloatingButtonCSS {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-}
-
-/* Tooltip text */
-.wlfToolTipText {
-  visibility: hidden;
-  width: 120px;
-  background-color: #0f0f0f;
-  border-radius: 20px;
-  border-color: #272727;
-  border-width: 4px;
-  border-style: solid;
-  box-shadow: 0px 2px 17px -1px rgba(0, 0, 0, 0.3);
-  color: #fff;
-  text-align: center;
-  padding: 10px;
-
-  font-family: Roboto, Arial, sans-serif;
-  font-size: 1rem;
-  font-weight: 500;
- 
-  /* Position the tooltip text - see examples below! */
-  position: absolute;
-  z-index: 9500;
-
-  width: 120px;
-  margin-left: -65px;
-  margin-top: 30px;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.wlfToolTipText.wlfToolTipActive {
-  visibility: visible;
-}
-
-#wlfMainMenuWrapper {
-  -khtml-user-select: none;
-  -o-user-select: none;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
-  pointer-events: none;
-  position: fixed;
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  z-index: 8000;
-  #wlfFloatingSnapBtnWrapper {
-    z-index: 0;
-    -khtml-user-select: none;
-    -o-user-select: none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
-    pointer-events: none;
-    position: absolute;
-    transform: translate(-50%, -50%);
-    top: 30px;
-    left: 86%;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    .wlfFabBtn {
-      img {
-        -khtml-user-select: none;
-        -o-user-select: none;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        user-select: none;
-        pointer-events: none;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-      }
-      pointer-events: all;
-      position: absolute;
-      top: 0;
-      left: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border-style: solid;
-      border-color: #272727;
-      border-width: 4px;
-      color: white;
-      box-shadow: 0px 2px 17px -1px rgba(0, 0, 0, 0.3);
-      z-index: 9000;
-    }
-    .wlfActivatedMainMenuWindow {
-      pointer-events: all;
-      display: none;
-      position: relative;
-      width: 300px;
-      height: 400px;
-      top: 0;
-      left: 0;
-      background-color: #0f0f0f;
-      border-radius: 20px;
-      border-color: #272727;
-      border-width: 4px;
-      border-style: solid;
-      transition: 0.5s;
-      z-index: 8500;
-      box-shadow: 0px 2px 17px -1px rgba(0, 0, 0, 0.3);
-    }
-    &.wlfLeftPosition {
-      .wlfActivatedMainMenuWindow {
-        left: 110%;
-        transition-delay: 0s;
-      }
-    }
-    &.wlfRightPosition {
-      .wlfActivatedMainMenuWindow {
-        left: -610%;
-        transition-delay: 0s;
-      }
-    }
-    &.wlfUpPosition {
-      .wlfActivatedMainMenuWindow {
-        top: -700%;
-        transition-delay: 0s;
-      }
-    }
-    &.wlfDownPosition {
-      .wlfActivatedMainMenuWindow {
-        top: 0%;
-        transition-delay: 0s;
-      }
-    }
-    ul {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      padding-top: 2%;
-      padding-bottom: 2%;
-      overflow: auto;
-      border-radius: 15px;
-      li {
-        cursor: pointer;
-        position: relative;
-        top: 0;
-        left: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #272727;
-        color: #ececec;
-        list-style-type: none;
-        transform: scale(0.95);
-        transition: 0.5s;
-        margin: 1%;
-        border-radius: 20px;
-        a {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 12px;
-            height: 32px;
-            min-width: 12px;
-            white-space: nowrap;
-            font-family: "Roboto", "Arial", sans-serif;
-            font-size: 1.4rem;
-            line-height: 2rem;
-            font-weight: 500;
-        }
-      }
-    }
-    &.wlfFabActive {
-      li:hover {
-        background-color: #3d3d3d;
-      }
-      li:active {
-        background-color: #505050;
-      }
-      .wlfActivatedMainMenuWindow {
-        display: block;
-      }
-    }
-    }
-    }
-    `);
-
-    mainMenuStyle.innerHTML = editedInnerHTML;
+    currentWolfermusContextMenuItems = [];
 }
 
 const contrainedPadding = 5;
@@ -561,17 +404,17 @@ class Position {
 }
 
 /**
- * 
+ * @param {HTMLElement} elementToContrain 
  * @param {Position} position 
+ * @param {Boolean} shouldDivideElementToContrainDimentionByTwo 
  */
-async function ContrainMainMenuViaPosition(position) {
+async function ContrainElementViaPosition(elementToContrain, position, shouldDivideElementWidthToContrainDimentionByTwo = true, shouldDivideElementHeightToContrainDimentionByTwo = true) {
     if (currentWolfermusMenuItems.length <= 0) return;
 
-    const mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
-    const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
+    const mainMenuRoot = document.getElementById("WolfermusMainMenuWrapper");
 
     if (mainMenuRoot === undefined || mainMenuRoot === null) return;
-    if (fabElement === undefined || fabElement === null) return;
+    if (elementToContrain === undefined || elementToContrain === null) return;
 
     while (mainMenuRoot.getBoundingClientRect().width === 0 && mainMenuRoot.getBoundingClientRect().height === 0) {
         await Sleep(100);
@@ -580,26 +423,32 @@ async function ContrainMainMenuViaPosition(position) {
     const windowWidth = mainMenuRoot.getBoundingClientRect().width;
     const windowHeight = mainMenuRoot.getBoundingClientRect().height;
 
-    const buttonWidth = fabElement.getBoundingClientRect().width;
-    const buttonHeight = fabElement.getBoundingClientRect().height;
+    const elementToContrainWidth = elementToContrain.getBoundingClientRect().width;
+    const elementToContrainHeight = elementToContrain.getBoundingClientRect().height;
 
-    const buttonWidthDivided2 = buttonWidth / 2;
-    const buttonHeightDivided2 = buttonHeight / 2;
-
-    if ((position.x - contrainedPadding) < buttonWidthDivided2) {
-        fabElement.style.left = (buttonWidthDivided2 + contrainedPadding) + "px";
-    } else if ((position.x + contrainedPadding) > windowWidth - (buttonWidthDivided2)) {
-        fabElement.style.left = (windowWidth - buttonWidthDivided2 - contrainedPadding) + "px";
-    } else {
-        fabElement.style.left = position.x + "px";
+    let elementToContrainWidthDivided2 = elementToContrainWidth;
+    let elementToContrainHeightDivided2 = elementToContrainHeight;
+    if (shouldDivideElementWidthToContrainDimentionByTwo) {
+        elementToContrainWidthDivided2 = elementToContrainWidth / 2;
+    }
+    if (shouldDivideElementHeightToContrainDimentionByTwo) {
+        elementToContrainHeightDivided2 = elementToContrainHeight / 2;
     }
 
-    if ((position.y - contrainedPadding) < buttonHeightDivided2) {
-        fabElement.style.top = (buttonHeightDivided2 + contrainedPadding) + "px";
-    } else if ((position.y + contrainedPadding) > windowHeight - buttonHeightDivided2) {
-        fabElement.style.top = (windowHeight - buttonHeightDivided2 - contrainedPadding) + "px";
+    if ((position.x - contrainedPadding) < (shouldDivideElementWidthToContrainDimentionByTwo ? elementToContrainWidthDivided2 : 0)) {
+        elementToContrain.style.left = ((shouldDivideElementWidthToContrainDimentionByTwo ? elementToContrainWidthDivided2 : 0) + contrainedPadding) + "px";
+    } else if ((position.x + contrainedPadding) > windowWidth - (elementToContrainWidthDivided2)) {
+        elementToContrain.style.left = (windowWidth - elementToContrainWidthDivided2 - contrainedPadding) + "px";
     } else {
-        fabElement.style.top = position.y + "px";
+        elementToContrain.style.left = position.x + "px";
+    }
+
+    if ((position.y - contrainedPadding) < (shouldDivideElementHeightToContrainDimentionByTwo ? elementToContrainHeightDivided2 : 0)) {
+        elementToContrain.style.top = ((shouldDivideElementHeightToContrainDimentionByTwo ? elementToContrainHeightDivided2 : 0) + contrainedPadding) + "px";
+    } else if ((position.y + contrainedPadding) > windowHeight - elementToContrainHeightDivided2) {
+        elementToContrain.style.top = (windowHeight - elementToContrainHeightDivided2 - contrainedPadding) + "px";
+    } else {
+        elementToContrain.style.top = position.y + "px";
     }
 }
 
@@ -608,8 +457,8 @@ let oldWindowWidth, oldWindowHeight;
 function ContrainMainMenu() {
     if (currentWolfermusMenuItems.length <= 0) return;
 
-    const mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
-    const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
+    const mainMenuRoot = document.getElementById("WolfermusMainMenuWrapper");
+    const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
     if (mainMenuRoot === undefined || mainMenuRoot === null) return;
     if (fabElement === undefined || fabElement === null) return;
 
@@ -632,15 +481,15 @@ function ContrainMainMenu() {
     const x = parseInt(fabElement.style.left.match(/\d/g).join(""));
     const y = parseInt(fabElement.style.top.match(/\d/g).join(""));
 
-    ContrainMainMenuViaPosition(new Position(x, y));
+    ContrainElementViaPosition(fabElement, new Position(x, y));
 }
 
 /**
  * @param {PointerEvent} event 
  */
 function MainMenuMove(event) {
-    const mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
-    const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
+    const mainMenuRoot = document.getElementById("WolfermusMainMenuWrapper");
+    const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
     if (mainMenuRoot === undefined || mainMenuRoot === null) return;
     if (fabElement === undefined || fabElement === null) return;
 
@@ -657,22 +506,22 @@ function MainMenuMove(event) {
     //     currentPosition.x = e.clientX;
     //     currentPosition.y = e.clientY;
     // }
-    ContrainMainMenuViaPosition(currentPosition);
+    ContrainElementViaPosition(fabElement, currentPosition);
 
     if (currentPosition.x < windowWidth / 2) {
-        fabElement.classList.remove("wlfRightPosition");
-        fabElement.classList.add("wlfLeftPosition");
+        fabElement.classList.remove("WolfermusRightPosition");
+        fabElement.classList.add("WolfermusLeftPosition");
     } else {
-        fabElement.classList.remove("wlfLeftPosition");
-        fabElement.classList.add("wlfRightPosition");
+        fabElement.classList.remove("WolfermusLeftPosition");
+        fabElement.classList.add("WolfermusRightPosition");
     }
 
     if (currentPosition.y < windowHeight / 2) {
-        fabElement.classList.remove("wlfUpPosition");
-        fabElement.classList.add("wlfDownPosition");
+        fabElement.classList.remove("WolfermusUpPosition");
+        fabElement.classList.add("WolfermusDownPosition");
     } else {
-        fabElement.classList.remove("wlfDownPosition");
-        fabElement.classList.add("wlfUpPosition");
+        fabElement.classList.remove("WolfermusDownPosition");
+        fabElement.classList.add("WolfermusUpPosition");
     }
 }
 
@@ -680,8 +529,8 @@ function MainMenuMove(event) {
  * @param {PointerEvent} event 
  */
 function MainMenuMouseDown(event) {
-    const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
-    const fabElementBtn = document.getElementById("wlfFloatingSnapBtn");
+    const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
+    const fabElementBtn = document.getElementById("WolfermusFloatingSnapBtn");
     if (fabElement === undefined || fabElement === null) return;
     if (fabElementBtn === undefined || fabElementBtn === null) return;
 
@@ -701,7 +550,142 @@ function MainMenuMouseDown(event) {
     fabElement.style.transition = "none";
 }
 
+/**
+ * @returns {string}
+ */
+function GenerateContextItems() {
+    let wolfermusContextItemsConverted = "";
+    for (const menuItem of wolfermusContextMenuItems) {
+        wolfermusContextItemsConverted += menuItem.Generate();
+    }
+    return wolfermusContextItemsConverted;
+}
+
+let withinContextMenu = false;
+
+/**
+ * @param {PointerEvent} event 
+ */
+function ContextMenuPointerEnter(event) {
+    withinContextMenu = true;
+}
+
+/**
+ * @param {PointerEvent} event 
+ */
+function ContextMenuPointerLeave(event) {
+    withinContextMenu = false;
+}
+
+/**
+ * @param {PointerEvent} event 
+ */
+function ContextMenuRemoveActiveIfNotWithin(event) {
+    if (!withinContextMenu) {
+        RemoveTempContextMenuListeners();
+
+        const contextMenu = document.getElementById("WolfermusMainMenuContextMenu");
+        if (contextMenu === undefined || contextMenu === null) return;
+
+        contextMenu.classList.remove("WolfermusActive");
+    }
+}
+
+function AddTempContextMenuListeners() {
+    const contextMenu = document.getElementById("WolfermusMainMenuContextMenu");
+    if (contextMenu === undefined || contextMenu === null) return;
+
+    contextMenu.addEventListener("pointerenter", ContextMenuPointerEnter);
+    contextMenu.addEventListener("pointerleave", ContextMenuPointerLeave);
+    window.addEventListener("pointerdown", ContextMenuRemoveActiveIfNotWithin);
+    window.addEventListener("pointerup", ContextMenuRemoveActiveIfNotWithin);
+    window.addEventListener("pointercancel", ContextMenuRemoveActiveIfNotWithin);
+}
+
+function RemoveTempContextMenuListeners() {
+    window.removeEventListener("pointerdown", ContextMenuRemoveActiveIfNotWithin);
+    window.removeEventListener("pointerup", ContextMenuRemoveActiveIfNotWithin);
+    window.removeEventListener("pointercancel", ContextMenuRemoveActiveIfNotWithin);
+
+    const contextMenu = document.getElementById("WolfermusMainMenuContextMenu");
+    if (contextMenu === undefined || contextMenu === null) return;
+
+    contextMenu.removeEventListener("pointerenter", ContextMenuPointerEnter);
+    contextMenu.removeEventListener("pointerleave", ContextMenuPointerLeave);
+}
+
+/**
+ * @param {PointerEvent} event 
+ */
+function ContextMenuCallback(event) {
+    event.preventDefault();
+    const contextMenu = document.getElementById("WolfermusMainMenuContextMenu");
+    if (contextMenu === undefined || contextMenu === null) return;
+
+    const x = event.clientX;
+    const y = event.clientY;
+
+    AddTempContextMenuListeners();
+
+    contextMenu.classList.add("WolfermusActive");
+
+    ContrainElementViaPosition(contextMenu, new Position(x, y), false, false);
+}
+
 (async () => {
+    let IsGMXmlHttpRequest1 = false;
+    // @ts-ignore
+    if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;
+
+    let IsGMXmlHttpRequest2 = false;
+    // @ts-ignore
+    if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest !== "undefined") IsGMXmlHttpRequest2 = true;
+
+    let IsGMXmlHttpRequest = false;
+    if (IsGMXmlHttpRequest1 || IsGMXmlHttpRequest2) IsGMXmlHttpRequest = true;
+
+    if (!IsGMXmlHttpRequest) {
+        const message = "Wolfermus ERROR: Main - Please run in a userscript manager";
+        alert(message);
+        console.log(message);
+        return;
+    }
+
+    let ChosenXmlHttpRequest;
+    if (IsGMXmlHttpRequest2) {
+        ChosenXmlHttpRequest = GM.xmlHttpRequest;
+    } else if (IsGMXmlHttpRequest1) {
+        ChosenXmlHttpRequest = GM_xmlHttpRequest;
+    } else {
+        const message = "Wolfermus ERROR: Main - Unexpected Error";
+        alert(message);
+        console.log(message);
+        return;
+    }
+    if (ChosenXmlHttpRequest === undefined || ChosenXmlHttpRequest === null) {
+        const message = "Wolfermus ERROR: Main - Unexpected Error";
+        alert(message);
+        console.log(message);
+        return;
+    }
+
+    function MakeGetRequest(url) {
+        return new Promise((resolve, reject) => {
+            ChosenXmlHttpRequest({
+                method: "GET",
+                url: url,
+                onload: (response) => {
+                    if (response.status !== 200) {
+                        reject(statusText);
+                        return;
+                    }
+                    resolve(response.responseText);
+                },
+                onerror: error => reject(error)
+            });
+        });
+    }
+
     let wolfermusAntiStuckLoop1 = 100;
     while (window === undefined || window === null) {
         await Sleep(500);
@@ -762,6 +746,8 @@ function MainMenuMouseDown(event) {
     }
 
     console.log("Wolfermus Main Menu Library Loading...");
+
+    //#region Loading and getting functions
 
     let wolfermusLoadLoopCounter = 0;
     while (!WolfermusCheckLibraryLoaded("StorageManager")) {
@@ -827,12 +813,49 @@ function MainMenuMouseDown(event) {
         console.log(wolfermusLoadLoopCounterDisplayString);
     }
 
+    //#endregion -Loading and getting functions
+
+    /**
+ * Updates the Main Menu Style
+ * @async
+ */
+    async function UpdateWolfermusMainMenuStyle() {
+        let mainMenuStyle = document.getElementById("WolfermusMainMenuStyle");
+
+        if (mainMenuStyle === undefined || mainMenuStyle === null) {
+            mainMenuStyle = document.createElement("style");
+            mainMenuStyle.id = "WolfermusMainMenuStyle";
+            document.head.append(mainMenuStyle);
+        }
+
+        async function GetCSS() {
+            const css = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Resources/MainMenuLib.css`));
+            return css;
+        }
+
+        let wolfermusPreventLoopLock1 = 10;
+        async function AttemptLoadCSS() {
+            return await GetCSS().then(async (response) => {
+                return response;
+            }).catch(async (error) => {
+                if (wolfermusPreventLoopLock1 <= 0) return;
+                wolfermusPreventLoopLock1--;
+                await Sleep(500);
+                return await AttemptLoadCSS();
+            });
+        }
+
+        const editedInnerHTML = bypassScriptPolicy.createHTML(await AttemptLoadCSS());
+
+        mainMenuStyle.innerHTML = editedInnerHTML;
+    }
+
     /**
      * @param {PointerEvent} event 
      */
     async function MainMenuMouseUp(event) {
-        const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
-        const fabElementBtn = document.getElementById("wlfFloatingSnapBtn");
+        const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
+        const fabElementBtn = document.getElementById("WolfermusFloatingSnapBtn");
         if (fabElement === undefined || fabElement === null) return;
         if (fabElementBtn === undefined || fabElementBtn === null) return;
 
@@ -867,13 +890,13 @@ function MainMenuMouseDown(event) {
 
         if (!WolfermusMainMenuSettings.Direction) WolfermusMainMenuSettings.Direction = {};
 
-        WolfermusMainMenuSettings.Direction.Vertical = "wlfDownPosition";
-        WolfermusMainMenuSettings.Direction.Horizontal = "wlfLeftPosition";
-        if (fabElement.classList.contains("wlfUpPosition")) {
-            WolfermusMainMenuSettings.Direction.Vertical = "wlfUpPosition";
+        WolfermusMainMenuSettings.Direction.Vertical = "WolfermusDownPosition";
+        WolfermusMainMenuSettings.Direction.Horizontal = "WolfermusLeftPosition";
+        if (fabElement.classList.contains("WolfermusUpPosition")) {
+            WolfermusMainMenuSettings.Direction.Vertical = "WolfermusUpPosition";
         }
-        if (fabElement.classList.contains("wlfRightPosition")) {
-            WolfermusMainMenuSettings.Direction.Horizontal = "wlfRightPosition";
+        if (fabElement.classList.contains("WolfermusRightPosition")) {
+            WolfermusMainMenuSettings.Direction.Horizontal = "WolfermusRightPosition";
         }
 
         // TODO: Update StorageManagerLib to handly localStorage only options.
@@ -883,14 +906,14 @@ function MainMenuMouseDown(event) {
     }
 
     function MainMenuClick(event) {
-        const fabElement = document.getElementById("wlfFloatingSnapBtnWrapper");
+        const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
         if (fabElement === undefined || fabElement === null) return;
 
         if (
             oldPositionY === fabElement.style.top &&
             oldPositionX === fabElement.style.left
         ) {
-            fabElement.classList.toggle("wlfFabActive");
+            fabElement.classList.toggle("WolfermusActive");
         }
     }
 
@@ -905,16 +928,16 @@ function MainMenuMouseDown(event) {
             wlfToolTipsElement = document.getElementById("WolfermusMenuItemToolTip");
             if (wlfToolTipsElement === undefined || wlfToolTipsElement === null) return;
         }
-        if (!wlfToolTipsElement.classList.contains("wlfToolTipActive") && !wlfToolTipsElement.classList.contains("wlfToolTipSetActive")) return;
+        if (!wlfToolTipsElement.classList.contains("WolfermusActive") && !wlfToolTipsElement.classList.contains("WolfermusToolTipSetActive")) return;
 
         const x = event.clientX;
-        const y = event.clientY;
-        wlfToolTipsElement.style.top = (y) + 'px';
-        wlfToolTipsElement.style.left = (x) + 'px';
+        const y = (event.clientY) + 30;
+
+        ContrainElementViaPosition(wlfToolTipsElement, new Position(x, y), true, false);
     }
 
     function AttachInteractionEventsToMainMenu() {
-        const fabElementBtn = document.getElementById("wlfFloatingSnapBtn");
+        const fabElementBtn = document.getElementById("WolfermusFloatingSnapBtn");
         if (fabElementBtn === undefined || fabElementBtn === null) return;
 
         fabElementBtn.addEventListener("pointerdown", MainMenuMouseDown);
@@ -928,11 +951,13 @@ function MainMenuMouseDown(event) {
 
         fabElementBtn.addEventListener("click", MainMenuClick);
 
+        fabElementBtn.addEventListener("contextmenu", ContextMenuCallback);
+
         window.addEventListener('pointermove', ToolTipPointerMove);
     }
 
     function RemoveInteractionEventsToMainMenu() {
-        const fabElementBtn = document.getElementById("wlfFloatingSnapBtn");
+        const fabElementBtn = document.getElementById("WolfermusFloatingSnapBtn");
         if (fabElementBtn === undefined || fabElementBtn === null) return;
 
         fabElementBtn.removeEventListener("pointerdown", MainMenuMouseDown);
@@ -946,6 +971,8 @@ function MainMenuMouseDown(event) {
 
         fabElementBtn.removeEventListener("click", MainMenuClick);
 
+        fabElementBtn.removeEventListener("contextmenu", ContextMenuCallback);
+
         window.removeEventListener('pointermove', ToolTipPointerMove);
         wlfToolTipsElement = undefined;
     }
@@ -953,7 +980,7 @@ function MainMenuMouseDown(event) {
     function FullscreenChangeMainMenu() {
         if (currentWolfermusMenuItems.length <= 0) return;
 
-        let mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
+        let mainMenuRoot = document.getElementById("WolfermusMainMenuWrapper");
         if (mainMenuRoot === undefined || mainMenuRoot === null) return;
 
         if (document.fullscreenElement !== null) {
@@ -967,14 +994,14 @@ function MainMenuMouseDown(event) {
      * Update Main Menu Items
      */
     async function UpdateMenuItems() {
-        let mainMenuRoot = document.getElementById("wlfMainMenuWrapper");
+        let mainMenuRoot = document.getElementById("WolfermusMainMenuWrapper");
         let creatingMainMenuRoot = false;
         if (mainMenuRoot === undefined || mainMenuRoot === null) {
             if (wolfermusMenuItems.length <= 0) return;
 
             mainMenuRoot = document.createElement("div");
-            mainMenuRoot.id = "wlfMainMenuWrapper";
-            mainMenuRoot.classList = "wlfDefaultFloatingButtonCSS";
+            mainMenuRoot.id = "WolfermusMainMenuWrapper";
+            mainMenuRoot.classList = "WolfermusDefaultCSS";
             mainMenuRoot.style.display = "none";
 
             creatingMainMenuRoot = true;
@@ -987,7 +1014,8 @@ function MainMenuMouseDown(event) {
         let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
         RemoveInteractionEventsToMainMenu();
-        RemoveAttachedScriptsForCurrentItems();
+        RemoveScriptsForCurrentItems();
+        RemoveTempContextMenuListeners();
 
         if (wolfermusMenuItems.length <= 0) {
             mainMenuRoot.style.display = "none";
@@ -999,33 +1027,37 @@ function MainMenuMouseDown(event) {
             console.log("Unable to locate logo");
         } else imgSrc = mainWindow["Wolfermus"]["Logo"]["Rounded"];
 
-        const editedInnerHTML = bypassScriptPolicy.createHTML(`
-  <span id="WolfermusMenuItemToolTip" class="wlfToolTipText"></span>
-  <div id="wlfFloatingSnapBtnWrapper" class="wlfDefaultFloatingButtonCSS ${WolfermusMainMenuSettings.Direction?.Horizontal ? WolfermusMainMenuSettings.Direction?.Horizontal : ""} ${WolfermusMainMenuSettings.Direction?.Vertical ? WolfermusMainMenuSettings.Direction?.Vertical : ""}"
-    style="${WolfermusMainMenuSettings.Top ? "top: " + WolfermusMainMenuSettings.Top + "px;" : ""} ${WolfermusMainMenuSettings.Left ? "left: " + WolfermusMainMenuSettings.Left + "px;" : ""}">
-    <!-- BEGIN :: Floating Button -->
-    <div id="wlfFloatingSnapBtn" class="wlfFabBtn wlfDefaultFloatingButtonCSS">
-      <img src="${imgSrc}" class="wlfDefaultFloatingButtonCSS"></img>
-    </div>
-    <!-- END :: Floating Button -->
-    <!-- BEGIN :: Expand Section -->
-    <div class="wlfActivatedMainMenuWindow wlfDefaultFloatingButtonCSS">
-      <ul class="wlfDefaultFloatingButtonCSS">
-        ${GenerateMenuItems()}
-      </ul>
-    </div>
-    <!-- END :: Expand Section -->
-  </div>
-    `);
+        async function GetHTML() {
+            const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Resources/MainMenuLibHTML.js`));
+            return script;
+        }
+
+        let wolfermusPreventLoopLock1 = 10;
+        async function AttemptLoadHTML() {
+            return await GetHTML().then(async (response) => {
+                return response;
+            }).catch(async (error) => {
+                if (wolfermusPreventLoopLock1 <= 0) return;
+                wolfermusPreventLoopLock1--;
+                await Sleep(500);
+                return await AttemptLoadHTML();
+            });
+        }
+
+        const editedInnerHTML = bypassScriptPolicy.createHTML(eval(await AttemptLoadHTML()));
 
         mainMenuRoot.innerHTML = editedInnerHTML;
+        if (mainMenuRoot.innerHTML === "") {
+            mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["Loaded"] = false;
+            return;
+        }
 
         if (creatingMainMenuRoot) {
-            document.body.append(mainMenuRoot);
+            document.documentElement.appendChild(mainMenuRoot);
         }
         mainMenuRoot.style.display = "none";
 
-        AttachScriptsForItems();
+        SetupScriptsForItems();
 
         AttachInteractionEventsToMainMenu();
         if (creatingMainMenuRoot) {
@@ -1034,21 +1066,48 @@ function MainMenuMouseDown(event) {
             window.addEventListener('resize', ContrainMainMenu);
         }
 
-        ContrainMainMenuViaPosition(new Position(WolfermusMainMenuSettings.Left, WolfermusMainMenuSettings.Top));
+        const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
         if (document.fullscreenElement !== null) {
             mainMenuRoot.style.display = "none";
         } else {
             mainMenuRoot.style.display = "block";
         }
+        ContrainElementViaPosition(fabElement, new Position(WolfermusMainMenuSettings.Left, WolfermusMainMenuSettings.Top));
     }
+
+    const updateMenuItemsContextMenuItem = new WolfermusMenuItem(
+        "WolfermusUpdateMenuItemsContextMenuItem",
+        "Update Menu Items",
+        `This Refreshes/Updates this whole menu
+        (left click and right click)
+        and the floating button itself`
+    );
+    updateMenuItemsContextMenuItem.clickCallback = UpdateMenuItems;
+
+    const updateWolfermusMainMenuStyleContextMenuItem = new WolfermusMenuItem(
+        "WolfermusUpdateWolfermusMainMenuStyleContextMenuItem",
+        "Update Wolfermus Main Menu Style CSS",
+        `This Refreshes/Updates the Wolfermus Main Menu Style CSS`
+    );
+    updateWolfermusMainMenuStyleContextMenuItem.clickCallback = async (event) => {
+        await UpdateWolfermusMainMenuStyle();
+
+        const contextMenu = document.getElementById("WolfermusMainMenuContextMenu");
+        if (contextMenu === undefined || contextMenu === null) return;
+
+        contextMenu.classList.remove("WolfermusActive");
+    };
+
+    SetContextMenuItem(updateMenuItemsContextMenuItem);
+    SetContextMenuItem(updateWolfermusMainMenuStyleContextMenuItem);
 
     mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["Loaded"] = false;
 
     mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["WolfermusMenuItem"] = WolfermusMenuItem;
 
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["SetMenuItem"] = SetMenuItem;
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["RemoveMenuItem"] = RemoveMenuItem;
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["ClearMenuItems"] = ClearMenuItems;
+    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["SetMainMenuItem"] = SetMainMenuItem;
+    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["RemoveMainMenuItem"] = RemoveMainMenuItem;
+    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["ClearMainMenuItems"] = ClearMainMenuItems;
 
     mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateMenuItems"] = UpdateMenuItems;
     mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateWolfermusMainMenuStyle"] = UpdateWolfermusMainMenuStyle;
