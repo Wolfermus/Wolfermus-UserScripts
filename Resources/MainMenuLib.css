@@ -5,7 +5,7 @@
 }
 
 .WolfermusActive {
-    display: block !important;
+    visibility: visible !important;
 }
 
 .WolfermusPopUpMenu {
@@ -73,7 +73,7 @@
 }
 
 #WolfermusMainMenuContextMenu {
-    display: none;
+    visibility: hidden;
     position: absolute;
     z-index: 8700;
     width: 140px;
@@ -93,7 +93,7 @@
     user-select: none;
     pointer-events: none;
 
-    display: none;
+    visibility: hidden;
     width: 120px;
     text-align: center;
 
@@ -172,7 +172,7 @@
         }
 
         .WolfermusActivatedMainMenuWindow {
-            display: none;
+            visibility: hidden;
             position: relative;
             width: 300px;
             height: 400px;
@@ -212,7 +212,7 @@
 
         &.WolfermusActive {
             .WolfermusActivatedMainMenuWindow {
-                display: block;
+                visibility: visible;
             }
         }
     }
