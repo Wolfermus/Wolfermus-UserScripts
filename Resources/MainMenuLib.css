@@ -47,7 +47,6 @@
             background: #272727;
             list-style-type: none;
             transform: scale(0.95);
-            transition: 0.5s;
             margin: 1%;
             border-radius: 20px;
 
@@ -178,7 +177,6 @@
             height: 400px;
             top: 0;
             left: 0;
-            transition: 0.5s;
             z-index: 8500;
         }
 
@@ -212,7 +210,12 @@
 
         &.WolfermusActive {
             .WolfermusActivatedMainMenuWindow {
+                transition: 0.5s;
                 visibility: visible;
+            }
+
+            .WolfermusPopUpMenu ul li {
+                transition: 0.5s;
             }
         }
     }
