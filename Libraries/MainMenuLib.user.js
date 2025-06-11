@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.1
+// @version      2.0.2
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -27,46 +27,50 @@
 // @icon         https://i.imgur.com/XFeWfV0.png
 // ==/UserScript== 
 
-const bypassScriptPolicy = trustedTypes.createPolicy("bypassScript", {
-    createHTML: (string) => string,
-    createScript: (string) => string,
-    createScriptURL: (string) => string
-});
+if (typeof wolfermusBypassScriptPolicy === "undefined" || typeof wolfermusBypassScriptPolicy === "null") {
+    var wolfermusBypassScriptPolicy = trustedTypes.createPolicy("wolfermusBypassScript", {
+        createHTML: (string) => string,
+        createScript: (string) => string,
+        createScriptURL: (string) => string
+    });
+}
 
 //#region Setting Up ChosenXmlHttpRequest
-let IsGMXmlHttpRequest1 = false;
-// @ts-ignore
-if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;
+if (typeof MakeGetRequest === "undefined" || typeof MakeGetRequest === "null") {
+    let IsGMXmlHttpRequest1 = false;
+    // @ts-ignore
+    if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;
 
-let IsGMXmlHttpRequest2 = false;
-// @ts-ignore
-if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest !== "undefined") IsGMXmlHttpRequest2 = true;
+    let IsGMXmlHttpRequest2 = false;
+    // @ts-ignore
+    if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest !== "undefined") IsGMXmlHttpRequest2 = true;
 
-let IsGMXmlHttpRequest = false;
-if (IsGMXmlHttpRequest1 || IsGMXmlHttpRequest2) IsGMXmlHttpRequest = true;
+    let IsGMXmlHttpRequest = false;
+    if (IsGMXmlHttpRequest1 || IsGMXmlHttpRequest2) IsGMXmlHttpRequest = true;
 
-if (!IsGMXmlHttpRequest) {
-    const message = "Wolfermus ERROR: Main - Please run in a userscript manager";
-    console.error(message);
-    throw new Error(message);
+    if (!IsGMXmlHttpRequest) {
+        const message = "Wolfermus ERROR: Main - Please run in a userscript manager";
+        console.error(message);
+        throw new Error(message);
+    }
+
+    var ChosenXmlHttpRequest;
+    if (IsGMXmlHttpRequest2) {
+        ChosenXmlHttpRequest = GM.xmlHttpRequest;
+    } else if (IsGMXmlHttpRequest1) {
+        ChosenXmlHttpRequest = GM_xmlHttpRequest;
+    } else {
+        const message = "Wolfermus ERROR: Main - Unexpected Error";
+        console.error(message);
+        throw new Error(message);
+    }
+    if (ChosenXmlHttpRequest === undefined || ChosenXmlHttpRequest === null) {
+        const message = "Wolfermus ERROR: Main - Unexpected Error";
+        console.error(message);
+        throw new Error(message);
+    }
+    //#endregion -Setting Up ChosenXmlHttpRequest
 }
-
-let ChosenXmlHttpRequest;
-if (IsGMXmlHttpRequest2) {
-    ChosenXmlHttpRequest = GM.xmlHttpRequest;
-} else if (IsGMXmlHttpRequest1) {
-    ChosenXmlHttpRequest = GM_xmlHttpRequest;
-} else {
-    const message = "Wolfermus ERROR: Main - Unexpected Error";
-    console.error(message);
-    throw new Error(message);
-}
-if (ChosenXmlHttpRequest === undefined || ChosenXmlHttpRequest === null) {
-    const message = "Wolfermus ERROR: Main - Unexpected Error";
-    console.error(message);
-    throw new Error(message);
-}
-//#endregion -Setting Up ChosenXmlHttpRequest
 
 function MakeGetRequest(url) {
     return new Promise((resolve, reject) => {
