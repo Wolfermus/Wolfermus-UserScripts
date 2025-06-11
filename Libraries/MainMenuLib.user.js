@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      1.2.3
+// @version      2.0.0
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -33,6 +33,58 @@ const bypassScriptPolicy = trustedTypes.createPolicy("bypassScript", {
     createScriptURL: (string) => string
 });
 
+//#region Setting Up ChosenXmlHttpRequest
+let IsGMXmlHttpRequest1 = false;
+// @ts-ignore
+if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;
+
+let IsGMXmlHttpRequest2 = false;
+// @ts-ignore
+if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest !== "undefined") IsGMXmlHttpRequest2 = true;
+
+let IsGMXmlHttpRequest = false;
+if (IsGMXmlHttpRequest1 || IsGMXmlHttpRequest2) IsGMXmlHttpRequest = true;
+
+if (!IsGMXmlHttpRequest) {
+    const message = "Wolfermus ERROR: Main - Please run in a userscript manager";
+    console.error(message);
+    throw new Error(message);
+}
+
+let ChosenXmlHttpRequest;
+if (IsGMXmlHttpRequest2) {
+    ChosenXmlHttpRequest = GM.xmlHttpRequest;
+} else if (IsGMXmlHttpRequest1) {
+    ChosenXmlHttpRequest = GM_xmlHttpRequest;
+} else {
+    const message = "Wolfermus ERROR: Main - Unexpected Error";
+    console.error(message);
+    throw new Error(message);
+}
+if (ChosenXmlHttpRequest === undefined || ChosenXmlHttpRequest === null) {
+    const message = "Wolfermus ERROR: Main - Unexpected Error";
+    console.error(message);
+    throw new Error(message);
+}
+//#endregion -Setting Up ChosenXmlHttpRequest
+
+function MakeGetRequest(url) {
+    return new Promise((resolve, reject) => {
+        ChosenXmlHttpRequest({
+            method: "GET",
+            url: url,
+            onload: (response) => {
+                if (response.status !== 200) {
+                    reject(statusText);
+                    return;
+                }
+                resolve(response.responseText);
+            },
+            onerror: error => reject(error)
+        });
+    });
+}
+
 /**
  * @param {number | undefined} ms
  */
@@ -42,53 +94,630 @@ function Sleep(ms) {
     });
 }
 
+/**
+ * @returns {Window}
+ */
+function GetWindow() {
+    let gottenWindow = window;
+
+    try {
+        if (unsafeWindow !== undefined) gottenWindow = unsafeWindow;
+    } catch (e) {
+
+    }
+
+    return gottenWindow;
+}
+
+/**
+ * @description Returns object of said module, if createIfNotFound is true then this function does not return undefined.
+ * 
+ * @param {string} key
+ * @param {boolean} [createIfNotFound=false]
+ * @throws If key is reserved
+ * @returns {any | undefined}
+ */
+function WolfermusGetModule(key, createIfNotFound = false) {
+    let mainWindow = GetWindow();
+
+    if (key === "Libraries") {
+        throw new Error(`Wolfermus ERROR: MainMenuLib - ${key} is reserved`);
+        return undefined;
+    }
+
+    if (!mainWindow["Wolfermus"]) {
+        if (createIfNotFound) mainWindow["Wolfermus"] = {};
+        else return undefined;
+    }
+
+    if (createIfNotFound && !mainWindow["Wolfermus"][key]) {
+        return mainWindow["Wolfermus"][key] = {};
+    }
+
+    return mainWindow["Wolfermus"][key];
+}
+
+/**
+ * @param {string} key
+ * @returns {boolean}
+ */
+function WolfermusCheckModuleLoaded(key) {
+    const gottenModule = WolfermusGetModule(key);
+
+    if (!gottenModule) return false;
+    if (!gottenModule["Loaded"]) return false;
+
+    return true;
+}
+
+/**
+ * @description Returns object of said library, if createIfNotFound is true then this function does not return undefined.
+ * 
+ * @param {string} key
+ * @param {boolean} [createIfNotFound=false]
+ * @returns {any | undefined}
+ */
+function WolfermusGetLibrary(key, createIfNotFound = false) {
+    let mainWindow = GetWindow();
+
+    if (!mainWindow["Wolfermus"]) {
+        if (createIfNotFound) mainWindow["Wolfermus"] = {};
+        else return undefined;
+    } else if (!mainWindow["Wolfermus"]["Libraries"]) {
+        if (createIfNotFound) mainWindow["Wolfermus"]["Libraries"] = {};
+        else return undefined;
+    }
+
+    if (createIfNotFound && !mainWindow["Wolfermus"]["Libraries"][key]) {
+        return mainWindow["Wolfermus"]["Libraries"][key] = {};
+    }
+
+    return mainWindow["Wolfermus"]["Libraries"][key];
+}
+
+/**
+ * @param {string} key
+ * @returns {boolean}
+ */
+function WolfermusCheckLibraryLoaded(key) {
+    const gottenLibrary = WolfermusGetLibrary(key);
+
+    if (!gottenLibrary) return false;
+    if (!gottenLibrary["Loaded"]) return false;
+
+    return true;
+}
+
+/**
+ * @param {boolean} [forceRequest=false] Forces function to request the html
+ * @async
+ * @throws If failed to load HTML or create element
+ * @returns {HTMLElement}
+ */
+async function GetWolfermusRoot(forceRequest = false) {
+    const wolfermusRootID = "WolfermusRoot";
+
+    let gottenElement = document.getElementById(wolfermusRootID);
+    const shouldCreateElement = gottenElement === undefined || gottenElement === null;
+
+    if (!shouldCreateElement && !forceRequest) return gottenElement;
+
+    if (shouldCreateElement) {
+        gottenElement = document.createElement("div");
+        gottenElement.id = wolfermusRootID;
+        gottenElement.classList = "WolfermusDefaultCSS";
+        document.documentElement.appendChild(gottenElement);
+
+        {
+            let checkingIfCreated = document.getElementById(wolfermusRootID);
+            if (checkingIfCreated === undefined || checkingIfCreated === null) {
+                debugger;
+                throw new Error("Wolfermus ERROR - MainMenuLib: Unable to create WolfermusRoot element");
+                return;
+            }
+        }
+    }
+
+    // TODO: Update StorageManagerLib to handly localStorage only options.
+    if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
+    let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
+
+    async function GetHTML() {
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Resources/MainMenuLibHTML.js`));
+        return script;
+    }
+
+    let wolfermusPreventLoopLock1 = 10;
+    async function AttemptLoadHTML() {
+        return await GetHTML().then(async (response) => {
+            return response;
+        }).catch(async (error) => {
+            if (wolfermusPreventLoopLock1 <= 0) return;
+            wolfermusPreventLoopLock1--;
+            await Sleep(500);
+            return await AttemptLoadHTML();
+        });
+    }
+
+    const editedInnerHTML = bypassScriptPolicy.createHTML(eval(await AttemptLoadHTML()));
+
+    gottenElement.innerHTML = editedInnerHTML;
+    if (gottenElement.innerHTML === "") {
+        throw new Error("Wolfermus ERROR: MainMenuLib - innerHTML is empty - HTML failed to load");
+        return undefined;
+    }
+
+    return gottenElement;
+}
+
+/**
+ * @type {WolfermusMenu | undefined}
+ */
+let MainMenu = undefined;
+/**
+ * @returns {WolfermusMenu}
+ */
+function GetMainMenu() {
+    if (MainMenu === undefined) {
+        MainMenu = new WolfermusMenu();
+        MainMenu.AddClass("WolfermusActivatedMainMenuWindow");
+    }
+    return MainMenu;
+}
+
+/**
+ * @type {WolfermusMenu | undefined}
+ */
+let ContextMenu = undefined;
+/**
+ * If you want to have a context menu on a WolfermusMenuItem use .contextItems under that WolfermusMenuItem for automatic proper use.
+ * 
+ * The items within this context menu is changed every time a WolfermusMenuItem with any .contextItems is right clicked.
+ * @returns {WolfermusMenu}
+ */
+function GetContextMenu() {
+    if (ContextMenu === undefined) {
+        ContextMenu = new WolfermusMenu();
+        ContextMenu.AddClass("WolfermusMainMenuContextMenu");
+    }
+    return ContextMenu;
+}
+
+/**
+ * @type {WolfermusMenuItem | undefined}
+ */
+let WolermusFabImageMenuItem = undefined;
+
+/**
+ * @returns {WolfermusMenuItem}
+ */
+function GetWolermusFabImageMenuItem() {
+    if (WolermusFabImageMenuItem === undefined) {
+        let mainWindow = window;
+
+        try {
+            if (unsafeWindow !== undefined) mainWindow = unsafeWindow;
+        } catch (e) {
+
+        }
+
+        let imgSrc = "";
+        if (!mainWindow["Wolfermus"]["Logo"] || !mainWindow["Wolfermus"]["Logo"]["Rounded"]) {
+            console.log("Unable to locate logo");
+        } else imgSrc = mainWindow["Wolfermus"]["Logo"]["Rounded"];
+
+        WolermusFabImageMenuItem = new WolfermusImageMenuItem("WolermusFabImage", imgSrc);
+
+        WolermusFabImageMenuItem.pointerDownCallback = (event) => {
+            const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
+            if (fabElement === undefined || fabElement === null) return;
+
+            if (WolermusFabImageMenuItem.element === undefined || WolermusFabImageMenuItem.element === null) return;
+
+            WolermusFabImageMenuItem.element.setPointerCapture(event.pointerId);
+
+            WolermusFabImageMenuItem.oldPositionX = fabElement.style.left;
+            WolermusFabImageMenuItem.oldPositionY = fabElement.style.top;
+
+            WolermusFabImageMenuItem.ShouldMove = true;
+
+            fabElement.style.transition = "none";
+        };
+
+        WolermusFabImageMenuItem.pointerUpCallback = async (event) => {
+            const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
+            if (fabElement === undefined || fabElement === null) return;
+
+            if (WolermusFabImageMenuItem.element === undefined || WolermusFabImageMenuItem.element === null) return;
+
+            //const GUIGotten = await GetValue("MainMenu", "{}");
+
+            // TODO: Update StorageManagerLib to handly localStorage only options.
+            if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
+            let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
+
+            WolermusFabImageMenuItem.ShouldMove = false;
+
+            WolermusFabImageMenuItem.element.releasePointerCapture(event.pointerId);
+
+            fabElement.style.transition = "0.3s ease-in-out left";
+
+            WolfermusMainMenuSettings.Top = parseInt(fabElement.style.top.match(/\d/g).join(""));
+            WolfermusMainMenuSettings.Left = parseInt(fabElement.style.left.match(/\d/g).join(""));
+
+            if (!WolfermusMainMenuSettings.Direction) WolfermusMainMenuSettings.Direction = {};
+
+            WolfermusMainMenuSettings.Direction.Vertical = "WolfermusDownPosition";
+            WolfermusMainMenuSettings.Direction.Horizontal = "WolfermusLeftPosition";
+            if (fabElement.classList.contains("WolfermusUpPosition")) {
+                WolfermusMainMenuSettings.Direction.Vertical = "WolfermusUpPosition";
+            }
+            if (fabElement.classList.contains("WolfermusRightPosition")) {
+                WolfermusMainMenuSettings.Direction.Horizontal = "WolfermusRightPosition";
+            }
+
+            // TODO: Update StorageManagerLib to handly localStorage only options.
+            localStorage["WolfermusMainMenu"] = JSON.stringify(WolfermusMainMenuSettings);
+
+            // SetValue("MainMenu", JSON.stringify(WolfermusMainMenuSettings));
+        };
+
+        WolermusFabImageMenuItem.pointerMoveCallback = async (event) => {
+            if (WolermusFabImageMenuItem.element === undefined || WolermusFabImageMenuItem.element === null) return;
+
+            if (WolermusFabImageMenuItem.ShouldMove !== true) return;
+
+            const mainMenuRoot = await GetWolfermusRoot();
+            const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
+            if (mainMenuRoot === undefined || mainMenuRoot === null) return;
+            if (fabElement === undefined || fabElement === null) return;
+
+            const windowWidth = mainMenuRoot.getBoundingClientRect().width;
+            const windowHeight = mainMenuRoot.getBoundingClientRect().height;
+
+            let position = new Position(event.clientX, event.clientY);
+
+            const mainMenu = GetMainMenu();
+
+            if (position.x < windowWidth / 2) {
+                fabElement.classList.remove("WolfermusRightPosition");
+                fabElement.classList.add("WolfermusLeftPosition");
+
+                mainMenu.RemoveClass("WolfermusRightPosition");
+                mainMenu.RemoveClass("WolfermusGroupRightPosition");
+                mainMenu.AddClass("WolfermusLeftPosition");
+                mainMenu.AddClass("WolfermusGroupLeftPosition");
+            } else {
+                fabElement.classList.remove("WolfermusLeftPosition");
+                fabElement.classList.add("WolfermusRightPosition");
+
+                mainMenu.RemoveClass("WolfermusLeftPosition");
+                mainMenu.RemoveClass("WolfermusGroupLeftPosition");
+                mainMenu.AddClass("WolfermusRightPosition");
+                mainMenu.AddClass("WolfermusGroupRightPosition");
+            }
+
+            if (position.y < windowHeight / 2) {
+                fabElement.classList.remove("WolfermusUpPosition");
+                fabElement.classList.add("WolfermusDownPosition");
+
+                mainMenu.RemoveClass("WolfermusUpPosition");
+                mainMenu.RemoveClass("WolfermusGroupUpPosition");
+                mainMenu.AddClass("WolfermusDownPosition");
+                mainMenu.AddClass("WolfermusGroupDownPosition");
+            } else {
+                fabElement.classList.remove("WolfermusDownPosition");
+                fabElement.classList.add("WolfermusUpPosition");
+
+                mainMenu.RemoveClass("WolfermusDownPosition");
+                mainMenu.RemoveClass("WolfermusGroupDownPosition");
+                mainMenu.AddClass("WolfermusUpPosition");
+                mainMenu.AddClass("WolfermusGroupUpPosition");
+            }
+
+            mainMenu.UpdateClasses();
+
+            ContrainElementViaPosition(fabElement, position);
+        };
+        WolermusFabImageMenuItem.clickCallback = (event) => {
+            const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
+            if (fabElement === undefined || fabElement === null) return;
+
+            if (WolermusFabImageMenuItem.oldPositionY === fabElement.style.top && WolermusFabImageMenuItem.oldPositionX === fabElement.style.left) {
+                GetMainMenu().ToggleVisibility();
+            }
+        };
+
+        const updateMenuItemsContextMenuItem = new WolfermusMenuItem(
+            "WolfermusUpdateMenuItemsContextMenuItem",
+            "Update Menu Items",
+            `This Refreshes/Updates this whole menu
+            (left click and right click)
+            and the floating button itself`
+        );
+        updateMenuItemsContextMenuItem.clickCallback = async (event) => {
+            await UpdateMenuItems();
+
+            const contextMenu = GetContextMenu();
+
+            contextMenu.Hide();
+        };
+
+        const updateWolfermusMainMenuStyleContextMenuItem = new WolfermusMenuItem(
+            "WolfermusUpdateWolfermusMainMenuStyleContextMenuItem",
+            "Update Wolfermus Main Menu Style CSS",
+            `This Refreshes/Updates the Wolfermus Main Menu Style CSS`
+        );
+        updateWolfermusMainMenuStyleContextMenuItem.clickCallback = async (event) => {
+            await UpdateWolfermusMainMenuStyle();
+
+            const contextMenu = GetContextMenu();
+
+            contextMenu.Hide();
+
+            await WolfermusMenuItem.HideToolTip();
+        };
+
+        WolermusFabImageMenuItem.contextItems.push(updateMenuItemsContextMenuItem);
+        WolermusFabImageMenuItem.contextItems.push(updateWolfermusMainMenuStyleContextMenuItem);
+    }
+    return WolermusFabImageMenuItem;
+}
+
+/**
+ * @type {WolfermusMenu | undefined}
+ */
+let FloatingButtonMenu = undefined;
+
+/**
+ * @returns {WolfermusMenu}
+ */
+function GetFloatingButtonMenu() {
+    if (FloatingButtonMenu === undefined) {
+        FloatingButtonMenu = new WolfermusMenu();
+        FloatingButtonMenu.AddClass("WolfermusFabBtn");
+
+        FloatingButtonMenu.items.push(GetWolermusFabImageMenuItem());
+    }
+    return FloatingButtonMenu;
+}
+
+/**
+ * Call this first.
+ * 
+ * This function executes a http request strongly advise against calling this often.
+ * 
+ * @description Updates the Main Menu Style
+ * @async
+ */
+async function UpdateWolfermusMainMenuStyle() {
+    let mainMenuStyle = document.getElementById("WolfermusMainMenuStyle");
+
+    if (mainMenuStyle === undefined || mainMenuStyle === null) {
+        mainMenuStyle = document.createElement("style");
+        mainMenuStyle.id = "WolfermusMainMenuStyle";
+        document.head.append(mainMenuStyle);
+    }
+
+    async function GetCSS() {
+        const css = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Resources/MainMenuLib.css`));
+        return css;
+    }
+
+    let wolfermusPreventLoopLock1 = 10;
+    async function AttemptLoadCSS() {
+        return await GetCSS().then(async (response) => {
+            return response;
+        }).catch(async (error) => {
+            if (wolfermusPreventLoopLock1 <= 0) return;
+            wolfermusPreventLoopLock1--;
+            await Sleep(500);
+            return await AttemptLoadCSS();
+        });
+    }
+
+    const editedInnerHTML = bypassScriptPolicy.createHTML(await AttemptLoadCSS());
+
+    mainMenuStyle.innerHTML = editedInnerHTML;
+}
+
+const contrainedPadding = 5;
+
+class Position {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+    x;
+    y;
+}
+
+/**
+ * @param {HTMLElement} elementToContrain
+ * @param {Position} position
+ * @param {Boolean} [shouldDivideElementWidthToContrainDimentionByTwo=true]
+ * @param {Boolean} [shouldDivideElementHeightToContrainDimentionByTwo=true]
+ * 
+ * @returns {{x: boolean, y: boolean}}
+ */
+async function ContrainElementViaPosition(elementToContrain, position, shouldDivideElementWidthToContrainDimentionByTwo = true, shouldDivideElementHeightToContrainDimentionByTwo = true) {
+    const mainMenuRoot = await GetWolfermusRoot();
+
+    if (mainMenuRoot === undefined || mainMenuRoot === null) return;
+    if (elementToContrain === undefined || elementToContrain === null) return;
+
+    while (mainMenuRoot.getBoundingClientRect().width === 0 && mainMenuRoot.getBoundingClientRect().height === 0) {
+        await Sleep(100);
+    }
+
+    const windowWidth = mainMenuRoot.getBoundingClientRect().width;
+    const windowHeight = mainMenuRoot.getBoundingClientRect().height;
+
+    const elementToContrainWidth = elementToContrain.getBoundingClientRect().width;
+    const elementToContrainHeight = elementToContrain.getBoundingClientRect().height;
+
+    let elementToContrainWidthDivided2 = elementToContrainWidth;
+    let elementToContrainHeightDivided2 = elementToContrainHeight;
+    if (shouldDivideElementWidthToContrainDimentionByTwo) {
+        elementToContrainWidthDivided2 = elementToContrainWidth / 2;
+    }
+    if (shouldDivideElementHeightToContrainDimentionByTwo) {
+        elementToContrainHeightDivided2 = elementToContrainHeight / 2;
+    }
+
+    let gotConstrained = {
+        x: true,
+        y: true
+    }
+
+    if ((position.x - contrainedPadding) < (shouldDivideElementWidthToContrainDimentionByTwo ? elementToContrainWidthDivided2 : 0)) {
+        position.x = ((shouldDivideElementWidthToContrainDimentionByTwo ? elementToContrainWidthDivided2 : 0) + contrainedPadding)
+    } else if ((position.x + contrainedPadding) > windowWidth - (elementToContrainWidthDivided2)) {
+        position.x = (windowWidth - elementToContrainWidthDivided2 - contrainedPadding);
+    } else {
+        gotConstrained.x = false;
+    }
+    elementToContrain.style.left = position.x + "px";
+
+    if ((position.y - contrainedPadding) < (shouldDivideElementHeightToContrainDimentionByTwo ? elementToContrainHeightDivided2 : 0)) {
+        position.y = ((shouldDivideElementHeightToContrainDimentionByTwo ? elementToContrainHeightDivided2 : 0) + contrainedPadding);
+    } else if ((position.y + contrainedPadding) > windowHeight - elementToContrainHeightDivided2) {
+        position.y = (windowHeight - elementToContrainHeightDivided2 - contrainedPadding);
+    } else {
+        gotConstrained.y = false;
+    }
+    elementToContrain.style.top = position.y + "px";
+
+    return gotConstrained;
+}
+
+let oldFabElementLeft, oldFabElementTop;
+let oldWindowWidth, oldWindowHeight;
+async function ContrainMainMenu() {
+    if (GetMainMenu().items.length <= 0) return;
+
+    const mainMenuRoot = await GetWolfermusRoot();
+    const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
+    if (mainMenuRoot === undefined || mainMenuRoot === null) return;
+    if (fabElement === undefined || fabElement === null) return;
+
+    if (fabElement.style.left === undefined || fabElement.style.left === null) return;
+    if (fabElement.style.top === undefined || fabElement.style.top === null) return;
+
+    const windowWidth = mainMenuRoot.getBoundingClientRect().width;
+    const windowHeight = mainMenuRoot.getBoundingClientRect().height;
+
+    if (windowWidth === oldWindowWidth && windowHeight === oldWindowHeight
+        && fabElement.style.left === oldFabElementLeft && fabElement.style.top === oldFabElementTop
+    ) return;
+
+    oldWindowWidth = windowWidth;
+    oldWindowHeight = windowHeight;
+
+    oldFabElementLeft = fabElement.style.left;
+    oldFabElementTop = fabElement.style.top;
+
+    const x = parseInt(fabElement.style.left.match(/\d/g).join(""));
+    const y = parseInt(fabElement.style.top.match(/\d/g).join(""));
+
+    ContrainElementViaPosition(fabElement, new Position(x, y));
+}
+
 class WolfermusMenuItem {
     /**
-     * @param {string} name 
-     * @param {string} title 
-     * @param {string | undefined} tooltip 
+     * @param {any} id
+     * @param {string} title
+     * @param {string} tooltip
      */
-    constructor(name, title, tooltip = undefined) {
-        this.name = name;
+    constructor(id, title, tooltip = "") {
+        this.id = id;
         this.title = title;
         this.tooltip = tooltip;
     }
     /**
-     * @type {string}
+     * @type {any}
      */
-    name;
+    id;
     /**
      * @type {string}
      */
     title;
     /**
+     * @type {HTMLElement | null}
+     */
+    element = null;
+    /**
+     * @type {Array<WolfermusMenuItem>}
+     */
+    items = [];
+    /**
+     * @type {Array<WolfermusMenuItem>}
+     */
+    contextItems = [];
+    /**
      * @type {string}
      */
-    tooltip = undefined;
+    tooltip = "";
     /**
      * @type {number}
      */
     tooltipTimeOut = 400;
 
-    #tooltipTimeoutID = undefined;
+    /**
+     * @type {Number}
+     */
+    static #tooltipTimeoutID = undefined;
 
-    HideToolTip() {
+    /**
+     * @type {WolfermusMenu}
+     */
+    static #ToolTipMenu = undefined;
+    /**
+     * @type {WolfermusMenuItem}
+     */
+    static #ToolTipMenuItem = undefined;
+
+    /**
+     * @returns {WolfermusMenuItem}
+     */
+    static GetToolTipMenuItem() {
+        if (this.#ToolTipMenuItem === undefined) {
+            this.#ToolTipMenuItem = new WolfermusMenuItem("ToolTipText", "");
+        }
+        return this.#ToolTipMenuItem;
+    }
+
+    /**
+     * @returns {WolfermusMenu}
+     */
+    static GetToolTipMenu() {
+        if (this.#ToolTipMenu === undefined) {
+            this.#ToolTipMenu = new WolfermusMenu();
+            this.#ToolTipMenu.AddClass("WolfermusMenuItemToolTip")
+            this.#ToolTipMenu.items.push(WolfermusMenuItem.GetToolTipMenuItem());
+        }
+        return this.#ToolTipMenu;
+    }
+
+    static async HideToolTip() {
         if (this.#tooltipTimeoutID !== undefined) {
             clearTimeout(this.#tooltipTimeoutID);
             this.#tooltipTimeoutID = undefined;
         }
 
-        const toolTips = document.getElementById("WolfermusMenuItemToolTip");
-        const toolTipsText = document.getElementById("WolfermusToolTipText");
-        if (toolTips === undefined || toolTips === null) return;
-        if (toolTipsText === undefined || toolTipsText === null) return;
+        const toolTips = this.GetToolTipMenu();
+        const toolTipsText = this.GetToolTipMenuItem();
 
-        toolTipsText.innerText = "";
+        toolTipsText.title = "";
 
-        toolTips.classList.remove("WolfermusToolTipSetActive");
-        toolTips.classList.remove("WolfermusActive");
+        toolTips.RemoveClass("WolfermusToolTipSetActive");
+        toolTips.RemoveClass("WolfermusActive");
+        toolTips.UpdateClasses();
+
+        await toolTips.Generate(await GetWolfermusRoot());
     }
 
+    //#region callbacks
     /**
      * @type {(PointerEvent) => void}
      */
@@ -102,41 +731,13 @@ class WolfermusMenuItem {
      * @param {PointerEvent} event 
      * @type {(PointerEvent) => void}
      */
-    pointerEnterCallback = (event) => {
-        const toolTips = document.getElementById("WolfermusMenuItemToolTip");
-        const toolTipsText = document.getElementById("WolfermusToolTipText");
-        if (toolTips === undefined || toolTips === null) return;
-        if (toolTipsText === undefined || toolTipsText === null) return;
-
-        toolTipsText.innerText = this.tooltip;
-
-        toolTips.classList.add("WolfermusToolTipSetActive");
-
-        const x = event.clientX;
-        const y = (event.clientY) + 30;
-
-        ContrainElementViaPosition(toolTips, new Position(x, y), true, false);
-
-        this.#tooltipTimeoutID = setTimeout(() => {
-            const toolTips = document.getElementById("WolfermusMenuItemToolTip");
-            const toolTipsText = document.getElementById("WolfermusToolTipText");
-            if (toolTips === undefined || toolTips === null) return;
-            if (toolTipsText === undefined || toolTipsText === null) return;
-
-            toolTipsText.innerText = this.tooltip;
-
-            toolTips.classList.add("WolfermusActive");
-            toolTips.classList.remove("WolfermusToolTipSetActive");
-
-        }, this.tooltipTimeOut);
-    };
-
+    pointerEnterCallback = undefined;
     /**
      * 
      * @param {PointerEvent} event 
      * @type {(PointerEvent) => void}
      */
-    pointerLeaveCallback = (event) => { this.HideToolTip(); };
+    pointerLeaveCallback = undefined;
     /**
      * @type {(PointerEvent) => void}
      */
@@ -154,8 +755,10 @@ class WolfermusMenuItem {
      * @param {PointerEvent} event 
      * @type {(PointerEvent) => void}
      */
-    pointerCancelCallback = (event) => { this.HideToolTip(); };
+    pointerCancelCallback = undefined;
+    //#endregion -callbacks
 
+    //#region currentCallbacks
     /**
      * @type {(PointerEvent) => void}
      */
@@ -188,34 +791,152 @@ class WolfermusMenuItem {
      * @type {(PointerEvent) => void}
      */
     #currentPointerCancelCallback = undefined;
+    //#endregion -currentCallbacks
 
     /**
-     * @returns {HTMLElement | null}
+     * @type {(PointerEvent) => void}
      */
-    GetElement() {
-        let gottenElement = document.getElementById(`WolfermusMenuItem${this.name}`);
-        if (gottenElement === undefined || gottenElement === null) return null;
-        return gottenElement;
-    }
+    #toolTipPointerEnterCallback = async (event) => {
+        await WolfermusMenuItem.HideToolTip();
+
+        if (this.tooltip === undefined || this.tooltip === "") return;
+
+        /**
+        * @type {WolfermusMenu}
+        */
+        const toolTips = WolfermusMenuItem.GetToolTipMenu();
+        /**
+        * @type {WolfermusMenuItem}
+        */
+        const toolTipsText = WolfermusMenuItem.GetToolTipMenuItem();
+
+        toolTipsText.title = this.tooltip;
+
+        toolTips.AddClass("WolfermusToolTipSetActive");
+        toolTips.UpdateClasses();
+        await toolTips.Generate(await GetWolfermusRoot());
+
+        const x = event.clientX;
+        const y = (event.clientY) + 30;
+
+        ContrainElementViaPosition(toolTips.element, new Position(x, y), true, false);
+
+        //@ts-ignore
+        WolfermusMenuItem.#tooltipTimeoutID = setTimeout(async () => {
+            /**
+            * @type {WolfermusMenu}
+            */
+            const toolTips = WolfermusMenuItem.GetToolTipMenu();
+            /**
+            * @type {WolfermusMenuItem}
+            */
+            const toolTipsText = WolfermusMenuItem.GetToolTipMenuItem();
+
+            toolTipsText.title = this.tooltip;
+
+            toolTips.AddClass("WolfermusActive");
+            toolTips.RemoveClass("WolfermusToolTipSetActive");
+            toolTips.UpdateClasses();
+
+            await toolTips.Generate(await GetWolfermusRoot());
+        }, this.tooltipTimeOut);
+    };
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #toolTipPointerLeaveCallback = async (event) => { await WolfermusMenuItem.HideToolTip(); };
 
     /**
+     * 
+     * @param {PointerEvent} event 
+     * @type {(PointerEvent) => void}
+     */
+    #contextMenuCallback = async (event) => {
+        const contextMenu = GetContextMenu();
+        contextMenu.Hide();
+
+        if (this.contextItems.length <= 0) return;
+
+        event.preventDefault();
+
+        const x = event.clientX;
+        const y = event.clientY;
+
+
+        contextMenu.items = this.contextItems;
+
+        contextMenu.UpdateClasses();
+        await contextMenu.Generate(await GetWolfermusRoot());
+
+        contextMenu.Show();
+
+        ContrainElementViaPosition(contextMenu.element, new Position(x, y), false, false);
+    };
+
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #menuPointerEnterCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #groupPointerEnterCallback = undefined;
+    /**
+     * @type {(PointerEvent) => void}
+     */
+    #groupPointerLeaveCallback = undefined;
+
+    /**
+     * @param {WolfermusMenu} menu
      * @returns {string}
      */
-    Generate() {
+    Generate(menu) {
+        if (this.id === undefined) return "";
+
+        let activable = "";
+        if (this.clickCallback !== undefined || this.doubleClickCallback !== undefined) activable = "WolfermusActivable";
+
+        if (this.items.length <= 0) {
+            if (activable !== "") {
+                return `
+                    <li id="WolfermusMenu${menu.id}${this.id}" class="WolfermusDefaultCSS ${activable}">
+                        <a>${this.title}</a>
+                    </li>
+                `;
+            } else {
+                return `
+                    <li id="WolfermusMenu${menu.id}${this.id}" class="WolfermusDefaultCSS WolfermusTextItem">
+                        <a>${this.title}</a>
+                    </li>
+                `;
+            }
+        }
         return `
-        <li id="WolfermusMenuItem${this.name}" class="WolfermusDefaultCSS">
-            <a>${this.title}</a>
-        </li>`
+            <li id="WolfermusMenu${menu.id}${this.id}" class="WolfermusDefaultCSS ${activable}">
+                <a class="WolfermusGroup WolfermusGroupRightPosition"><</a>    
+                <a>${this.title}</a>
+                <a class="WolfermusGroup WolfermusGroupLeftPosition">></a>
+            </li>
+        `;
     }
     /**
+     * @param {WolfermusMenu} menu
      * @returns {Boolean}
      */
-    SetupScripts() {
-        let gottenElement = this.GetElement();
-        if (gottenElement === null) return false;
+    async SetupEvents(menu) {
+        if (this.id === undefined) return false;
+        if (menu === undefined || menu === null) return false;
+        if (menu.id === undefined || menu.id === null) return false;
 
-        this.RemoveScripts();
+        {
+            const gottenElement = document.getElementById(`WolfermusMenu${menu.id}${this.id}`);
+            if (gottenElement === undefined || gottenElement === null) return false;
+            this.element = gottenElement;
+        }
 
+        this.RemoveEvents(menu);
+
+        //#region callbacks
         this.#currentClickCallback = this.clickCallback;
         this.#currentDoubleClickCallback = this.doubleClickCallback;
         this.#currentPointerEnterCallback = this.pointerEnterCallback;
@@ -225,39 +946,303 @@ class WolfermusMenuItem {
         this.#currentPointerMoveCallback = this.pointerMoveCallback;
         this.#currentPointerCancelCallback = this.pointerCancelCallback;
 
-        if (this.#currentClickCallback !== undefined) gottenElement.addEventListener("click", this.#currentClickCallback);
-        if (this.#currentDoubleClickCallback !== undefined) gottenElement.addEventListener("dblclick", this.#currentDoubleClickCallback);
-        if (this.#currentPointerEnterCallback !== undefined) gottenElement.addEventListener("pointerenter", this.#currentPointerEnterCallback);
-        if (this.#currentPointerLeaveCallback !== undefined) gottenElement.addEventListener("pointerleave", this.#currentPointerLeaveCallback);
-        if (this.#currentPointerDownCallback !== undefined) gottenElement.addEventListener("pointerdown", this.#currentPointerDownCallback);
-        if (this.#currentPointerUpCallback !== undefined) gottenElement.addEventListener("pointerup", this.#currentPointerUpCallback);
-        if (this.#currentPointerMoveCallback !== undefined) gottenElement.addEventListener("pointermove", this.#currentPointerMoveCallback);
-        if (this.#currentPointerCancelCallback !== undefined) gottenElement.addEventListener("pointercancel", this.#currentPointerCancelCallback);
+        if (this.#currentClickCallback !== undefined) this.element.addEventListener("click", this.#currentClickCallback);
+        if (this.#currentDoubleClickCallback !== undefined) this.element.addEventListener("dblclick", this.#currentDoubleClickCallback);
+        if (this.#currentPointerEnterCallback !== undefined) this.element.addEventListener("pointerenter", this.#currentPointerEnterCallback);
+        if (this.#currentPointerLeaveCallback !== undefined) this.element.addEventListener("pointerleave", this.#currentPointerLeaveCallback);
+        if (this.#currentPointerDownCallback !== undefined) this.element.addEventListener("pointerdown", this.#currentPointerDownCallback);
+        if (this.#currentPointerUpCallback !== undefined) this.element.addEventListener("pointerup", this.#currentPointerUpCallback);
+        if (this.#currentPointerMoveCallback !== undefined) this.element.addEventListener("pointermove", this.#currentPointerMoveCallback);
+        if (this.#currentPointerCancelCallback !== undefined) this.element.addEventListener("pointercancel", this.#currentPointerCancelCallback);
+        //#endregion -callbacks
+
+        this.element.addEventListener("pointerenter", this.#toolTipPointerEnterCallback);
+        this.element.addEventListener("pointerleave", this.#toolTipPointerLeaveCallback);
+        this.element.addEventListener("pointercancel", this.#toolTipPointerLeaveCallback);
+        this.element.addEventListener("contextmenu", this.#contextMenuCallback);
+
+        if (this.items.length <= 0) return true;
+
+        const wolfermusRoot = await GetWolfermusRoot();
+        if (wolfermusRoot === undefined || wolfermusRoot === null) return false;
+
+        /**
+         * @param {PointerEvent} event 
+         */
+        this.#menuPointerEnterCallback = (event) => {
+            if (this.id === undefined) return;
+
+            const constChangingId = menu.attached?.id;
+            if (constChangingId !== this.id) return;
+            if (menu.attached?.menu === undefined) return;
+            if (menu.attached?.menu.element === undefined) return;
+            if (menu.attached.menu.IsHoveringAnyMenu()) return;
+
+            setTimeout(() => {
+                if (constChangingId !== this.id) return;
+                if (menu.attached?.menu === undefined) return;
+                if (menu.attached?.menu.element === undefined) return;
+                if (menu.attached.menu.IsHoveringAnyMenu()) return;
+
+                if (this.element !== undefined && this.element !== null) {
+                    if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
+                }
+
+                if (menu.attached?.cooldownIntervalID !== undefined) {
+                    clearInterval(menu.attached.cooldownIntervalID);
+                    menu.attached.cooldownIntervalID = undefined;
+                    let gottenItem = menu.items.find((item) => item.id === menu.attached.id);
+                    if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
+                }
+
+                console.log(`${menu.attached.menu.id} Closing Via menuPointerEnterCallback`);
+
+                menu.attached.menu.Hide();
+                menu.attached.id = undefined;
+                if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+            }, 0);
+        }
+
+        /**
+         * @param {PointerEvent} event 
+         */
+        this.#groupPointerEnterCallback = async (event) => {
+            if (menu.attached?.intervalID !== undefined) {
+                clearInterval(menu.attached.intervalID);
+                menu.attached.intervalID = undefined;
+            }
+
+            if (this.id === undefined) {
+                if (menu.attached?.cooldownIntervalID !== undefined) {
+                    clearInterval(menu.attached.cooldownIntervalID);
+                    menu.attached.cooldownIntervalID = undefined;
+                }
+                return;
+            }
+
+            if (menu.attached === undefined) menu.attached = {};
+            if (menu.attached.menu === undefined) {
+                menu.attached.menu = new WolfermusMenu();
+                menu.attached.menu.AddClass("WolfermusGroupMenuWindow");
+            }
+
+            if (menu.attached.id === this.id) return;
+
+            if (menu.attached.id !== undefined) {
+                this.element.style["background-color"] = "";
+            }
+
+            if (menu.attached?.cooldownIntervalID !== undefined) {
+                clearInterval(menu.attached.cooldownIntervalID);
+                menu.attached.cooldownIntervalID = undefined;
+                let gottenItem = menu.items.find((item) => item.id === menu.attached.id);
+                if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
+            }
+
+            menu.attached.menu.Hide();
+
+            if (this.element === undefined || this.element === null) return;
+
+            if (menu.element === undefined || menu.element.style["visibility"] === "hidden") return;
+
+            const menuItemGroupCollection = this.element.getElementsByClassName("WolfermusGroup");
+            if (menuItemGroupCollection === undefined || menuItemGroupCollection === null || menuItemGroupCollection.length <= 0) return;
+
+            let menuItemGroup = undefined;
+            for (let foundElement of menuItemGroupCollection) {
+                const computedStyle = window.getComputedStyle(foundElement);
+                if (computedStyle["visibility"] !== "hidden") {
+                    menuItemGroup = foundElement;
+                    break;
+                }
+            }
+            if (menuItemGroup === undefined || menuItemGroup === null) return;
+
+            menu.attached.menu.ValidateElement(wolfermusRoot);
+
+            menu.attached.id = this.id;
+
+            const clientRect = menuItemGroup.getBoundingClientRect();
+            let position = new Position(clientRect.left + clientRect.width / 2, clientRect.top + clientRect.height / 2);
+
+            if (menu.ContainsClass("WolfermusGroupRightPosition")) {
+                position.x -= 4;
+                menu.attached.menu.AddClass("WolfermusRightPosition");
+                menu.attached.menu.AddClass("WolfermusGroupRightPosition");
+                menu.attached.menu.RemoveClass("WolfermusLeftPosition");
+                menu.attached.menu.RemoveClass("WolfermusGroupLeftPosition");
+            } else {
+                position.x += 4;
+                menu.attached.menu.AddClass("WolfermusLeftPosition");
+                menu.attached.menu.AddClass("WolfermusGroupLeftPosition");
+                menu.attached.menu.RemoveClass("WolfermusRightPosition");
+                menu.attached.menu.RemoveClass("WolfermusGroupRightPosition");
+            }
+            if (menu.ContainsClass("WolfermusGroupUpPosition")) {
+                position.y += clientRect.height / 2;
+                menu.attached.menu.AddClass("WolfermusUpPosition");
+                menu.attached.menu.AddClass("WolfermusGroupUpPosition");
+                menu.attached.menu.RemoveClass("WolfermusDownPosition");
+                menu.attached.menu.RemoveClass("WolfermusGroupDownPosition");
+            } else {
+                position.y -= clientRect.height / 2;
+                menu.attached.menu.AddClass("WolfermusDownPosition");
+                menu.attached.menu.AddClass("WolfermusGroupDownPosition");
+                menu.attached.menu.RemoveClass("WolfermusUpPosition");
+                menu.attached.menu.RemoveClass("WolfermusGroupUpPosition");
+            }
+            menu.attached.menu.UpdateClasses();
+
+            menu.attached.menu.items = this.items;
+            await menu.attached.menu.Generate(wolfermusRoot);
+
+            menu.attached.menu.Hide();
+
+            menu.attached.menu.element.style["left"] = position.x + "px";
+            menu.attached.menu.element.style["top"] = position.y + "px";
+
+            const attachedMenuClientRect = menu.attached.menu.element.getBoundingClientRect();
+            let checkPosition = new Position(clientRect.left + clientRect.width / 2, clientRect.top + clientRect.height / 2);
+
+            if (menu.attached.menu.ContainsClass("WolfermusRightPosition")) {
+                checkPosition.x -= attachedMenuClientRect.width;
+                checkPosition.x += clientRect.height / 2;
+                checkPosition.x -= attachedMenuClientRect.width;
+            } else {
+                checkPosition.x += attachedMenuClientRect.width;
+                checkPosition.x -= clientRect.height / 2;
+                checkPosition.x += attachedMenuClientRect.width;
+            }
+            if (menu.attached.menu.ContainsClass("WolfermusUpPosition")) {
+                checkPosition.y += clientRect.height / 2;
+                checkPosition.y -= attachedMenuClientRect.height;
+                checkPosition.y += clientRect.height;
+                checkPosition.y -= attachedMenuClientRect.height;
+            } else {
+                checkPosition.y += attachedMenuClientRect.height;
+            }
+
+            const mainMenuRoot = await GetWolfermusRoot();
+
+            const windowClientRect = mainMenuRoot.getBoundingClientRect();
+
+            if (checkPosition.x < 0) {
+                menu.attached.menu.AddClass("WolfermusGroupLeftPosition");
+                menu.attached.menu.RemoveClass("WolfermusGroupRightPosition");
+            } else if (checkPosition.x > windowClientRect.width) {
+                menu.attached.menu.AddClass("WolfermusGroupRightPosition");
+                menu.attached.menu.RemoveClass("WolfermusGroupLeftPosition");
+            }
+
+            if (checkPosition.y < 0) {
+                menu.attached.menu.AddClass("WolfermusGroupDownPosition");
+                menu.attached.menu.RemoveClass("WolfermusGroupUpPosition");
+            } else if (checkPosition.y > windowClientRect.height) {
+                menu.attached.menu.AddClass("WolfermusGroupUpPosition");
+                menu.attached.menu.RemoveClass("WolfermusGroupDownPosition");
+            }
+
+            menu.attached.menu.UpdateClasses();
+
+            menu.attached.menu.Show();
+            this.element.style["background-color"] = "#3d3d3d";
+
+            console.log(`${menu.attached.menu.id} Opening elementPointerEnterCallback`);
+        };
+
+        /**
+         * @param {PointerEvent} event 
+         */
+        this.#groupPointerLeaveCallback = (event) => {
+            if (this.id === undefined) return;
+
+            const constChangingId = menu.attached?.id;
+            if (constChangingId !== this.id) return;
+            if (menu.attached?.menu === undefined) return;
+            if (menu.attached.menu.element === undefined) return;
+
+            if (menu.attached?.cooldownIntervalID !== undefined) {
+                clearInterval(menu.attached.cooldownIntervalID);
+                menu.attached.cooldownIntervalID = undefined;
+                if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+            }
+
+            if (menu.attached.menu.attached?.id !== undefined) return;
+
+            setTimeout(() => {
+                if (constChangingId !== this.id) return;
+                if (menu.attached?.menu === undefined) return;
+                if (menu.attached.menu.element === undefined) return;
+
+                if (menu.attached.menu.attached.id !== undefined) return;
+
+                if (this.element !== undefined && this.element !== null) {
+                    if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
+                }
+                if (!menu.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
+
+
+                menu.attached.cooldownIntervalID = setTimeout(() => {
+                    if (constChangingId !== this.id) return;
+                    if (menu.attached?.menu === undefined) return;
+                    if (menu.attached.menu.element === undefined) return;
+
+                    if (menu.attached.menu.attached.id !== undefined) return;
+
+                    if (this.element !== undefined && this.element !== null) {
+                        if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
+                    }
+                    if (!menu.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
+
+                    console.log(`${menu.attached.menu.id} Closing Via elementPointerLeaveCallback setTimeout 0`);
+                    menu.attached.menu.Hide();
+                    menu.attached.id = undefined;
+                    if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+                }, 500);
+            }, 0);
+
+            menu.attached.menu.element.style["transition"] = "";
+
+            menu.attached.intervalID = setTimeout(() => {
+                if (menu.attached?.menu?.element === undefined) return;
+                menu.attached.menu.element.style["transition"] = "0s";
+            }, 200);
+        };
+
+        menu.element.addEventListener("pointerenter", this.#menuPointerEnterCallback);
+        this.element.addEventListener("pointerenter", this.#groupPointerEnterCallback);
+        this.element.addEventListener("pointerleave", this.#groupPointerLeaveCallback);
 
         return true;
     }
-    RemoveScripts() {
-        let gottenElement = this.GetElement();
 
-        if (this.#tooltipTimeoutID !== undefined) {
-            clearTimeout(this.#tooltipTimeoutID);
-            this.#tooltipTimeoutID = undefined;
+    /**
+     * @param {WolfermusMenu} menu
+     */
+    RemoveEvents(menu) {
+        if (menu.id === undefined || menu.id === null) return false;
+
+        if (this.element !== undefined && this.element !== null) {
+            if (this.#currentClickCallback !== undefined) this.element.removeEventListener("click", this.#currentClickCallback);
+            if (this.#currentDoubleClickCallback !== undefined) this.element.removeEventListener("dblclick", this.#currentDoubleClickCallback);
+            if (this.#currentPointerEnterCallback !== undefined) this.element.removeEventListener("pointerenter", this.#currentPointerEnterCallback);
+            if (this.#currentPointerLeaveCallback !== undefined) this.element.removeEventListener("pointerleave", this.#currentPointerLeaveCallback);
+            if (this.#currentPointerDownCallback !== undefined) this.element.removeEventListener("pointerdown", this.#currentPointerDownCallback);
+            if (this.#currentPointerUpCallback !== undefined) this.element.removeEventListener("pointerup", this.#currentPointerUpCallback);
+            if (this.#currentPointerMoveCallback !== undefined) this.element.removeEventListener("pointermove", this.#currentPointerMoveCallback);
+            if (this.#currentPointerCancelCallback !== undefined) this.element.removeEventListener("pointercancel", this.#currentPointerCancelCallback);
+
+            if (this.#groupPointerEnterCallback !== undefined) this.element.removeEventListener("pointerenter", this.#groupPointerEnterCallback);
+            if (this.#groupPointerLeaveCallback !== undefined) this.element.removeEventListener("pointerleave", this.#groupPointerLeaveCallback);
+
+            this.element.removeEventListener("pointerenter", this.#toolTipPointerEnterCallback);
+            this.element.removeEventListener("pointerleave", this.#toolTipPointerLeaveCallback);
+            this.element.removeEventListener("pointercancel", this.#toolTipPointerLeaveCallback);
+            this.element.removeEventListener("contextmenu", this.#contextMenuCallback);
         }
 
-        if (gottenElement !== null) {
-            if (this.#currentClickCallback !== undefined) gottenElement.removeEventListener("click", this.#currentClickCallback);
-            if (this.#currentDoubleClickCallback !== undefined) gottenElement.removeEventListener("dblclick", this.#currentDoubleClickCallback);
-            if (this.#currentPointerEnterCallback !== undefined) gottenElement.removeEventListener("pointerenter", this.#currentPointerEnterCallback);
-            if (this.#currentPointerLeaveCallback !== undefined) gottenElement.removeEventListener("pointerleave", this.#currentPointerLeaveCallback);
-            if (this.#currentPointerDownCallback !== undefined) gottenElement.removeEventListener("pointerdown", this.#currentPointerDownCallback);
-            if (this.#currentPointerUpCallback !== undefined) gottenElement.removeEventListener("pointerup", this.#currentPointerUpCallback);
-            if (this.#currentPointerMoveCallback !== undefined) gottenElement.removeEventListener("pointermove", this.#currentPointerMoveCallback);
-            if (this.#currentPointerCancelCallback !== undefined) gottenElement.removeEventListener("pointercancel", this.#currentPointerCancelCallback);
-        }
-
-        if (this.#tooltipTimeoutID !== undefined) {
-            clearTimeout(this.#tooltipTimeoutID);
-            this.#tooltipTimeoutID = undefined;
+        if (menu !== undefined && menu !== null && menu.element !== undefined) {
+            if (this.#menuPointerEnterCallback !== undefined) menu.element.removeEventListener("pointerenter", this.#menuPointerEnterCallback);
         }
 
         this.#currentClickCallback = undefined;
@@ -268,844 +1253,448 @@ class WolfermusMenuItem {
         this.#currentPointerUpCallback = undefined;
         this.#currentPointerMoveCallback = undefined;
         this.#currentPointerCancelCallback = undefined;
+
+        this.#groupPointerEnterCallback = undefined;
+        this.#groupPointerLeaveCallback = undefined;
+        this.#menuPointerEnterCallback = undefined;
     }
 }
 
-/**
- * @type {Array<WolfermusMenuItem>}
- */
-let wolfermusMenuItems = [];
-/**
- * @type {Array<WolfermusMenuItem>}
- */
-let currentWolfermusMenuItems = [];
-
-/**
- * @type {Array<WolfermusMenuItem>}
- */
-let wolfermusContextMenuItems = [];
-/**
- * @type {Array<WolfermusMenuItem>}
- */
-let currentWolfermusContextMenuItems = [];
-
-/**
- * Add/Set a Menu Item to Main Menu
- * @param {WolfermusMenuItem} item
- */
-function SetMainMenuItem(item) {
-    if (wolfermusMenuItems.find((menuItem) => menuItem.name === item.name) !== undefined) return;
-    wolfermusMenuItems.push(item);
-}
-
-/**
- * Remove a Menu Item from Main Menu
- * 
- * @param {string} itemName
- */
-function RemoveMainMenuItem(itemName) {
-    let foundIndex = wolfermusMenuItems.findIndex((menuItem) => menuItem.name === itemName);
-    if (foundIndex === -1) return;
-
-    wolfermusMenuItems.splice(foundIndex, 1);
-}
-
-/**
- * Clear all Menu Items from Main Menu
- */
-function ClearMainMenuItems() {
-    wolfermusMenuItems = [];
-}
-
-/**
- * Add/Set a Menu Item to Context Menu
- * @param {WolfermusMenuItem} item
- */
-function SetContextMenuItem(item) {
-    if (wolfermusContextMenuItems.find((menuItem) => menuItem.name === item.name) !== undefined) return;
-    wolfermusContextMenuItems.push(item);
-}
-
-/**
- * Remove a Menu Item from Context Menu
- * 
- * @param {string} itemName
- */
-function RemoveContextMenuItem(itemName) {
-    let foundIndex = wolfermusContextMenuItems.findIndex((menuItem) => menuItem.name === itemName);
-    if (foundIndex === -1) return;
-
-    wolfermusContextMenuItems.splice(foundIndex, 1);
-}
-
-/**
- * Clear all Menu Items from Context Menu
- */
-function ClearContextMenuItems() {
-    wolfermusContextMenuItems = [];
-}
-
-/**
- * @returns {string}
- */
-function GenerateMenuItems() {
-    let wolfermusMenuItemsConverted = "";
-    for (const menuItem of wolfermusMenuItems) {
-        wolfermusMenuItemsConverted += menuItem.Generate();
+class WolfermusImageMenuItem extends WolfermusMenuItem {
+    /**
+     * @param {any} id
+     * @param {string} imageSource
+     * @param {string} tooltip
+     */
+    constructor(id, imageSource, tooltip = "") {
+        super(id, "", tooltip);
+        this.imageSource = imageSource;
     }
-    return wolfermusMenuItemsConverted;
-}
+    /**
+     * @type {string}
+     */
+    imageSource = "";
 
-/**
- * Only run after appending new Menu Items to document.
- */
-function SetupScriptsForItems() {
-    for (const menuItem of wolfermusMenuItems) {
-        if (menuItem.SetupScripts()) currentWolfermusMenuItems.push(menuItem);
-    }
+    /**
+     * @param {WolfermusMenu} menu
+     * @returns {string}
+     */
+    Generate(menu) {
+        if (this.id === undefined) return "";
 
-    for (const menuItem of wolfermusContextMenuItems) {
-        if (menuItem.SetupScripts()) currentWolfermusContextMenuItems.push(menuItem);
+        return `
+            <li id="WolfermusMenu${menu.id}${this.id}" class="WolfermusDefaultCSS">
+                <img src="${this.imageSource}" class="WolfermusDefaultCSS"></img>
+            </li>
+        `;
     }
 }
 
-/**
- * Removes all Event Listeners currently rendered from menu items
- */
-function RemoveScriptsForCurrentItems() {
-    for (const menuItem of currentWolfermusMenuItems) {
-        menuItem.RemoveScripts();
+class WolfermusMenu {
+    constructor() {
+        this.id = WolfermusMenu.id;
+        WolfermusMenu.id++;
     }
-    currentWolfermusMenuItems = [];
+    /**
+     * @type {Number}
+     */
+    static id = 0;
+    /**
+     * @type {Number}
+     */
+    id = 0;
+    /**
+     * @type {Array<WolfermusMenuItem>}
+     */
+    items = [];
+    /**
+     * @type {Array<WolfermusMenuItem>}
+     */
+    #currentItems = [];
+    /**
+     * @type {HTMLElement | null}
+     */
+    element = null;
+    /**
+     * @type {{
+     *  id: any,
+     *  menu: WolfermusMenu,
+     *  intervalID: Number | undefined,
+     *  cooldownIntervalID: Number | undefined
+     * }}
+     */
+    attached = {
+        id: undefined,
+        menu: undefined,
+        intervalID: undefined,
+        cooldownIntervalID: undefined
+    };
+    /**
+     * @type {Array<String>}
+     */
+    #classes = ["WolfermusDefaultCSS", "WolfermusPopUpMenu", "WolfermusText"];
+    /**
+     * @type {boolean} 
+     */
+    #showing = false;
 
-    for (const menuItem of currentWolfermusContextMenuItems) {
-        menuItem.RemoveScripts();
-    }
-    currentWolfermusContextMenuItems = [];
-}
-
-const contrainedPadding = 5;
-let oldPositionX, oldPositionY;
-
-class Position {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-    x;
-    y;
-}
-
-/**
- * @param {HTMLElement} elementToContrain 
- * @param {Position} position 
- * @param {Boolean} shouldDivideElementToContrainDimentionByTwo 
- */
-async function ContrainElementViaPosition(elementToContrain, position, shouldDivideElementWidthToContrainDimentionByTwo = true, shouldDivideElementHeightToContrainDimentionByTwo = true) {
-    if (currentWolfermusMenuItems.length <= 0) return;
-
-    const mainMenuRoot = document.getElementById("WolfermusMainMenuWrapper");
-
-    if (mainMenuRoot === undefined || mainMenuRoot === null) return;
-    if (elementToContrain === undefined || elementToContrain === null) return;
-
-    while (mainMenuRoot.getBoundingClientRect().width === 0 && mainMenuRoot.getBoundingClientRect().height === 0) {
-        await Sleep(100);
-    }
-
-    const windowWidth = mainMenuRoot.getBoundingClientRect().width;
-    const windowHeight = mainMenuRoot.getBoundingClientRect().height;
-
-    const elementToContrainWidth = elementToContrain.getBoundingClientRect().width;
-    const elementToContrainHeight = elementToContrain.getBoundingClientRect().height;
-
-    let elementToContrainWidthDivided2 = elementToContrainWidth;
-    let elementToContrainHeightDivided2 = elementToContrainHeight;
-    if (shouldDivideElementWidthToContrainDimentionByTwo) {
-        elementToContrainWidthDivided2 = elementToContrainWidth / 2;
-    }
-    if (shouldDivideElementHeightToContrainDimentionByTwo) {
-        elementToContrainHeightDivided2 = elementToContrainHeight / 2;
+    UpdateClasses() {
+        if (this.element === undefined || this.element === null) return;
+        this.element.classList = this.#classes.join(" ");
     }
 
-    if ((position.x - contrainedPadding) < (shouldDivideElementWidthToContrainDimentionByTwo ? elementToContrainWidthDivided2 : 0)) {
-        elementToContrain.style.left = ((shouldDivideElementWidthToContrainDimentionByTwo ? elementToContrainWidthDivided2 : 0) + contrainedPadding) + "px";
-    } else if ((position.x + contrainedPadding) > windowWidth - (elementToContrainWidthDivided2)) {
-        elementToContrain.style.left = (windowWidth - elementToContrainWidthDivided2 - contrainedPadding) + "px";
-    } else {
-        elementToContrain.style.left = position.x + "px";
+    /**
+     * @param {HTMLElement} elementToAppendTo
+     */
+    ValidateElement(elementToAppendTo) {
+        if (elementToAppendTo === undefined || elementToAppendTo === null) {
+            debugger;
+            throw new Error("Wolfermus ERROR - MainMenuLib: elementToAppendTo is invalid");
+            return;
+        }
+        if (this.element !== undefined && this.element !== null) return;
+        const gottenElement = document.getElementById(`WolfermusMenu${this.id}`);
+        if (gottenElement !== undefined && gottenElement !== null) {
+            this.element = gottenElement;
+            return;
+        }
+
+        this.element = document.createElement("div");
+        this.element.id = `WolfermusMenu${this.id}`;
+        this.UpdateClasses();
+
+        this.element.style["transition"] = "0s";
+
+        if (this.#showing) {
+            this.element.style["visibility"] = "visible";
+        } else {
+            this.element.style["visibility"] = "hidden";
+        }
+
+        elementToAppendTo.append(this.element);
     }
 
-    if ((position.y - contrainedPadding) < (shouldDivideElementHeightToContrainDimentionByTwo ? elementToContrainHeightDivided2 : 0)) {
-        elementToContrain.style.top = ((shouldDivideElementHeightToContrainDimentionByTwo ? elementToContrainHeightDivided2 : 0) + contrainedPadding) + "px";
-    } else if ((position.y + contrainedPadding) > windowHeight - elementToContrainHeightDivided2) {
-        elementToContrain.style.top = (windowHeight - elementToContrainHeightDivided2 - contrainedPadding) + "px";
-    } else {
-        elementToContrain.style.top = position.y + "px";
+    /**
+     * @returns {String}
+     */
+    #GenerateItems() {
+        let wolfermusMenuItemsConverted = "";
+        for (const menuItem of this.items) {
+            wolfermusMenuItemsConverted += menuItem.Generate(this);
+        }
+        return wolfermusMenuItemsConverted;
     }
-}
 
-let oldFabElementLeft, oldFabElementTop;
-let oldWindowWidth, oldWindowHeight;
-function ContrainMainMenu() {
-    if (currentWolfermusMenuItems.length <= 0) return;
+    async #SetupItems() {
+        for (const menuItem of this.items) {
+            if (await menuItem.SetupEvents(this)) this.#currentItems.push(menuItem);
+        }
+    }
 
-    const mainMenuRoot = document.getElementById("WolfermusMainMenuWrapper");
-    const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
-    if (mainMenuRoot === undefined || mainMenuRoot === null) return;
-    if (fabElement === undefined || fabElement === null) return;
+    #UnloadItems() {
+        for (const menuItem of this.#currentItems) {
+            menuItem.RemoveEvents(this);
+        }
+        this.#currentItems = [];
+    }
 
-    if (fabElement.style.left === undefined || fabElement.style.left === null) return;
-    if (fabElement.style.top === undefined || fabElement.style.top === null) return;
+    /**
+     * @param {String} classString 
+     */
+    AddClass(classString) {
+        if (classString === undefined || classString === null || classString === "") return;
+        if (this.#classes.find((value) => value === classString) !== undefined) return;
+        this.#classes.push(classString);
+    }
+    /**
+     * @param {String} classString
+     */
+    RemoveClass(classString) {
+        if (classString === undefined || classString === null || classString === "") return;
+        let indexOf = this.#classes.findIndex((value) => value === classString);
+        if (indexOf === -1) return;
+        this.#classes.splice(indexOf, 1);
+    }
+    /**
+     * @param {String} classString
+     */
+    ToggleClass(classString) {
+        if (classString === undefined || classString === null || classString === "") return;
+        let indexOf = this.#classes.findIndex((value) => value === classString);
+        if (indexOf === -1) {
+            this.#classes.push(classString);
+            return;
+        }
+        this.#classes.splice(indexOf, 1);
+    }
+    /**
+     * @param {String} classString
+     * @returns {Boolean}
+     */
+    ContainsClass(classString) {
+        if (classString === undefined || classString === null || classString === "") return;
+        return this.#classes.includes(classString);
+    }
 
-    const windowWidth = mainMenuRoot.getBoundingClientRect().width;
-    const windowHeight = mainMenuRoot.getBoundingClientRect().height;
+    /**
+     * @param {HTMLElement} elementToAppendTo
+     * @async
+     */
+    async Generate(elementToAppendTo) {
+        if (elementToAppendTo === undefined || elementToAppendTo === null) {
+            debugger;
+            throw new Error("Wolfermus ERROR - MainMenuLib: elementToAppendTo is invalid");
+            return;
+        }
+        this.ValidateElement(elementToAppendTo);
 
-    if (windowWidth === oldWindowWidth && windowHeight === oldWindowHeight
-        && fabElement.style.left === oldFabElementLeft && fabElement.style.top === oldFabElementTop
-    ) return;
+        this.#UnloadItems();
 
-    oldWindowWidth = windowWidth;
-    oldWindowHeight = windowHeight;
+        this.element.innerHTML = `
+            <ul class="WolfermusDefaultCSS">
+                ${this.#GenerateItems()}
+            </ul>
+        `;
 
-    oldFabElementLeft = fabElement.style.left;
-    oldFabElementTop = fabElement.style.top;
+        await this.#SetupItems();
+    }
 
-    const x = parseInt(fabElement.style.left.match(/\d/g).join(""));
-    const y = parseInt(fabElement.style.top.match(/\d/g).join(""));
+    Show() {
+        if (this.element !== undefined && this.element !== null) {
+            this.element.style["visibility"] = "visible";
+        }
 
-    ContrainElementViaPosition(fabElement, new Position(x, y));
+        this.#showing = true;
+    }
+
+    Hide() {
+        if (this.attached?.menu !== undefined) {
+            this.attached.menu.Hide();
+            this.attached.id = undefined;
+        }
+
+        if (this.element !== undefined && this.element !== null) {
+            this.element.style["visibility"] = "hidden";
+        }
+
+        this.#showing = false;
+    }
+
+    ToggleVisibility() {
+        if (this.IsHidden()) {
+            this.Show();
+        } else {
+            this.Hide();
+        }
+    }
+
+    /**
+     * @returns {Boolean}
+     */
+    IsHidden() {
+        if (this.element !== undefined && this.element !== null) {
+            return this.element.style["visibility"] === "hidden";
+        }
+        return true;
+    }
+
+    IsHoveringAnyMenu() {
+        if (this.element !== undefined && this.element !== null) {
+            if (this.element.matches(":hover")) return true;
+        }
+
+        if (this.attached?.menu !== undefined) {
+            return this.attached.menu.IsHoveringAnyMenu();
+        }
+
+        return false;
+    }
 }
 
 /**
  * @param {PointerEvent} event 
  */
-function MainMenuMove(event) {
-    const mainMenuRoot = document.getElementById("WolfermusMainMenuWrapper");
-    const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
-    if (mainMenuRoot === undefined || mainMenuRoot === null) return;
-    if (fabElement === undefined || fabElement === null) return;
+async function ToolTipPointerMove(event) {
+    if (GetMainMenu().items.length <= 0) return;
 
-    const windowWidth = mainMenuRoot.getBoundingClientRect().width;
-    const windowHeight = mainMenuRoot.getBoundingClientRect().height;
+    const toolTips = WolfermusMenuItem.GetToolTipMenu();
 
-    const currentPosition = new Position(event.clientX, event.clientY);
+    if (!toolTips.ContainsClass("WolfermusActive") && !toolTips.ContainsClass("WolfermusToolTipSetActive")) return;
 
-    // let currentPosition = new Position();
-    // if (e.type === "touchmove") {
-    //     currentPosition.x = e.changedTouches[0].clientX;
-    //     currentPosition.y = e.changedTouches[0].clientY;
-    // } else {
-    //     currentPosition.x = e.clientX;
-    //     currentPosition.y = e.clientY;
-    // }
-    ContrainElementViaPosition(fabElement, currentPosition);
-
-    if (currentPosition.x < windowWidth / 2) {
-        fabElement.classList.remove("WolfermusRightPosition");
-        fabElement.classList.add("WolfermusLeftPosition");
-    } else {
-        fabElement.classList.remove("WolfermusLeftPosition");
-        fabElement.classList.add("WolfermusRightPosition");
-    }
-
-    if (currentPosition.y < windowHeight / 2) {
-        fabElement.classList.remove("WolfermusUpPosition");
-        fabElement.classList.add("WolfermusDownPosition");
-    } else {
-        fabElement.classList.remove("WolfermusDownPosition");
-        fabElement.classList.add("WolfermusUpPosition");
-    }
-}
-
-/**
- * @param {PointerEvent} event 
- */
-function MainMenuMouseDown(event) {
-    const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
-    const fabElementBtn = document.getElementById("WolfermusFloatingSnapBtn");
-    if (fabElement === undefined || fabElement === null) return;
-    if (fabElementBtn === undefined || fabElementBtn === null) return;
-
-    fabElementBtn.setPointerCapture(event.pointerId);
-
-    oldPositionY = fabElement.style.top;
-    oldPositionX = fabElement.style.left;
-
-    fabElementBtn.addEventListener("pointermove", MainMenuMove);
-
-    // if (event.type === "mousedown") {
-    //     window.addEventListener("mousemove", MainMenuMove);
-    // } else {
-    //     window.addEventListener("touchmove", MainMenuMove);
-    // }
-
-    fabElement.style.transition = "none";
-}
-
-/**
- * @returns {string}
- */
-function GenerateContextItems() {
-    let wolfermusContextItemsConverted = "";
-    for (const menuItem of wolfermusContextMenuItems) {
-        wolfermusContextItemsConverted += menuItem.Generate();
-    }
-    return wolfermusContextItemsConverted;
-}
-
-let withinContextMenu = false;
-
-/**
- * @param {PointerEvent} event 
- */
-function ContextMenuPointerEnter(event) {
-    withinContextMenu = true;
-}
-
-/**
- * @param {PointerEvent} event 
- */
-function ContextMenuPointerLeave(event) {
-    withinContextMenu = false;
-}
-
-/**
- * @param {PointerEvent} event 
- */
-function ContextMenuRemoveActiveIfNotWithin(event) {
-    if (!withinContextMenu) {
-        RemoveTempContextMenuListeners();
-
-        const contextMenu = document.getElementById("WolfermusMainMenuContextMenu");
-        if (contextMenu === undefined || contextMenu === null) return;
-
-        contextMenu.classList.remove("WolfermusActive");
-    }
-}
-
-function AddTempContextMenuListeners() {
-    const contextMenu = document.getElementById("WolfermusMainMenuContextMenu");
-    if (contextMenu === undefined || contextMenu === null) return;
-
-    contextMenu.addEventListener("pointerenter", ContextMenuPointerEnter);
-    contextMenu.addEventListener("pointerleave", ContextMenuPointerLeave);
-    window.addEventListener("pointerdown", ContextMenuRemoveActiveIfNotWithin);
-    window.addEventListener("pointerup", ContextMenuRemoveActiveIfNotWithin);
-    window.addEventListener("pointercancel", ContextMenuRemoveActiveIfNotWithin);
-}
-
-function RemoveTempContextMenuListeners() {
-    window.removeEventListener("pointerdown", ContextMenuRemoveActiveIfNotWithin);
-    window.removeEventListener("pointerup", ContextMenuRemoveActiveIfNotWithin);
-    window.removeEventListener("pointercancel", ContextMenuRemoveActiveIfNotWithin);
-
-    const contextMenu = document.getElementById("WolfermusMainMenuContextMenu");
-    if (contextMenu === undefined || contextMenu === null) return;
-
-    contextMenu.removeEventListener("pointerenter", ContextMenuPointerEnter);
-    contextMenu.removeEventListener("pointerleave", ContextMenuPointerLeave);
-}
-
-/**
- * @param {PointerEvent} event 
- */
-function ContextMenuCallback(event) {
-    event.preventDefault();
-    const contextMenu = document.getElementById("WolfermusMainMenuContextMenu");
-    if (contextMenu === undefined || contextMenu === null) return;
+    await toolTips.Generate(await GetWolfermusRoot());
 
     const x = event.clientX;
-    const y = event.clientY;
+    const y = (event.clientY) + 30;
 
-    AddTempContextMenuListeners();
+    ContrainElementViaPosition(toolTips.element, new Position(x, y), true, false);
+}
 
-    contextMenu.classList.add("WolfermusActive");
+/**
+ * @param {PointerEvent} event 
+ */
+function ResetItemBackgroundColor(event) {
+    const menu = GetMainMenu();
+    if (menu.attached?.id === undefined) return;
 
-    ContrainElementViaPosition(contextMenu, new Position(x, y), false, false);
+    const foundItem = menu.items.find((item) => item.id === menu.attached.id);
+    if (foundItem.element !== undefined) foundItem.element.style["background-color"] = "";
+}
+
+/**
+ * @param {PointerEvent} event 
+ */
+function CloseWolfermusMainMenu(event) {
+    const menu = GetMainMenu();
+    if (menu.IsHoveringAnyMenu()) return;
+    ResetItemBackgroundColor();
+    if (menu.attached?.menu !== undefined) menu.attached.menu.Hide();
+}
+
+/**
+ * @param {PointerEvent} event 
+ */
+function HideWolfermusMainMenu(event) {
+    const menu = GetMainMenu();
+    ResetItemBackgroundColor();
+    if (menu.attached?.menu !== undefined) menu.attached.menu.Hide();
+}
+
+/**
+ * @param {PointerEvent} event 
+ */
+function CloseWolfermusContextMenu(event) {
+    const menu = GetContextMenu();
+    if (menu.IsHoveringAnyMenu()) return;
+    menu.Hide();
+}
+
+/**
+ * @param {PointerEvent} event 
+ */
+function HideWolfermusContextMenu(event) {
+    const menu = GetContextMenu();
+    menu.Hide();
+}
+
+async function FullscreenChangeMainMenu() {
+    if (GetMainMenu().items.length <= 0) return;
+
+    const mainMenuRoot = await GetWolfermusRoot();
+    const menu1 = GetMainMenu();
+    const floatingButtonMenu = GetFloatingButtonMenu();
+
+    if (document.fullscreenElement !== null) {
+        mainMenuRoot.style.display = "none";
+        floatingButtonMenu.Hide();
+        menu1.Hide();
+    } else {
+        mainMenuRoot.style.display = "block";
+        floatingButtonMenu.Show();
+    }
+}
+
+function AttachInteractionEventsToMainMenu() {
+    window.addEventListener("pointerclick", CloseWolfermusMainMenu);
+    window.addEventListener("pointerup", CloseWolfermusMainMenu);
+    window.addEventListener("pointerleave", HideWolfermusMainMenu);
+    window.addEventListener("pointercancel", HideWolfermusMainMenu);
+    window.addEventListener('pointermove', ToolTipPointerMove);
+
+    window.addEventListener("pointerclick", CloseWolfermusContextMenu);
+    window.addEventListener("pointerup", CloseWolfermusContextMenu);
+    window.addEventListener("pointerleave", HideWolfermusContextMenu);
+    window.addEventListener("pointercancel", HideWolfermusContextMenu);
+
+    document.addEventListener('fullscreenchange', FullscreenChangeMainMenu);
+    window.addEventListener('resize', ContrainMainMenu);
+}
+
+function RemoveInteractionEventsToMainMenu() {
+    window.removeEventListener("pointerclick", CloseWolfermusMainMenu);
+    window.removeEventListener("pointerup", CloseWolfermusMainMenu);
+    window.removeEventListener("pointerleave", HideWolfermusMainMenu);
+    window.removeEventListener("pointercancel", HideWolfermusMainMenu);
+    window.removeEventListener('pointermove', ToolTipPointerMove);
+
+    document.removeEventListener('fullscreenchange', FullscreenChangeMainMenu);
+    window.removeEventListener('resize', ContrainMainMenu);
+}
+
+/**
+ * Call this second.
+ * 
+ * This function executes a http request strongly advise against calling this often.
+ * 
+ * @description Updates the Main Menu Items and Regenerates HTML and Re-setups events.
+ * @async
+ */
+async function UpdateMenuItems() {
+    const wolfermusRoot = await GetWolfermusRoot();
+
+    let wolfermusFloatingSnapBtnWrapper = document.getElementById("WolfermusFloatingSnapBtnWrapper");
+    if (wolfermusFloatingSnapBtnWrapper === undefined || wolfermusFloatingSnapBtnWrapper === null) {
+        debugger;
+        return;
+    }
+
+    const menu1 = GetMainMenu();
+    const floatingButtonMenu = GetFloatingButtonMenu();
+
+    RemoveInteractionEventsToMainMenu();
+
+    if (menu1.items.length <= 0) {
+        wolfermusRoot.style.display = "none";
+        return;
+    }
+
+    await floatingButtonMenu.Generate(wolfermusFloatingSnapBtnWrapper);
+    await menu1.Generate(wolfermusFloatingSnapBtnWrapper);
+
+    menu1.element.style["transition"] = "";
+
+    AttachInteractionEventsToMainMenu();
+
+    await FullscreenChangeMainMenu();
+
+    // TODO: Update StorageManagerLib to handly localStorage only options.
+    if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
+    let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
+
+    ContrainElementViaPosition(wolfermusFloatingSnapBtnWrapper, new Position(WolfermusMainMenuSettings.Left, WolfermusMainMenuSettings.Top));
 }
 
 (async () => {
-    let IsGMXmlHttpRequest1 = false;
-    // @ts-ignore
-    if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;
-
-    let IsGMXmlHttpRequest2 = false;
-    // @ts-ignore
-    if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest !== "undefined") IsGMXmlHttpRequest2 = true;
-
-    let IsGMXmlHttpRequest = false;
-    if (IsGMXmlHttpRequest1 || IsGMXmlHttpRequest2) IsGMXmlHttpRequest = true;
-
-    if (!IsGMXmlHttpRequest) {
-        const message = "Wolfermus ERROR: Main - Please run in a userscript manager";
-        alert(message);
-        console.log(message);
-        return;
-    }
-
-    let ChosenXmlHttpRequest;
-    if (IsGMXmlHttpRequest2) {
-        ChosenXmlHttpRequest = GM.xmlHttpRequest;
-    } else if (IsGMXmlHttpRequest1) {
-        ChosenXmlHttpRequest = GM_xmlHttpRequest;
-    } else {
-        const message = "Wolfermus ERROR: Main - Unexpected Error";
-        alert(message);
-        console.log(message);
-        return;
-    }
-    if (ChosenXmlHttpRequest === undefined || ChosenXmlHttpRequest === null) {
-        const message = "Wolfermus ERROR: Main - Unexpected Error";
-        alert(message);
-        console.log(message);
-        return;
-    }
-
-    function MakeGetRequest(url) {
-        return new Promise((resolve, reject) => {
-            ChosenXmlHttpRequest({
-                method: "GET",
-                url: url,
-                onload: (response) => {
-                    if (response.status !== 200) {
-                        reject(statusText);
-                        return;
-                    }
-                    resolve(response.responseText);
-                },
-                onerror: error => reject(error)
-            });
-        });
-    }
-
-    let wolfermusAntiStuckLoop1 = 100;
-    while (window === undefined || window === null) {
-        await Sleep(500);
-
-        if (wolfermusAntiStuckLoop1 < 0) {
-            alert("ERROR: antiStuckLoop engaged");
-            return;
-        }
-        wolfermusAntiStuckLoop1--;
-
-    }
-
-    let mainWindow = window;
-
-    try {
-        if (unsafeWindow !== undefined) mainWindow = unsafeWindow;
-    } catch (e) {
-
-    }
-
-    /**
-     * @param {string} key
-     * @returns {boolean}
-     */
-    function WolfermusCheckModuleLoaded(key) {
-        if (!mainWindow["Wolfermus"]) {
-            mainWindow["Wolfermus"] = {}
-            return false;
-        }
-
-        if (!mainWindow["Wolfermus"][key]) return false;
-
-        if (!mainWindow["Wolfermus"][key]["Loaded"]) return false;
-
-        return true;
-    }
-
-    /**
-     * @param {string} key
-     * @returns {boolean}
-     */
-    function WolfermusCheckLibraryLoaded(key) {
-        if (!mainWindow["Wolfermus"]) {
-            mainWindow["Wolfermus"] = {}
-            return false;
-        }
-
-        if (!mainWindow["Wolfermus"]["Libraries"]) {
-            mainWindow["Wolfermus"]["Libraries"] = {}
-            return false;
-        }
-
-        if (!mainWindow["Wolfermus"]["Libraries"][key]) return false;
-
-        if (!mainWindow["Wolfermus"]["Libraries"][key]["Loaded"]) return false;
-
-        return true;
-    }
-
-    console.log("Wolfermus Main Menu Library Loading...");
-
-    //#region Loading and getting functions
-
-    let wolfermusLoadLoopCounter = 0;
+    let wolfermusLoadLoopCounter = 100;
     while (!WolfermusCheckLibraryLoaded("StorageManager")) {
-        await Sleep(500);
+        await Sleep(100);
 
-        if (wolfermusLoadLoopCounter >= 100) {
+        if (wolfermusLoadLoopCounter <= 0) {
             alert("ERROR: antiStuckLoop engaged");
             return;
         }
-        wolfermusLoadLoopCounter++;
+        wolfermusLoadLoopCounter--;
     }
 
     if (WolfermusCheckLibraryLoaded("MainMenu")) return;
 
-    if (!mainWindow["Wolfermus"]) mainWindow["Wolfermus"] = {};
-    if (!mainWindow["Wolfermus"]["Libraries"]) mainWindow["Wolfermus"]["Libraries"] = {};
+    console.log("Wolfermus Main Menu Library Loading...");
 
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"] = {};
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["Loaded"] = false;
+    let MainMenuLibrary = WolfermusGetLibrary("MainMenu", true);
 
-    let wlfLogoRounded = mainWindow["Wolfermus"]["Logo"]["Rounded"];
+    MainMenuLibrary["Loaded"] = false;
 
-    let Notify = mainWindow["Wolfermus"]["Libraries"]["StorageManager"]["Notify"];
-    let SetValue = mainWindow["Wolfermus"]["Libraries"]["StorageManager"]["SetValue"];
-    let GetValue = mainWindow["Wolfermus"]["Libraries"]["StorageManager"]["GetValue"];
+    MainMenuLibrary["Classes"] = {};
+    MainMenuLibrary["Classes"]["WolfermusMenu"] = WolfermusMenu;
+    MainMenuLibrary["Classes"]["WolfermusMenuItem"] = WolfermusMenuItem;
+    MainMenuLibrary["Classes"]["WolfermusImageMenuItem"] = WolfermusImageMenuItem;
 
-    /**
-     * Allows a userscript to add a listener for changes to the value of a specific key in the userscript's storage.
-     * 
-     * The function takes two parameters:
-     *  
-     * - A string specifying the key for which changes should be monitored.
-     * - A callback function that will be called when the value of the key changes. The callback function should have the following signature:
-     * ```js
-     *  function(key, oldValue, newValue, remote) {
-     *      // key is the key whose value has changed
-     *      // oldValue is the previous value of the key
-     *      // newValue is the new value of the key
-     *      // remote is a boolean indicating whether the change originated from a different userscript instance
-     *  }
-     * ```
-     * @type {(key: string, callback: (key: string, oldValue: any, newValue: any, remote: boolean) => void) => Promise<number>}
-    */
-    let AddValueChangeListener = mainWindow["Wolfermus"]["Libraries"]["StorageManager"]["AddValueChangeListener"];
+    MainMenuLibrary["Menus"] = {};
+    MainMenuLibrary["Menus"]["GetMainMenu"] = GetMainMenu;
+    MainMenuLibrary["Menus"]["GetFloatingButtonMenu"] = GetFloatingButtonMenu;
+    MainMenuLibrary["Menus"]["GetContextMenu"] = GetContextMenu;
 
-    /**
-     * Removes a listener for changes to the value of a specific key in the userscript's storage.
-     * 
-      * @type {(listenerId: number) => void}
-      */
-    let RemoveValueChangeListener = mainWindow["Wolfermus"]["Libraries"]["StorageManager"]["RemoveValueChangeListener"];
+    MainMenuLibrary["UpdateWolfermusMainMenuStyle"] = UpdateWolfermusMainMenuStyle;
+    MainMenuLibrary["UpdateMenuItems"] = UpdateMenuItems;
 
-    let wolfermusLoadLoopCounterDisplayString = `Wolfermus Took ${wolfermusLoadLoopCounter} loops to load`;
-    if (wolfermusLoadLoopCounter === 0) wolfermusLoadLoopCounterDisplayString = "Wolfermus Loaded First Time";
-
-    if (wolfermusLoadLoopCounter > 50) {
-        await Notify({
-            title: "Wolfermus LoadCounter",
-            text: wolfermusLoadLoopCounterDisplayString,
-            image: wlfLogoRounded
-        });
-    } else {
-        console.log(wolfermusLoadLoopCounterDisplayString);
-    }
-
-    //#endregion -Loading and getting functions
-
-    /**
- * Updates the Main Menu Style
- * @async
- */
-    async function UpdateWolfermusMainMenuStyle() {
-        let mainMenuStyle = document.getElementById("WolfermusMainMenuStyle");
-
-        if (mainMenuStyle === undefined || mainMenuStyle === null) {
-            mainMenuStyle = document.createElement("style");
-            mainMenuStyle.id = "WolfermusMainMenuStyle";
-            document.head.append(mainMenuStyle);
-        }
-
-        async function GetCSS() {
-            const css = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Resources/MainMenuLib.css`));
-            return css;
-        }
-
-        let wolfermusPreventLoopLock1 = 10;
-        async function AttemptLoadCSS() {
-            return await GetCSS().then(async (response) => {
-                return response;
-            }).catch(async (error) => {
-                if (wolfermusPreventLoopLock1 <= 0) return;
-                wolfermusPreventLoopLock1--;
-                await Sleep(500);
-                return await AttemptLoadCSS();
-            });
-        }
-
-        const editedInnerHTML = bypassScriptPolicy.createHTML(await AttemptLoadCSS());
-
-        mainMenuStyle.innerHTML = editedInnerHTML;
-    }
-
-    /**
-     * @param {PointerEvent} event 
-     */
-    async function MainMenuMouseUp(event) {
-        const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
-        const fabElementBtn = document.getElementById("WolfermusFloatingSnapBtn");
-        if (fabElement === undefined || fabElement === null) return;
-        if (fabElementBtn === undefined || fabElementBtn === null) return;
-
-        //const GUIGotten = await GetValue("MainMenu", "{}");
-
-        // TODO: Update StorageManagerLib to handly localStorage only options.
-        if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
-        let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
-
-        fabElementBtn.removeEventListener("pointermove", MainMenuMove);
-
-        fabElementBtn.releasePointerCapture(event.pointerId);
-
-        // if (e.type === "mouseup") {
-        //     window.removeEventListener("mousemove", MainMenuMove);
-        // } else {
-        //     window.removeEventListener("touchmove", MainMenuMove);
-        // }
-        //snapToSide(e);
-        fabElement.style.transition = "0.3s ease-in-out left";
-
-        WolfermusMainMenuSettings.Top = parseInt(fabElement.style.top.match(/\d/g).join(""));
-        WolfermusMainMenuSettings.Left = parseInt(fabElement.style.left.match(/\d/g).join(""));
-
-        // if (e.type === "mouseup") {
-        //     WolfermusMainMenuSettings.Top = e.clientY;
-        //     WolfermusMainMenuSettings.Left = e.clientX;
-        // } else {
-        //     WolfermusMainMenuSettings.Top = e.touches[0].clientY;
-        //     WolfermusMainMenuSettings.Left = e.touches[0].clientX;
-        // }
-
-        if (!WolfermusMainMenuSettings.Direction) WolfermusMainMenuSettings.Direction = {};
-
-        WolfermusMainMenuSettings.Direction.Vertical = "WolfermusDownPosition";
-        WolfermusMainMenuSettings.Direction.Horizontal = "WolfermusLeftPosition";
-        if (fabElement.classList.contains("WolfermusUpPosition")) {
-            WolfermusMainMenuSettings.Direction.Vertical = "WolfermusUpPosition";
-        }
-        if (fabElement.classList.contains("WolfermusRightPosition")) {
-            WolfermusMainMenuSettings.Direction.Horizontal = "WolfermusRightPosition";
-        }
-
-        // TODO: Update StorageManagerLib to handly localStorage only options.
-        localStorage["WolfermusMainMenu"] = JSON.stringify(WolfermusMainMenuSettings);
-
-        // SetValue("MainMenu", JSON.stringify(WolfermusMainMenuSettings));
-    }
-
-    function MainMenuClick(event) {
-        const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
-        if (fabElement === undefined || fabElement === null) return;
-
-        if (
-            oldPositionY === fabElement.style.top &&
-            oldPositionX === fabElement.style.left
-        ) {
-            fabElement.classList.toggle("WolfermusActive");
-        }
-    }
-
-    let wlfToolTipsElement = undefined;
-    /**
-     * @param {PointerEvent} event 
-     */
-    function ToolTipPointerMove(event) {
-        if (currentWolfermusMenuItems.length <= 0) return;
-
-        if (wlfToolTipsElement === undefined || wlfToolTipsElement === null) {
-            wlfToolTipsElement = document.getElementById("WolfermusMenuItemToolTip");
-            if (wlfToolTipsElement === undefined || wlfToolTipsElement === null) return;
-        }
-        if (!wlfToolTipsElement.classList.contains("WolfermusActive") && !wlfToolTipsElement.classList.contains("WolfermusToolTipSetActive")) return;
-
-        const x = event.clientX;
-        const y = (event.clientY) + 30;
-
-        ContrainElementViaPosition(wlfToolTipsElement, new Position(x, y), true, false);
-    }
-
-    function AttachInteractionEventsToMainMenu() {
-        const fabElementBtn = document.getElementById("WolfermusFloatingSnapBtn");
-        if (fabElementBtn === undefined || fabElementBtn === null) return;
-
-        fabElementBtn.addEventListener("pointerdown", MainMenuMouseDown);
-        fabElementBtn.addEventListener("pointerup", MainMenuMouseUp);
-
-        //fabElementBtn.addEventListener("mousedown", MainMenuMouseDown);
-        //fabElementBtn.addEventListener("mouseup", MainMenuMouseUp);
-
-        //fabElementBtn.addEventListener("touchstart", MainMenuMouseDown);
-        //fabElementBtn.addEventListener("touchend", MainMenuMouseUp);
-
-        fabElementBtn.addEventListener("click", MainMenuClick);
-
-        fabElementBtn.addEventListener("contextmenu", ContextMenuCallback);
-
-        window.addEventListener('pointermove', ToolTipPointerMove);
-    }
-
-    function RemoveInteractionEventsToMainMenu() {
-        const fabElementBtn = document.getElementById("WolfermusFloatingSnapBtn");
-        if (fabElementBtn === undefined || fabElementBtn === null) return;
-
-        fabElementBtn.removeEventListener("pointerdown", MainMenuMouseDown);
-        fabElementBtn.removeEventListener("pointerup", MainMenuMouseUp);
-
-        //fabElementBtn.removeEventListener("mousedown", MainMenuMouseDown);
-        //fabElementBtn.removeEventListener("mouseup", MainMenuMouseUp);
-
-        //fabElementBtn.removeEventListener("touchstart", MainMenuMouseDown);
-        //fabElementBtn.removeEventListener("touchend", MainMenuMouseUp);
-
-        fabElementBtn.removeEventListener("click", MainMenuClick);
-
-        fabElementBtn.removeEventListener("contextmenu", ContextMenuCallback);
-
-        window.removeEventListener('pointermove', ToolTipPointerMove);
-        wlfToolTipsElement = undefined;
-    }
-
-    function FullscreenChangeMainMenu() {
-        if (currentWolfermusMenuItems.length <= 0) return;
-
-        let mainMenuRoot = document.getElementById("WolfermusMainMenuWrapper");
-        if (mainMenuRoot === undefined || mainMenuRoot === null) return;
-
-        if (document.fullscreenElement !== null) {
-            mainMenuRoot.style.display = "none";
-        } else {
-            mainMenuRoot.style.display = "block";
-        }
-    }
-
-    /**
-     * Update Main Menu Items
-     */
-    async function UpdateMenuItems() {
-        let mainMenuRoot = document.getElementById("WolfermusMainMenuWrapper");
-        let creatingMainMenuRoot = false;
-        if (mainMenuRoot === undefined || mainMenuRoot === null) {
-            if (wolfermusMenuItems.length <= 0) return;
-
-            mainMenuRoot = document.createElement("div");
-            mainMenuRoot.id = "WolfermusMainMenuWrapper";
-            mainMenuRoot.classList = "WolfermusDefaultCSS";
-            mainMenuRoot.style.display = "none";
-
-            creatingMainMenuRoot = true;
-        }
-
-        //const GUIGotten = await GetValue("MainMenu", "{}");
-
-        // TODO: Update StorageManagerLib to handly localStorage only options.
-        if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
-        let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
-
-        RemoveInteractionEventsToMainMenu();
-        RemoveScriptsForCurrentItems();
-        RemoveTempContextMenuListeners();
-
-        if (wolfermusMenuItems.length <= 0) {
-            mainMenuRoot.style.display = "none";
-            return;
-        }
-
-        let imgSrc = "";
-        if (!mainWindow["Wolfermus"]["Logo"] || !mainWindow["Wolfermus"]["Logo"]["Rounded"]) {
-            console.log("Unable to locate logo");
-        } else imgSrc = mainWindow["Wolfermus"]["Logo"]["Rounded"];
-
-        async function GetHTML() {
-            const script = bypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Resources/MainMenuLibHTML.js`));
-            return script;
-        }
-
-        let wolfermusPreventLoopLock1 = 10;
-        async function AttemptLoadHTML() {
-            return await GetHTML().then(async (response) => {
-                return response;
-            }).catch(async (error) => {
-                if (wolfermusPreventLoopLock1 <= 0) return;
-                wolfermusPreventLoopLock1--;
-                await Sleep(500);
-                return await AttemptLoadHTML();
-            });
-        }
-
-        const editedInnerHTML = bypassScriptPolicy.createHTML(eval(await AttemptLoadHTML()));
-
-        mainMenuRoot.innerHTML = editedInnerHTML;
-        if (mainMenuRoot.innerHTML === "") {
-            mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["Loaded"] = false;
-            return;
-        }
-
-        if (creatingMainMenuRoot) {
-            document.documentElement.appendChild(mainMenuRoot);
-        }
-        mainMenuRoot.style.display = "none";
-
-        SetupScriptsForItems();
-
-        AttachInteractionEventsToMainMenu();
-        if (creatingMainMenuRoot) {
-            // Event listener for fullscreen changes
-            document.addEventListener('fullscreenchange', FullscreenChangeMainMenu);
-            window.addEventListener('resize', ContrainMainMenu);
-        }
-
-        const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
-        if (document.fullscreenElement !== null) {
-            mainMenuRoot.style.display = "none";
-        } else {
-            mainMenuRoot.style.display = "block";
-        }
-        ContrainElementViaPosition(fabElement, new Position(WolfermusMainMenuSettings.Left, WolfermusMainMenuSettings.Top));
-    }
-
-    const updateMenuItemsContextMenuItem = new WolfermusMenuItem(
-        "WolfermusUpdateMenuItemsContextMenuItem",
-        "Update Menu Items",
-        `This Refreshes/Updates this whole menu
-        (left click and right click)
-        and the floating button itself`
-    );
-    updateMenuItemsContextMenuItem.clickCallback = UpdateMenuItems;
-
-    const updateWolfermusMainMenuStyleContextMenuItem = new WolfermusMenuItem(
-        "WolfermusUpdateWolfermusMainMenuStyleContextMenuItem",
-        "Update Wolfermus Main Menu Style CSS",
-        `This Refreshes/Updates the Wolfermus Main Menu Style CSS`
-    );
-    updateWolfermusMainMenuStyleContextMenuItem.clickCallback = async (event) => {
-        await UpdateWolfermusMainMenuStyle();
-
-        const contextMenu = document.getElementById("WolfermusMainMenuContextMenu");
-        if (contextMenu === undefined || contextMenu === null) return;
-
-        contextMenu.classList.remove("WolfermusActive");
-
-        updateWolfermusMainMenuStyleContextMenuItem.HideToolTip();
-    };
-
-    SetContextMenuItem(updateMenuItemsContextMenuItem);
-    SetContextMenuItem(updateWolfermusMainMenuStyleContextMenuItem);
-
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["Loaded"] = false;
-
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["WolfermusMenuItem"] = WolfermusMenuItem;
-
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["SetMainMenuItem"] = SetMainMenuItem;
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["RemoveMainMenuItem"] = RemoveMainMenuItem;
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["ClearMainMenuItems"] = ClearMainMenuItems;
-
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateMenuItems"] = UpdateMenuItems;
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateWolfermusMainMenuStyle"] = UpdateWolfermusMainMenuStyle;
-
-    mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["Loaded"] = true;
+    MainMenuLibrary["Loaded"] = true;
 })();
