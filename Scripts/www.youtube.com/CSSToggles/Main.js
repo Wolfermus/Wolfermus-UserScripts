@@ -328,6 +328,8 @@ async (path) => {
     let ToggleFrostedGlassMenuItem = new WolfermusMenuItem("MainPageScrollFrostedGlass", `[${WolfermusCSSTogglesSettings["FrostedGlass"]}] Toggle Scroll Frosted Glass`, "This script toggles the top bar from a frosted transparent\nlook into solid color");
     ToggleFrostedGlassMenuItem.clickCallback = async () => {
         WolfermusCSSTogglesSettings["FrostedGlass"] = !WolfermusCSSTogglesSettings["FrostedGlass"];
+        ToggleFrostedGlassMenuItem.title = `[${WolfermusCSSTogglesSettings["FrostedGlass"]}] Toggle Scroll Frosted Glass`;
+        SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));
 
         if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
             await AttemptLoadChangeFrostedGlassStyle();
@@ -335,9 +337,6 @@ async (path) => {
             await AttemptRestoreFrostedGlassBackgroundColor();
         }
 
-        SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));
-
-        ToggleFrostedGlassMenuItem.title = `[${WolfermusCSSTogglesSettings["FrostedGlass"]}] Toggle Scroll Frosted Glass`;
     };
     ToggleFrostedGlassMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/"];
 
