@@ -243,11 +243,11 @@ async (path) => {
     const WolfermusMenu = mainMenuLibrary["Classes"]["WolfermusMenu"];
 
     /**
-     * @import {WolfermusMenuItem} from "../Libraries/MainMenuLib.user.js"
+     * @import {WolfermusMenuItem} from "../../../Libraries/MainMenuLib.user.js"
      */
 
     /**
-     * @import {WolfermusMenu} from "../Libraries/MainMenuLib.user.js"
+     * @import {WolfermusMenu} from "../../../Libraries/MainMenuLib.user.js"
      */
 
     /**
