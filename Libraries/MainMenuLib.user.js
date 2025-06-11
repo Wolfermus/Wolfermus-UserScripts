@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.4
+// @version      2.0.5
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -339,6 +339,10 @@ function GetWolfermusFabImageMenuItem() {
         localStorage["WolfermusMainMenu"] = JSON.stringify(WolfermusMainMenuSettings);
 
         WolfermusFabImageMenuItem.pointerDownCallback = (event) => {
+            // TODO: Update StorageManagerLib to handly localStorage only options.
+            if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
+            let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
+
             if (!(WolfermusMainMenuSettings?.FloatingButton?.ToggleMovement ?? true)) return;
 
             const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
@@ -357,6 +361,10 @@ function GetWolfermusFabImageMenuItem() {
         };
 
         WolfermusFabImageMenuItem.pointerUpCallback = async (event) => {
+            // TODO: Update StorageManagerLib to handly localStorage only options.
+            if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
+            let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
+
             if (!(WolfermusMainMenuSettings?.FloatingButton?.ToggleMovement ?? true)) return;
 
             const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
@@ -365,10 +373,6 @@ function GetWolfermusFabImageMenuItem() {
             if (WolfermusFabImageMenuItem.element === undefined || WolfermusFabImageMenuItem.element === null) return;
 
             //const GUIGotten = await GetValue("MainMenu", "{}");
-
-            // TODO: Update StorageManagerLib to handly localStorage only options.
-            if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
-            let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
             WolfermusFabImageMenuItem.ShouldMove = false;
 
