@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.7
+// @version      2.1.3
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -96,6 +96,25 @@ function Sleep(ms) {
     return new Promise(resolve => {
         setTimeout(resolve, ms)
     });
+}
+
+function MatchRuleExpl(str, rule) {
+    // for this solution to work on any string, no matter what characters it has
+    var escapeRegex = (str) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+
+    // "."  => Find a single character, except newline or line terminator
+    // ".*" => Matches any string that contains zero or more characters
+    rule = rule.split("*").map(escapeRegex).join(".*");
+
+    // "^"  => Matches any string with the following at the beginning of it
+    // "$"  => Matches any string with that in front at the end of it
+    rule = "^" + rule + "$"
+
+    //Create a regular expression object for matching string
+    var regex = new RegExp(rule);
+
+    //Returns true if it finds a match, otherwise it returns false
+    return regex.test(str);
 }
 
 /**
@@ -700,6 +719,25 @@ async function ContrainMainMenu() {
     ContrainElementViaPosition(fabElement, new Position(x, y));
 }
 
+let wolfermusHrefChangesEvent = [];
+
+let oldHref = document.location.href;
+const observeUrlChange = () => {
+    const body = document.querySelector('body');
+    const observer = new MutationObserver(mutations => {
+        if (oldHref !== document.location.href) {
+            oldHref = document.location.href;
+            for (let callback of wolfermusHrefChangesEvent) {
+                callback?.();
+            }
+        }
+    });
+    observer.observe(body, { childList: true, subtree: true });
+};
+
+window.addEventListener("load", observeUrlChange);
+observeUrlChange();
+
 class WolfermusMenuItem {
     /**
      * @param {any} id
@@ -718,6 +756,7 @@ class WolfermusMenuItem {
                 WolfermusMenuItem.#tooltipTimeoutID = undefined;
             }
         });
+        wolfermusHrefChangesEvent.push(this.CheckUrls);
     }
     /**
      * @type {any}
@@ -747,6 +786,126 @@ class WolfermusMenuItem {
      * @type {number}
      */
     tooltipTimeOut = 400;
+    /**
+     * @type {boolean}
+     */
+    #disabled = false;
+
+    get disabled() { return this.#disabled; }
+
+    #ProxyDeletePropertyCallback = (target, property) => {
+        delete target[property];
+        if (isNaN(property)) return true;
+        this.CheckUrls();
+        return true;
+    };
+
+    #ProxySetCallback = (target, property, value, receiver) => {
+        target[property] = value;
+        if (isNaN(property)) return true;
+        this.CheckUrls();
+        return true;
+    };
+
+    //#region includesUrls
+    /**
+     * @type {Array<string>}
+     * @default ["*"]
+     */
+    #includesArray = ["*"];
+
+    #includesArrayProxy = new Proxy(this.#includesArray, {
+        deleteProperty: this.#ProxyDeletePropertyCallback,
+        set: this.#ProxySetCallback
+    });
+
+    /**
+     * @type {Array<string>}
+     * @default ["*"]
+     */
+    set includesUrls(newValue) {
+        this.#includesArray.splice(0, this.#includesArray.length);
+
+        if (Array.isArray(newValue)) {
+            for (let newItem of newValue) {
+                this.#includesArrayProxy.push(newItem);
+            }
+            return;
+        }
+
+        this.#includesArrayProxy.push(newValue);
+    }
+    /**
+     * @type {Array<string>}
+     * @default ["*"]
+     */
+    get includesUrls() { return this.#includesArrayProxy; }
+    //#endregion -includesUrls
+
+    //#region excludesUrls
+    /**
+     * @type {Array<string>}
+     * @default []
+     */
+    #excludesArray = [];
+
+    #excludesArrayProxy = new Proxy(this.#excludesArray, {
+        deleteProperty: this.#ProxyDeletePropertyCallback,
+        set: this.#ProxySetCallback
+    });
+
+    /**
+     * @type {Array<string>}
+     * @default []
+     */
+    set excludesUrls(newValue) {
+        this.#excludesArray.splice(0, this.#excludesArray.length);
+
+        if (Array.isArray(newValue)) {
+            for (let newItem of newValue) {
+                this.#excludesArrayProxy.push(newItem);
+            }
+            return;
+        }
+
+        this.#excludesArrayProxy.push(newValue);
+    }
+    /**
+     * @type {Array<string>}
+     * @default []
+     */
+    get excludesUrls() { return this.#excludesArrayProxy; }
+    //#endregion -excludesUrls
+
+    CheckUrls = () => {
+        let includesBool = false;
+        let excludesBool = false;
+
+        for (const urlRule of this.#includesArray) {
+            if (MatchRuleExpl(window.location.href, urlRule)) {
+                includesBool = true;
+                break;
+            }
+        }
+        for (const urlRule of this.#excludesArray) {
+            if (MatchRuleExpl(window.location.href, urlRule)) {
+                excludesBool = true;
+                break;
+            }
+        }
+
+        if (includesBool && !excludesBool) {
+            this.#disabled = false;
+            if (this.element !== undefined && this.element !== null) {
+                this.element.style.display = "";
+            }
+        } else {
+            this.#disabled = true;
+            if (this.element !== undefined && this.element !== null) {
+                this.element.style.display = "none";
+            }
+        }
+    }
 
     /**
      * @param {string} newTitle 
@@ -1345,6 +1504,8 @@ class WolfermusMenuItem {
         this.element.addEventListener("pointerenter", this.#groupPointerEnterCallback);
         this.element.addEventListener("pointerleave", this.#groupPointerLeaveCallback);
 
+        this.CheckUrls();
+
         return true;
     }
 
@@ -1596,11 +1757,11 @@ class WolfermusMenu {
 
         this.UnloadItems();
 
-        this.element.innerHTML = `
+        this.element.innerHTML = wolfermusBypassScriptPolicy.createHTML(`
             <ul class="WolfermusDefaultCSS">
                 ${this.#GenerateItems()}
             </ul>
-        `;
+        `);
 
         await this.#SetupItems();
     }
@@ -1693,7 +1854,10 @@ function CloseWolfermusMainMenu(event) {
     const menu = GetMainMenu();
     if (menu.IsHoveringAnyMenu()) return;
     ResetItemBackgroundColor();
-    if (menu.attached?.menu !== undefined) menu.attached.menu.Hide();
+    if (menu.attached !== undefined) {
+        menu.attached.menu?.Hide();
+        menu.attached.id = undefined;
+    }
 }
 
 /**
@@ -1702,7 +1866,10 @@ function CloseWolfermusMainMenu(event) {
 function HideWolfermusMainMenu(event) {
     const menu = GetMainMenu();
     ResetItemBackgroundColor();
-    if (menu.attached?.menu !== undefined) menu.attached.menu.Hide();
+    if (menu.attached !== undefined) {
+        menu.attached.menu?.Hide();
+        menu.attached.id = undefined;
+    }
 }
 
 /**

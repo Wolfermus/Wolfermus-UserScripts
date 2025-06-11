@@ -1,12 +1,13 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu (Beta)
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.8
+// @version      2.0.9
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them. (Beta)
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
 // @supportURL   https://github.com/Wolfermus/Wolfermus-UserScripts/issues
-// @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Main.user.js
+// @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/MainBetaBranch.user.js
+// @downloadURL  https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/MainBetaBranch.user.js
 // @license      GPLv3
 // @noframes
 // @match        *
@@ -273,6 +274,9 @@ function WolfermusCheckLibraryLoaded(key) {
 
         let scriptsURLS = [];
 
+        if (websiteFolderItem === undefined || websiteFolderItem === null) return scriptsURLS;
+
+
         let gottenWebsiteScriptsFolder = JSON.parse(await MakeGetRequest(websiteFolderItem.url));
         for (let scriptItem of gottenWebsiteScriptsFolder.tree) {
             if (scriptItem.type === "blob") {
@@ -295,7 +299,7 @@ function WolfermusCheckLibraryLoaded(key) {
         //console.log("Scripts/Main.js - 3");
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path));
-            eval(script)(baseScriptURL);
+            await eval(script)(baseScriptURL);
         } catch (error) {
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
@@ -321,20 +325,20 @@ function WolfermusCheckLibraryLoaded(key) {
     //console.log("Scripts/Main.js - 1");
     await AttemptLoadScript();
 
-    {
-        let wolfermusAntiStuckLoop1 = 100;
-        while (document.readyState !== "complete") {
-            await Sleep(100);
+    // {
+    //     let wolfermusAntiStuckLoop1 = 100;
+    //     while (document.readyState !== "complete") {
+    //         await Sleep(100);
 
-            if (wolfermusAntiStuckLoop1 < 0) {
-                alert("ERROR: antiStuckLoop engaged");
-                return;
-            }
-            wolfermusAntiStuckLoop1--;
-        }
-    }
+    //         if (wolfermusAntiStuckLoop1 < 0) {
+    //             alert("ERROR: antiStuckLoop engaged");
+    //             return;
+    //         }
+    //         wolfermusAntiStuckLoop1--;
+    //     }
+    // }
 
-    await Sleep(500);
+    //await Sleep(500);
 
     await UpdateWolfermusMainMenuStyle();
     await UpdateMenuItems();

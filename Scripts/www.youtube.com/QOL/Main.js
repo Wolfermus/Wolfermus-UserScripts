@@ -1,7 +1,4 @@
 async (path) => {
-    //debugger;
-    //if (window.location.href !== "https://www.youtube.com/") return;
-
     //#region Setting Up ChosenXmlHttpRequest
     let IsGMXmlHttpRequest1 = false;
     // @ts-ignore
@@ -15,7 +12,7 @@ async (path) => {
     if (IsGMXmlHttpRequest1 || IsGMXmlHttpRequest2) IsGMXmlHttpRequest = true;
 
     if (!IsGMXmlHttpRequest) {
-        const message = "Wolfermus ERROR: Youtube CSSToggles - Please run in a userscript manager";
+        const message = "Wolfermus ERROR: Youtube QOL - Please run in a userscript manager";
         console.error(message);
         throw new Error(message);
     }
@@ -26,12 +23,12 @@ async (path) => {
     } else if (IsGMXmlHttpRequest1) {
         ChosenXmlHttpRequest = GM_xmlHttpRequest;
     } else {
-        const message = "Wolfermus ERROR: Youtube CSSToggles - Unexpected Error";
+        const message = "Wolfermus ERROR: Youtube QOL - Unexpected Error";
         console.error(message);
         throw new Error(message);
     }
     if (ChosenXmlHttpRequest === undefined || ChosenXmlHttpRequest === null) {
-        const message = "Wolfermus ERROR: Youtube CSSToggles - Unexpected Error";
+        const message = "Wolfermus ERROR: Youtube QOL - Unexpected Error";
         console.error(message);
         throw new Error(message);
     }
@@ -54,8 +51,6 @@ async (path) => {
         });
     }
 
-    console.log("Wolfermus: Youtube - CSSToggles Running");
-
     /**
      * @param {number | undefined} ms
      */
@@ -68,19 +63,6 @@ async (path) => {
     {
         let wolfermusAntiStuckLoop1 = 100;
         while (window === undefined || window === null) {
-            await Sleep(100);
-
-            if (wolfermusAntiStuckLoop1 < 0) {
-                alert("ERROR: antiStuckLoop engaged");
-                return;
-            }
-            wolfermusAntiStuckLoop1--;
-        }
-    }
-
-    {
-        let wolfermusAntiStuckLoop1 = 100;
-        while (document.readyState !== "complete") {
             await Sleep(100);
 
             if (wolfermusAntiStuckLoop1 < 0) {
@@ -213,7 +195,7 @@ async (path) => {
         }
     }
 
-    console.log("Wolfermus - Adding CSSToggles");
+    console.log("Wolfermus: Youtube - QOL Running");
 
     const storageManagerLibrary = WolfermusGetLibrary("StorageManager");
 
@@ -243,11 +225,11 @@ async (path) => {
     const WolfermusMenu = mainMenuLibrary["Classes"]["WolfermusMenu"];
 
     /**
-     * @import {WolfermusMenuItem} from "../../../Libraries/MainMenuLib.user.js"
+     * @import {WolfermusMenuItem} from "../Libraries/MainMenuLib.user.js"
      */
 
     /**
-     * @import {WolfermusMenu} from "../../../Libraries/MainMenuLib.user.js"
+     * @import {WolfermusMenu} from "../Libraries/MainMenuLib.user.js"
      */
 
     /**
@@ -257,96 +239,62 @@ async (path) => {
      */
     const GetMainMenu = mainMenuLibrary["Menus"]["GetMainMenu"];
 
-    const GUIGotten = await GetValue("CSSToggles", "{}");
-    let WolfermusCSSTogglesSettings = JSON.parse(GUIGotten);
 
-    if (WolfermusCSSTogglesSettings["FrostedGlass"] === undefined || WolfermusCSSTogglesSettings["FrostedGlass"] === null) {
-        WolfermusCSSTogglesSettings["FrostedGlass"] = false;
-    }
 
-    let ChangeFrostedGlassStyle;
-    let RestoreFrostedGlassBackgroundColor;
-
-    async function LoadChangeFrostedGlassStyle() {
-        if (ChangeFrostedGlassStyle !== undefined && ChangeFrostedGlassStyle !== null) return;
-
-        const bypassScriptPolicy = trustedTypes.createPolicy("bypassScriptChangeFrostedGlassStyle", {
-            createScript: (string) => string,
-            createScriptURL: (string) => string
-        });
-
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${path}/CSSToggles/ChangeFrostedGlassStyle.js`));
-        ChangeFrostedGlassStyle = eval(script);
-    }
-
-    async function LoadRestoreFrostedGlassBackgroundColor() {
-        if (RestoreFrostedGlassBackgroundColor !== undefined && RestoreFrostedGlassBackgroundColor !== null) return;
-
-        const bypassScriptPolicy = trustedTypes.createPolicy("bypassScriptRestoreFrostedGlassBackgroundColor", {
-            createScript: (string) => string,
-            createScriptURL: (string) => string
-        });
-
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${path}/CSSToggles/RestoreFrostedGlassBackgroundColor.js`));
-        RestoreFrostedGlassBackgroundColor = eval(script);
-    }
-
-    let wolfermusPreventLoopLock1 = 10;
-
-    async function AttemptLoadChangeFrostedGlassStyle() {
-        await LoadChangeFrostedGlassStyle().then(async () => {
-            wolfermusPreventLoopLock1 = 10;
-            await ChangeFrostedGlassStyle();
-        }).catch(async (error) => {
-            //debugger;
-            //console.log("CSSToggles - AttemptLoadChangeFrostedGlassStyle - ERROR");
-            //console.log(error);
-            if (wolfermusPreventLoopLock1 <= 0) return;
-            wolfermusPreventLoopLock1--;
-            await Sleep(100);
-            await AttemptLoadChangeFrostedGlassStyle();
-        });
-    }
-
-    let wolfermusPreventLoopLock2 = 10;
-
-    async function AttemptRestoreFrostedGlassBackgroundColor() {
-        await LoadRestoreFrostedGlassBackgroundColor().then(async () => {
-            wolfermusPreventLoopLock2 = 10;
-            await RestoreFrostedGlassBackgroundColor();
-        }).catch(async (error) => {
-            //debugger;
-            //console.log("CSSToggles - AttemptRestoreFrostedGlassBackgroundColor - ERROR");
-            //console.log(error);
-            if (wolfermusPreventLoopLock2 <= 0) return;
-            wolfermusPreventLoopLock2--;
-            await Sleep(100);
-            await AttemptRestoreFrostedGlassBackgroundColor();
-        });
-    }
-
-    let ToggleFrostedGlassMenuItem = new WolfermusMenuItem("MainPageScrollFrostedGlass", `[${WolfermusCSSTogglesSettings["FrostedGlass"]}] Toggle Scroll Frosted Glass`, "This script toggles the top bar from a frosted transparent\nlook into solid color");
-    ToggleFrostedGlassMenuItem.clickCallback = async () => {
-        WolfermusCSSTogglesSettings["FrostedGlass"] = !WolfermusCSSTogglesSettings["FrostedGlass"];
-        ToggleFrostedGlassMenuItem.title = `[${WolfermusCSSTogglesSettings["FrostedGlass"]}] Toggle Scroll Frosted Glass`;
-        SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));
-
-        if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
-            await AttemptLoadChangeFrostedGlassStyle();
-        } else {
-            await AttemptRestoreFrostedGlassBackgroundColor();
+    let wolfermusPreventLoopLock1 = {};
+    async function LoadScriptOnce(scriptName) {
+        if (!wolfermusPreventLoopLock1[scriptName]) {
+            wolfermusPreventLoopLock1[scriptName] = {
+                once: false,
+                value: 10
+            }
         }
-
-    };
-    ToggleFrostedGlassMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/"];
-
-    ToggleFrostedGlassMenuItem.CheckUrls();
-
-    if (WolfermusCSSTogglesSettings["FrostedGlass"] && !ToggleFrostedGlassMenuItem.disabled) {
-        AttemptLoadChangeFrostedGlassStyle();
+        if (wolfermusPreventLoopLock1[scriptName].once) return;
+        //console.log("Scripts/Main.js - 3");
+        try {
+            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${path}/QOL/${scriptName}.js`));
+            // TODO: Allow scripts to return an object detailing to only load script once, a menuitem 
+            await eval(script)(baseScriptURL);
+            wolfermusPreventLoopLock1[scriptName].once = true;
+        } catch (error) {
+            if (!wolfermusPreventLoopLock1[scriptName]) return;
+            if (wolfermusPreventLoopLock1[scriptName].value <= 0) return;
+            wolfermusPreventLoopLock1[scriptName].value--;
+            await Sleep(100);
+            await LoadScriptOnce(scriptName);
+        }
     }
+
+
+    const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
+    let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
+
+    WolfermusQOLTimeRemainingSettings.Active ??= false;
+
+    if (WolfermusQOLTimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
+
+    const QOLTimeRemainingMenuItem = new WolfermusMenuItem("WolfermusQOLTimeRemainingMenuItem", `[${WolfermusQOLTimeRemainingSettings.Active}] Toggle Time Remaining`);
+    QOLTimeRemainingMenuItem.clickCallback = async (event) => {
+        const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
+        let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
+
+        WolfermusQOLTimeRemainingSettings.Active ??= false;
+
+        WolfermusQOLTimeRemainingSettings.Active = !WolfermusQOLTimeRemainingSettings.Active;
+
+        SetValue("QOLTimeRemaining", JSON.stringify(WolfermusQOLTimeRemainingSettings));
+
+        QOLTimeRemainingMenuItem.title = `[${WolfermusQOLTimeRemainingSettings.Active}] Toggle Time Remaining`;
+
+        if (WolfermusQOLTimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
+    };
+
+
+
+    let QOLMenuItem = new WolfermusMenuItem("WolfermusQOLMenuItem", "Quality Of Life");
+    QOLMenuItem.items.push(QOLTimeRemainingMenuItem);
 
     const mainMenu = GetMainMenu();
 
-    mainMenu.items.push(ToggleFrostedGlassMenuItem);
+    mainMenu.items.push(QOLMenuItem);
 };
