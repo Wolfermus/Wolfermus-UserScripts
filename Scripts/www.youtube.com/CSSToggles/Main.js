@@ -275,7 +275,7 @@
             createScriptURL: (string) => string
         });
 
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/ChangeFrostedGlassStyle.js"));
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/www.youtube.com/CSSToggles/ChangeFrostedGlassStyle.js"));
         ChangeFrostedGlassStyle = eval(script);
     }
 
@@ -287,7 +287,7 @@
             createScriptURL: (string) => string
         });
 
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Youtube/CSSToggles/RestoreFrostedGlassBackgroundColor.js"));
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/www.youtube.com/CSSToggles/RestoreFrostedGlassBackgroundColor.js"));
         RestoreFrostedGlassBackgroundColor = eval(script);
     }
 
