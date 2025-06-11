@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.1.0
+// @version      2.1.1
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -804,13 +804,13 @@ class WolfermusMenuItem {
         deleteProperty: function (target, property) {
             delete target[property];
             if (isNaN(property)) return true;
-            console.log("Deleted %o", property);
+            this.CheckUrls();
             return true;
         },
         set: function (target, property, value, receiver) {
             target[property] = value;
             if (isNaN(property)) return true;
-            console.log("Set %o to %o", property, value);
+            this.CheckUrls();
             return true;
         }
     });
@@ -849,13 +849,13 @@ class WolfermusMenuItem {
         deleteProperty: function (target, property) {
             delete target[property];
             if (isNaN(property)) return true;
-            console.log("Deleted %o", property);
+            this.CheckUrls();
             return true;
         },
         set: function (target, property, value, receiver) {
             target[property] = value;
             if (isNaN(property)) return true;
-            console.log("Set %o to %o", property, value);
+            this.CheckUrls();
             return true;
         }
     });
