@@ -334,7 +334,7 @@ function WolfermusCheckLibraryLoaded(key) {
         }
     }
 
-    await Sleep(100);
+    await Sleep(500);
 
     await UpdateWolfermusMainMenuStyle();
     await UpdateMenuItems();
