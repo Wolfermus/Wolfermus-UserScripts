@@ -29,69 +29,168 @@
 // @icon         https://i.imgur.com/XFeWfV0.png
 // ==/UserScript== 
 
+const bypassScriptPolicy = trustedTypes.createPolicy("bypassScript", {
+    createHTML: (string) => string,
+    createScript: (string) => string,
+    createScriptURL: (string) => string
+});
+
+//#region Setting Up ChosenXmlHttpRequest
+let IsGMXmlHttpRequest1 = false;
+// @ts-ignore
+if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;
+
+let IsGMXmlHttpRequest2 = false;
+// @ts-ignore
+if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest !== "undefined") IsGMXmlHttpRequest2 = true;
+
+let IsGMXmlHttpRequest = false;
+if (IsGMXmlHttpRequest1 || IsGMXmlHttpRequest2) IsGMXmlHttpRequest = true;
+
+if (!IsGMXmlHttpRequest) {
+    const message = "Wolfermus ERROR: Main - Please run in a userscript manager";
+    console.error(message);
+    throw new Error(message);
+}
+
+let ChosenXmlHttpRequest;
+if (IsGMXmlHttpRequest2) {
+    ChosenXmlHttpRequest = GM.xmlHttpRequest;
+} else if (IsGMXmlHttpRequest1) {
+    ChosenXmlHttpRequest = GM_xmlHttpRequest;
+} else {
+    const message = "Wolfermus ERROR: Main - Unexpected Error";
+    console.error(message);
+    throw new Error(message);
+}
+if (ChosenXmlHttpRequest === undefined || ChosenXmlHttpRequest === null) {
+    const message = "Wolfermus ERROR: Main - Unexpected Error";
+    console.error(message);
+    throw new Error(message);
+}
+//#endregion -Setting Up ChosenXmlHttpRequest
+
+function MakeGetRequest(url) {
+    return new Promise((resolve, reject) => {
+        ChosenXmlHttpRequest({
+            method: "GET",
+            url: url,
+            onload: (response) => {
+                if (response.status !== 200) {
+                    reject(statusText);
+                    return;
+                }
+                resolve(response.responseText);
+            },
+            onerror: error => reject(error)
+        });
+    });
+}
+
+/**
+ * @param {number | undefined} ms
+ */
+function Sleep(ms) {
+    return new Promise(resolve => {
+        setTimeout(resolve, ms)
+    });
+}
+
+/**
+ * @returns {Window}
+ */
+function GetWindow() {
+    let gottenWindow = window;
+
+    try {
+        if (unsafeWindow !== undefined) gottenWindow = unsafeWindow;
+    } catch (e) {
+
+    }
+
+    return gottenWindow;
+}
+
+/**
+ * @description Returns object of said module, if createIfNotFound is true then this function does not return undefined.
+ * 
+ * @param {string} key
+ * @param {boolean} [createIfNotFound=false]
+ * @throws If key is reserved
+ * @returns {any | undefined}
+ */
+function WolfermusGetModule(key, createIfNotFound = false) {
+    let mainWindow = GetWindow();
+
+    if (key === "Libraries") {
+        throw new Error(`Wolfermus ERROR: MainMenuLib - ${key} is reserved`);
+        return undefined;
+    }
+
+    if (!mainWindow["Wolfermus"]) {
+        if (createIfNotFound) mainWindow["Wolfermus"] = {};
+        else return undefined;
+    }
+
+    if (createIfNotFound && !mainWindow["Wolfermus"][key]) {
+        return mainWindow["Wolfermus"][key] = {};
+    }
+
+    return mainWindow["Wolfermus"][key];
+}
+
+/**
+ * @param {string} key
+ * @returns {boolean}
+ */
+function WolfermusCheckModuleLoaded(key) {
+    const gottenModule = WolfermusGetModule(key);
+
+    if (!gottenModule) return false;
+    if (!gottenModule["Loaded"]) return false;
+
+    return true;
+}
+
+/**
+ * @description Returns object of said library, if createIfNotFound is true then this function does not return undefined.
+ * 
+ * @param {string} key
+ * @param {boolean} [createIfNotFound=false]
+ * @returns {any | undefined}
+ */
+function WolfermusGetLibrary(key, createIfNotFound = false) {
+    let mainWindow = GetWindow();
+
+    if (!mainWindow["Wolfermus"]) {
+        if (createIfNotFound) mainWindow["Wolfermus"] = {};
+        else return undefined;
+    } else if (!mainWindow["Wolfermus"]["Libraries"]) {
+        if (createIfNotFound) mainWindow["Wolfermus"]["Libraries"] = {};
+        else return undefined;
+    }
+
+    if (createIfNotFound && !mainWindow["Wolfermus"]["Libraries"][key]) {
+        return mainWindow["Wolfermus"]["Libraries"][key] = {};
+    }
+
+    return mainWindow["Wolfermus"]["Libraries"][key];
+}
+
+/**
+ * @param {string} key
+ * @returns {boolean}
+ */
+function WolfermusCheckLibraryLoaded(key) {
+    const gottenLibrary = WolfermusGetLibrary(key);
+
+    if (!gottenLibrary) return false;
+    if (!gottenLibrary["Loaded"]) return false;
+
+    return true;
+}
+
 (async () => {
-    /**
-     * @param {number | undefined} ms
-     */
-    function Sleep(ms) {
-        return new Promise(resolve => {
-            setTimeout(resolve, ms)
-        });
-    }
-
-    let IsGMXmlHttpRequest1 = false;
-    // @ts-ignore
-    if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;
-
-    let IsGMXmlHttpRequest2 = false;
-    // @ts-ignore
-    if (typeof GM !== "undefined" && typeof GM.xmlHttpRequest !== "undefined") IsGMXmlHttpRequest2 = true;
-
-    let IsGMXmlHttpRequest = false;
-    if (IsGMXmlHttpRequest1 || IsGMXmlHttpRequest2) IsGMXmlHttpRequest = true;
-
-    if (!IsGMXmlHttpRequest) {
-        const message = "Wolfermus ERROR: Main - Please run in a userscript manager";
-        alert(message);
-        console.log(message);
-        return;
-    }
-
-    let ChosenXmlHttpRequest;
-    if (IsGMXmlHttpRequest2) {
-        ChosenXmlHttpRequest = GM.xmlHttpRequest;
-    } else if (IsGMXmlHttpRequest1) {
-        ChosenXmlHttpRequest = GM_xmlHttpRequest;
-    } else {
-        const message = "Wolfermus ERROR: Main - Unexpected Error";
-        alert(message);
-        console.log(message);
-        return;
-    }
-    if (ChosenXmlHttpRequest === undefined || ChosenXmlHttpRequest === null) {
-        const message = "Wolfermus ERROR: Main - Unexpected Error";
-        alert(message);
-        console.log(message);
-        return;
-    }
-
-    function MakeGetRequest(url) {
-        return new Promise((resolve, reject) => {
-            ChosenXmlHttpRequest({
-                method: "GET",
-                url: url,
-                onload: (response) => {
-                    if (response.status !== 200) {
-                        reject(statusText);
-                        return;
-                    }
-                    resolve(response.responseText);
-                },
-                onerror: error => reject(error)
-            });
-        });
-    }
-
     let wolfermusAntiStuckLoop1 = 100;
     while (window === undefined || window === null) {
         await Sleep(500);
@@ -104,64 +203,17 @@
 
     }
 
-    let mainWindow = window;
-
-    try {
-        if (unsafeWindow !== undefined) mainWindow = unsafeWindow;
-    } catch (e) {
-
-    }
-
-    /**
-     * @param {string} key
-     * @returns {boolean}
-     */
-    function WolfermusCheckModuleLoaded(key) {
-        if (!mainWindow["Wolfermus"]) {
-            mainWindow["Wolfermus"] = {}
-            return false;
-        }
-
-        if (!mainWindow["Wolfermus"][key]) return false;
-
-        if (!mainWindow["Wolfermus"][key]["Loaded"]) return false;
-
-        return true;
-    }
-
-    /**
-     * @param {string} key
-     * @returns {boolean}
-     */
-    function WolfermusCheckLibraryLoaded(key) {
-        if (!mainWindow["Wolfermus"]) {
-            mainWindow["Wolfermus"] = {}
-            return false;
-        }
-
-        if (!mainWindow["Wolfermus"]["Libraries"]) {
-            mainWindow["Wolfermus"]["Libraries"] = {}
-            return false;
-        }
-
-        if (!mainWindow["Wolfermus"]["Libraries"][key]) return false;
-
-        if (!mainWindow["Wolfermus"]["Libraries"][key]["Loaded"]) return false;
-
-        return true;
-    }
-
     if (WolfermusCheckModuleLoaded("MainMenu")) return;
-    if (!mainWindow["Wolfermus"]["MainMenu"]) mainWindow["Wolfermus"]["MainMenu"] = {};
+    let mainMenuModule = WolfermusGetModule("MainMenu", true);
 
-    while (mainWindow["Wolfermus"]["MainMenu"]["Loading"] === true) {
+    while (mainMenuModule["Loading"] === true) {
         await Sleep(500);
     }
 
     if (WolfermusCheckModuleLoaded("MainMenu")) return;
 
-    mainWindow["Wolfermus"]["MainMenu"]["Loaded"] = false;
-    mainWindow["Wolfermus"]["MainMenu"]["Loading"] = true;
+    mainMenuModule["Loaded"] = false;
+    mainMenuModule["Loading"] = true;
 
     console.log("Wolfermus Main Menu Loading...");
 
@@ -175,20 +227,21 @@
         }
         wolfermusLoadLoopCounter++;
     }
+    let mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
     /**
      * Update Main Menu Items
      * @async
      * @type {() => Promise<void>}
      */
-    const UpdateMenuItems = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateMenuItems"];
+    const UpdateMenuItems = mainMenuLibrary["UpdateMenuItems"];
 
     /**
      * Updates the Main Menu Style
      * @async
      * @type {() => Promise<void>}
      */
-    const UpdateWolfermusMainMenuStyle = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["UpdateWolfermusMainMenuStyle"];
+    const UpdateWolfermusMainMenuStyle = mainMenuLibrary["UpdateWolfermusMainMenuStyle"];
 
     // async function LoadScript() {
     //     MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`).then((result) => {
@@ -234,7 +287,7 @@
     await AttemptLoadScript();
 
     if (wolfermusPreventLoopLock1 <= 0) {
-        mainWindow["Wolfermus"]["MainMenu"]["Loading"] = false;
+        mainMenuModule["Loading"] = false;
         return;
     }
 
@@ -242,6 +295,6 @@
 
     console.log("Wolfermus Loaded Scripts/Main.js");
 
-    mainWindow["Wolfermus"]["MainMenu"]["Loaded"] = true;
-    mainWindow["Wolfermus"]["MainMenu"]["Loading"] = false;
+    mainMenuModule["Loaded"] = true;
+    mainMenuModule["Loading"] = false;
 })();
