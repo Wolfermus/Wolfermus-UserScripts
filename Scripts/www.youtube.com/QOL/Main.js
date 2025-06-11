@@ -292,5 +292,5 @@ async (path) => {
 
     const mainMenu = GetMainMenu();
 
-    mainMenu.items.push(ToggleFrostedGlassMenuItem);
+    mainMenu.items.push(QOLMenuItem);
 };
