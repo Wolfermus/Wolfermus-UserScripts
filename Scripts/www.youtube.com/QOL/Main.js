@@ -272,7 +272,7 @@ async (path) => {
     if (WolfermusQOLTimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
 
     const QOLTimeRemainingMenuItem = new WolfermusMenuItem("WolfermusQOLTimeRemainingMenuItem", `[${WolfermusQOLTimeRemainingSettings.Active}] Toggle Time Remaining`);
-    QOLTimeRemainingMenuItem.clickCallback(async (event) => {
+    QOLTimeRemainingMenuItem.clickCallback = async (event) => {
         const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
         let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
 
@@ -283,7 +283,7 @@ async (path) => {
         SetValue("QOLTimeRemaining", JSON.stringify(WolfermusQOLTimeRemainingSettings));
 
         if (WolfermusQOLTimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
-    });
+    };
 
 
 
