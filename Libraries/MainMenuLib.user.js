@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.3
+// @version      2.0.4
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -307,13 +307,13 @@ function GetContextMenu() {
 /**
  * @type {WolfermusMenuItem | undefined}
  */
-let WolermusFabImageMenuItem = undefined;
+let WolfermusFabImageMenuItem = undefined;
 
 /**
  * @returns {WolfermusMenuItem}
  */
-function GetWolermusFabImageMenuItem() {
-    if (WolermusFabImageMenuItem === undefined) {
+function GetWolfermusFabImageMenuItem() {
+    if (WolfermusFabImageMenuItem === undefined) {
         let mainWindow = window;
 
         try {
@@ -327,29 +327,42 @@ function GetWolermusFabImageMenuItem() {
             console.log("Unable to locate logo");
         } else imgSrc = mainWindow["Wolfermus"]["Logo"]["Rounded"];
 
-        WolermusFabImageMenuItem = new WolfermusImageMenuItem("WolermusFabImage", imgSrc);
+        // TODO: Update StorageManagerLib to handly localStorage only options.
+        if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
+        let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
-        WolermusFabImageMenuItem.pointerDownCallback = (event) => {
+        WolfermusFabImageMenuItem = new WolfermusImageMenuItem("WolfermusFabImage", imgSrc);
+
+        WolfermusMainMenuSettings.FloatingButton ??= {};
+        WolfermusMainMenuSettings.FloatingButton.ToggleMovement ??= true;
+
+        localStorage["WolfermusMainMenu"] = JSON.stringify(WolfermusMainMenuSettings);
+
+        WolfermusFabImageMenuItem.pointerDownCallback = (event) => {
+            if (!(WolfermusMainMenuSettings?.FloatingButton?.ToggleMovement ?? true)) return;
+
             const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
             if (fabElement === undefined || fabElement === null) return;
 
-            if (WolermusFabImageMenuItem.element === undefined || WolermusFabImageMenuItem.element === null) return;
+            if (WolfermusFabImageMenuItem.element === undefined || WolfermusFabImageMenuItem.element === null) return;
 
-            WolermusFabImageMenuItem.element.setPointerCapture(event.pointerId);
+            WolfermusFabImageMenuItem.element.setPointerCapture(event.pointerId);
 
-            WolermusFabImageMenuItem.oldPositionX = fabElement.style.left;
-            WolermusFabImageMenuItem.oldPositionY = fabElement.style.top;
+            WolfermusFabImageMenuItem.oldPositionX = fabElement.style.left;
+            WolfermusFabImageMenuItem.oldPositionY = fabElement.style.top;
 
-            WolermusFabImageMenuItem.ShouldMove = true;
+            WolfermusFabImageMenuItem.ShouldMove = true;
 
             fabElement.style.transition = "none";
         };
 
-        WolermusFabImageMenuItem.pointerUpCallback = async (event) => {
+        WolfermusFabImageMenuItem.pointerUpCallback = async (event) => {
+            if (!(WolfermusMainMenuSettings?.FloatingButton?.ToggleMovement ?? true)) return;
+
             const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
             if (fabElement === undefined || fabElement === null) return;
 
-            if (WolermusFabImageMenuItem.element === undefined || WolermusFabImageMenuItem.element === null) return;
+            if (WolfermusFabImageMenuItem.element === undefined || WolfermusFabImageMenuItem.element === null) return;
 
             //const GUIGotten = await GetValue("MainMenu", "{}");
 
@@ -357,9 +370,9 @@ function GetWolermusFabImageMenuItem() {
             if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
             let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
-            WolermusFabImageMenuItem.ShouldMove = false;
+            WolfermusFabImageMenuItem.ShouldMove = false;
 
-            WolermusFabImageMenuItem.element.releasePointerCapture(event.pointerId);
+            WolfermusFabImageMenuItem.element.releasePointerCapture(event.pointerId);
 
             fabElement.style.transition = "0.3s ease-in-out left";
 
@@ -383,10 +396,10 @@ function GetWolermusFabImageMenuItem() {
             // SetValue("MainMenu", JSON.stringify(WolfermusMainMenuSettings));
         };
 
-        WolermusFabImageMenuItem.pointerMoveCallback = async (event) => {
-            if (WolermusFabImageMenuItem.element === undefined || WolermusFabImageMenuItem.element === null) return;
+        WolfermusFabImageMenuItem.pointerMoveCallback = async (event) => {
+            if (WolfermusFabImageMenuItem.element === undefined || WolfermusFabImageMenuItem.element === null) return;
 
-            if (WolermusFabImageMenuItem.ShouldMove !== true) return;
+            if (WolfermusFabImageMenuItem.ShouldMove !== true) return;
 
             const mainMenuRoot = await GetWolfermusRoot();
             const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
@@ -440,11 +453,11 @@ function GetWolermusFabImageMenuItem() {
 
             ContrainElementViaPosition(fabElement, position);
         };
-        WolermusFabImageMenuItem.clickCallback = (event) => {
+        WolfermusFabImageMenuItem.clickCallback = (event) => {
             const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
             if (fabElement === undefined || fabElement === null) return;
 
-            if (WolermusFabImageMenuItem.oldPositionY === fabElement.style.top && WolermusFabImageMenuItem.oldPositionX === fabElement.style.left) {
+            if (WolfermusFabImageMenuItem.oldPositionY === fabElement.style.top && WolfermusFabImageMenuItem.oldPositionX === fabElement.style.left) {
                 GetMainMenu().ToggleVisibility();
             }
         };
@@ -495,11 +508,33 @@ function GetWolermusFabImageMenuItem() {
             await WolfermusMenuItem.HideToolTip();
         };
 
-        WolermusFabImageMenuItem.contextItems.push(updateMenuItemsContextMenuItem);
-        WolermusFabImageMenuItem.contextItems.push(forceRefreshWolfermusRootItem);
-        WolermusFabImageMenuItem.contextItems.push(updateWolfermusMainMenuStyleContextMenuItem);
+        // TODO: Change to a toggle menu item
+        const toggleMovementMenuItem = new WolfermusMenuItem(
+            "WolfermusToggleMovementMenuItem",
+            `[${WolfermusMainMenuSettings.FloatingButton.ToggleMovement}] Toggle Movement (On This Page)`,
+            `Toggles the ability to move the floating button (per page setting)`
+        );
+        toggleMovementMenuItem.clickCallback = async (event) => {
+            // TODO: Update StorageManagerLib to handly localStorage only options.
+            if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
+            let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
+
+            WolfermusMainMenuSettings.FloatingButton ??= {};
+            WolfermusMainMenuSettings.FloatingButton.ToggleMovement ??= true;
+
+            WolfermusMainMenuSettings.FloatingButton.ToggleMovement = !WolfermusMainMenuSettings.FloatingButton.ToggleMovement;
+
+            localStorage["WolfermusMainMenu"] = JSON.stringify(WolfermusMainMenuSettings);
+
+            toggleMovementMenuItem.title = `[${WolfermusMainMenuSettings.FloatingButton.ToggleMovement}] Toggle Movement (On This Page)`;
+        };
+
+        WolfermusFabImageMenuItem.contextItems.push(updateMenuItemsContextMenuItem);
+        WolfermusFabImageMenuItem.contextItems.push(forceRefreshWolfermusRootItem);
+        WolfermusFabImageMenuItem.contextItems.push(updateWolfermusMainMenuStyleContextMenuItem);
+        WolfermusFabImageMenuItem.contextItems.push(toggleMovementMenuItem);
     }
-    return WolermusFabImageMenuItem;
+    return WolfermusFabImageMenuItem;
 }
 
 /**
@@ -515,7 +550,7 @@ function GetFloatingButtonMenu() {
         FloatingButtonMenu = new WolfermusMenu();
         FloatingButtonMenu.AddClass("WolfermusFabBtn");
 
-        FloatingButtonMenu.items.push(GetWolermusFabImageMenuItem());
+        FloatingButtonMenu.items.push(GetWolfermusFabImageMenuItem());
     }
     return FloatingButtonMenu;
 }
@@ -687,7 +722,7 @@ class WolfermusMenuItem {
     /**
      * @type {string}
      */
-    title;
+    #title;
     /**
      * @type {HTMLElement | null}
      */
@@ -708,6 +743,25 @@ class WolfermusMenuItem {
      * @type {number}
      */
     tooltipTimeOut = 400;
+
+    /**
+     * @param {string} newTitle 
+     */
+    set title(newTitle) {
+        this.#title = newTitle;
+        if (this.element !== undefined && this.element !== null) {
+            const gottenTitleElementGroup = this.element.getElementsByClassName("WolfermusTitle");
+            for (let titleElement of gottenTitleElementGroup) {
+                titleElement.innerText = this.#title;
+            }
+        }
+    }
+    /**
+     * @returns {string}
+     */
+    get title() {
+        return this.#title;
+    }
 
     /**
      * @type {Number}
@@ -950,13 +1004,13 @@ class WolfermusMenuItem {
             if (activable !== "") {
                 return `
                     <li id="WolfermusMenu${menu.id}${this.id}" class="WolfermusDefaultCSS ${activable}">
-                        <a>${this.title}</a>
+                        <a class="WolfermusTitle">${this.title}</a>
                     </li>
                 `;
             } else {
                 return `
                     <li id="WolfermusMenu${menu.id}${this.id}" class="WolfermusDefaultCSS WolfermusTextItem">
-                        <a>${this.title}</a>
+                        <a class="WolfermusTitle">${this.title}</a>
                     </li>
                 `;
             }
@@ -964,7 +1018,7 @@ class WolfermusMenuItem {
         return `
             <li id="WolfermusMenu${menu.id}${this.id}" class="WolfermusDefaultCSS ${activable}">
                 <a class="WolfermusGroup WolfermusGroupRightPosition"><</a>    
-                <a>${this.title}</a>
+                <a class="WolfermusTitle">${this.title}</a>
                 <a class="WolfermusGroup WolfermusGroupLeftPosition">></a>
             </li>
         `;
