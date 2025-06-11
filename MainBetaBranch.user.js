@@ -1,20 +1,20 @@
 // ==UserScript==
-// @name         Wolfermus Main Menu
+// @name         Wolfermus Main Menu (Beta)
 // @namespace    https://greasyfork.org/en/users/900467-feb199
 // @version      2.0.7
-// @description  This script is a main menu that loads displays all scripts and allows you to enable them.
+// @description  This script is a main menu that loads displays all scripts and allows you to enable them. (Beta)
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
 // @supportURL   https://github.com/Wolfermus/Wolfermus-UserScripts/issues
-// @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Main.user.js
+// @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Main.user.js
 // @license      GPLv3
 // @noframes
 // @match        *
 // @match        *://*/*
 // @match        http://*/*
 // @match        https://*/*
-// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Libraries/StorageManagerLib.user.js
-// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Libraries/MainMenuLib.user.js
+// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Libraries/StorageManagerLib.user.js
+// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Libraries/MainMenuLib.user.js
 // @connect      raw.githubusercontent.com
 // @connect      api.github.com
 // @grant        GM_getValue
@@ -261,7 +261,7 @@ function WolfermusCheckLibraryLoaded(key) {
     // }
 
     const websiteName = window.location.hostname;
-    const branch = "main";
+    const branch = "beta";
     const baseScriptURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Scripts/${websiteName}`;
     async function GetScripts() {
         let gottenBody = JSON.parse(await MakeGetRequest(`https://api.github.com/repos/Wolfermus/Wolfermus-UserScripts/git/trees/${branch}`));
