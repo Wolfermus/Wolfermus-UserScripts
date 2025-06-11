@@ -253,7 +253,8 @@ async (path) => {
         //console.log("Scripts/Main.js - 3");
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${path}/QOL/${scriptName}.js`));
-            eval(script)(baseScriptURL);
+            // TODO: Allow scripts to return an object detailing to only load script once, a menuitem 
+            await eval(script)(baseScriptURL);
             wolfermusPreventLoopLock1[scriptName].once = true;
         } catch (error) {
             if (!wolfermusPreventLoopLock1[scriptName]) return;
