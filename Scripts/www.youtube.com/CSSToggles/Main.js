@@ -1,6 +1,6 @@
 async (path) => {
     //debugger;
-    if (window.location.href !== "https://www.youtube.com/") return;
+    //if (window.location.href !== "https://www.youtube.com/") return;
 
     //#region Setting Up ChosenXmlHttpRequest
     let IsGMXmlHttpRequest1 = false;
@@ -235,7 +235,7 @@ async (path) => {
     /**
      * @type {WolfermusMenuItem}
      */
-    const WolfermusMenuItem = mainMenuLibrary["Classes"]["WolfermusMenuItem"];
+    //const WolfermusMenuItem = mainMenuLibrary["Classes"]["WolfermusMenuItem"];
 
     /**
      * @type {WolfermusMenu}
@@ -325,10 +325,6 @@ async (path) => {
         });
     }
 
-    if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
-        await AttemptLoadChangeFrostedGlassStyle();
-    }
-
     let ToggleFrostedGlassMenuItem = new WolfermusMenuItem("MainPageScrollFrostedGlass", "Toggle Scroll Frosted Glass", "This script toggles the top bar from a frosted transparent\nlook into solid color");
     ToggleFrostedGlassMenuItem.clickCallback = async () => {
         WolfermusCSSTogglesSettings["FrostedGlass"] = !WolfermusCSSTogglesSettings["FrostedGlass"];
@@ -341,6 +337,14 @@ async (path) => {
 
         SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));
     };
+    ToggleFrostedGlassMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/"];
+
+    ToggleFrostedGlassMenuItem.CheckUrls();
+
+    if (WolfermusCSSTogglesSettings["FrostedGlass"] && !ToggleFrostedGlassMenuItem.disabled) {
+        debugger;
+        await AttemptLoadChangeFrostedGlassStyle();
+    }
 
     const mainMenu = GetMainMenu();
 
