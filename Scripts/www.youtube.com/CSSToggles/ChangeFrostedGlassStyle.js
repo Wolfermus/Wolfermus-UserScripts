@@ -40,7 +40,10 @@ async () => {
         parts.push(1);
     }
 
+    let wlfStopInf = 50;
+
     while (parts[0] === "0" && parts[1] === "0" && parts[2] === "0") {
+        if (wlfStopInf <= 0) return;
         await Sleep(200);
 
         parts = null;
@@ -50,7 +53,6 @@ async () => {
 
         // Get the current background-color value:
         value = getComputedStyle(gottenElement).getPropertyValue("background-color");
-        console.log(value);
 
         // Get all color components (alpha may not be there if = 1):
         parts = value.match(/[\d.]+/g);
@@ -59,6 +61,7 @@ async () => {
         if (parts.length === 3) {
             parts.push(1);
         }
+        wlfStopInf--;
     }
 
     // Modify alpha:
