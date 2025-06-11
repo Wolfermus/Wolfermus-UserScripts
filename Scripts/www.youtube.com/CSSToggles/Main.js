@@ -1,4 +1,4 @@
-(async () => {
+async (path) => {
     //debugger;
     if (window.location.href !== "https://www.youtube.com/") return;
 
@@ -275,7 +275,7 @@
             createScriptURL: (string) => string
         });
 
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/www.youtube.com/CSSToggles/ChangeFrostedGlassStyle.js"));
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${path}/CSSToggles/ChangeFrostedGlassStyle.js`));
         ChangeFrostedGlassStyle = eval(script);
     }
 
@@ -287,7 +287,7 @@
             createScriptURL: (string) => string
         });
 
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest("https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/www.youtube.com/CSSToggles/RestoreFrostedGlassBackgroundColor.js"));
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${path}/CSSToggles/RestoreFrostedGlassBackgroundColor.js`));
         RestoreFrostedGlassBackgroundColor = eval(script);
     }
 
@@ -345,4 +345,4 @@
     const mainMenu = GetMainMenu();
 
     mainMenu.items.push(ToggleFrostedGlassMenuItem);
-})();
+};
