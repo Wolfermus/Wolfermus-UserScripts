@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.1
+// @version      2.0.2
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -38,7 +38,7 @@ if (typeof wolfermusBypassScriptPolicy === "undefined" || typeof wolfermusBypass
 }
 
 //#region Setting Up ChosenXmlHttpRequest
-if (typeof MakeGetRequest === "undefined" || typeof MakeGetRequest === "null") {
+if (typeof ChosenXmlHttpRequest === "undefined" || typeof ChosenXmlHttpRequest === "null") {
     let IsGMXmlHttpRequest1 = false;
     // @ts-ignore
     if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;
@@ -249,7 +249,7 @@ function WolfermusCheckLibraryLoaded(key) {
 
     // async function LoadScript() {
     //     MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`).then((result) => {
-    //         const script = bypassScriptPolicy.createScript(result);
+    //         const script = wolfermusBypassScriptPolicy.createScript(result);
     //         return eval(script)().then(() => {
     //             resolve();
     //         }).catch(() => {
