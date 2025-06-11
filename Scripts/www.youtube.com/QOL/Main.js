@@ -254,6 +254,7 @@ async (path) => {
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${path}/QOL/${scriptName}.js`));
             eval(script)(baseScriptURL);
+            wolfermusPreventLoopLock1[scriptName].once = true;
         } catch (error) {
             if (!wolfermusPreventLoopLock1[scriptName]) return;
             if (wolfermusPreventLoopLock1[scriptName].value <= 0) return;
@@ -281,6 +282,8 @@ async (path) => {
         WolfermusQOLTimeRemainingSettings.Active = !WolfermusQOLTimeRemainingSettings.Active;
 
         SetValue("QOLTimeRemaining", JSON.stringify(WolfermusQOLTimeRemainingSettings));
+
+        QOLTimeRemainingMenuItem.title = `[${WolfermusQOLTimeRemainingSettings.Active}] Toggle Time Remaining`;
 
         if (WolfermusQOLTimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
     };
