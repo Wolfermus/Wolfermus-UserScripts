@@ -260,25 +260,25 @@ function WolfermusCheckLibraryLoaded(key) {
     //     })
     // }
 
+    const websiteName = window.location.hostname;
+    const branch = "main";
+    const baseScriptURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Scripts/${websiteName}`;
     async function GetScripts() {
-        let gottenBody = JSON.parse(await MakeGetRequest("https://api.github.com/repos/Wolfermus/Wolfermus-UserScripts/git/trees/main"));
+        let gottenBody = JSON.parse(await MakeGetRequest(`https://api.github.com/repos/Wolfermus/Wolfermus-UserScripts/git/trees/${branch}`));
         let scriptsFolderItem = gottenBody.tree.find(item => item.path === "Scripts");
 
         let gottenScriptsFolder = JSON.parse(await MakeGetRequest(scriptsFolderItem.url));
 
-        const websiteName = window.location.hostname;
-
         let websiteFolderItem = gottenScriptsFolder.tree.filter(item => item.type === "tree").find(item => item.path === websiteName);
 
-        const baseScriptURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${websiteName}/`;
         let scriptsURLS = [];
 
         let gottenWebsiteScriptsFolder = JSON.parse(await MakeGetRequest(websiteFolderItem.url));
         for (let scriptItem of gottenWebsiteScriptsFolder.tree) {
             if (scriptItem.type === "blob") {
-                scriptsURLS.push(baseScriptURL + scriptItem.path);
+                scriptsURLS.push(`${baseScriptURL}/${scriptItem.path}`);
             } else if (scriptItem.type === "tree") {
-                scriptsURLS.push(baseScriptURL + scriptItem.path + "/Main.js");
+                scriptsURLS.push(`${baseScriptURL}/${scriptItem.path}/Main.js`);
             }
         }
 
@@ -295,7 +295,7 @@ function WolfermusCheckLibraryLoaded(key) {
         //console.log("Scripts/Main.js - 3");
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path));
-            eval(script);
+            eval(script)(baseScriptURL);
         } catch (error) {
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
