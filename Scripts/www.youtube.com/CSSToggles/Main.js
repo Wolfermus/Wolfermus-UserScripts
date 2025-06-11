@@ -343,8 +343,7 @@ async (path) => {
     ToggleFrostedGlassMenuItem.CheckUrls();
 
     if (WolfermusCSSTogglesSettings["FrostedGlass"] && !ToggleFrostedGlassMenuItem.disabled) {
-        debugger;
-        await AttemptLoadChangeFrostedGlassStyle();
+        AttemptLoadChangeFrostedGlassStyle();
     }
 
     const mainMenu = GetMainMenu();
