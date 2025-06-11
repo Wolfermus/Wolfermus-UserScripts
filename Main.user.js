@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.6
+// @version      2.0.7
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -320,6 +320,21 @@ function WolfermusCheckLibraryLoaded(key) {
     }
     //console.log("Scripts/Main.js - 1");
     await AttemptLoadScript();
+
+    {
+        let wolfermusAntiStuckLoop1 = 100;
+        while (document.readyState !== "complete") {
+            await Sleep(100);
+
+            if (wolfermusAntiStuckLoop1 < 0) {
+                alert("ERROR: antiStuckLoop engaged");
+                return;
+            }
+            wolfermusAntiStuckLoop1--;
+        }
+    }
+
+    await Sleep(100);
 
     await UpdateWolfermusMainMenuStyle();
     await UpdateMenuItems();
