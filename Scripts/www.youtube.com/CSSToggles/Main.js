@@ -1,4 +1,4 @@
-async () => {
+(async () => {
     //debugger;
     if (window.location.href !== "https://www.youtube.com/") return;
 
@@ -345,4 +345,4 @@ async () => {
     const mainMenu = GetMainMenu();
 
     mainMenu.items.push(ToggleFrostedGlassMenuItem);
-};
+})();
