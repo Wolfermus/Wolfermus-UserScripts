@@ -793,6 +793,20 @@ class WolfermusMenuItem {
 
     get disabled() { return this.#disabled; }
 
+    #ProxyDeletePropertyCallback = (target, property) => {
+        delete target[property];
+        if (isNaN(property)) return true;
+        this.CheckUrls();
+        return true;
+    };
+
+    #ProxySetCallback = (target, property, value, receiver) => {
+        target[property] = value;
+        if (isNaN(property)) return true;
+        this.CheckUrls();
+        return true;
+    };
+
     //#region includesUrls
     /**
      * @type {Array<string>}
@@ -801,18 +815,8 @@ class WolfermusMenuItem {
     #includesArray = ["*"];
 
     #includesArrayProxy = new Proxy(this.#includesArray, {
-        deleteProperty: function (target, property) {
-            delete target[property];
-            if (isNaN(property)) return true;
-            this.CheckUrls();
-            return true;
-        },
-        set: function (target, property, value, receiver) {
-            target[property] = value;
-            if (isNaN(property)) return true;
-            this.CheckUrls();
-            return true;
-        }
+        deleteProperty: this.#ProxyDeletePropertyCallback,
+        set: this.#ProxySetCallback
     });
 
     /**
@@ -846,18 +850,8 @@ class WolfermusMenuItem {
     #excludesArray = [];
 
     #excludesArrayProxy = new Proxy(this.#excludesArray, {
-        deleteProperty: function (target, property) {
-            delete target[property];
-            if (isNaN(property)) return true;
-            this.CheckUrls();
-            return true;
-        },
-        set: function (target, property, value, receiver) {
-            target[property] = value;
-            if (isNaN(property)) return true;
-            this.CheckUrls();
-            return true;
-        }
+        deleteProperty: this.#ProxyDeletePropertyCallback,
+        set: this.#ProxySetCallback
     });
 
     /**
