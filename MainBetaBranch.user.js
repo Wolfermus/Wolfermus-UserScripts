@@ -6,8 +6,8 @@
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
 // @supportURL   https://github.com/Wolfermus/Wolfermus-UserScripts/issues
-// @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Main.user.js
-// @downloadURL  https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Main.user.js
+// @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/MainBetaBranch.user.js
+// @downloadURL  https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/MainBetaBranch.user.js
 // @license      GPLv3
 // @noframes
 // @match        *
