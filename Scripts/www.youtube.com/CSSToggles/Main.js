@@ -68,7 +68,7 @@
     {
         let wolfermusAntiStuckLoop1 = 100;
         while (window === undefined || window === null) {
-            await Sleep(500);
+            await Sleep(100);
 
             if (wolfermusAntiStuckLoop1 < 0) {
                 alert("ERROR: antiStuckLoop engaged");
@@ -81,7 +81,7 @@
     {
         let wolfermusAntiStuckLoop1 = 100;
         while (document.readyState !== "complete") {
-            await Sleep(500);
+            await Sleep(100);
 
             if (wolfermusAntiStuckLoop1 < 0) {
                 alert("ERROR: antiStuckLoop engaged");
@@ -190,7 +190,7 @@
     {
         let wolfermusLoadLoopCounter = 0;
         while (!WolfermusCheckLibraryLoaded("StorageManager")) {
-            await Sleep(500);
+            await Sleep(100);
 
             if (wolfermusLoadLoopCounter >= 100) {
                 alert("ERROR: antiStuckLoop engaged");
@@ -203,7 +203,7 @@
     {
         let wolfermusLoadLoopCounter = 0;
         while (!WolfermusCheckLibraryLoaded("MainMenu")) {
-            await Sleep(500);
+            await Sleep(100);
 
             if (wolfermusLoadLoopCounter >= 100) {
                 alert("ERROR: antiStuckLoop engaged");
