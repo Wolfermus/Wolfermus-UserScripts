@@ -344,10 +344,7 @@ async (path) => {
 
     var shouldUpdate = true;
 
-    /**
-     * @param {HTMLVideoElement} video
-     */
-    async function UpdateRemainingLeft(video) {
+    async function UpdateRemainingLeft() {
         const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
         let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
 
@@ -564,7 +561,7 @@ async (path) => {
             if (lastValue !== elementToInsertAfter.innerHTML) {
                 lastValue = remainingTimeFromElementTime;
                 // console.log(remainingTimeFromElementTime);
-                await UpdatePreviewRemainingLeft(video);
+                await UpdatePreviewRemainingLeft();
             }
             if (lastClassValue !== elementToInsertAfter.className) {
                 lastClassValue = elementToInsertAfter.className;
@@ -592,7 +589,7 @@ async (path) => {
 
             if (!WolfermusQOLTimeRemainingSettings.Active) return;
 
-            await UpdatePreviewRemainingLeft(video);
+            await UpdatePreviewRemainingLeft();
         });
 
         video.addEventListener("durationchange", async (event) => {
@@ -601,7 +598,7 @@ async (path) => {
 
             if (!WolfermusQOLTimeRemainingSettings.Active) return;
 
-            await UpdatePreviewRemainingLeft(video);
+            await UpdatePreviewRemainingLeft();
         });
 
         video.addEventListener("timeupdate", async (event) => {
@@ -610,20 +607,24 @@ async (path) => {
 
             if (!WolfermusQOLTimeRemainingSettings.Active) return;
 
-            await UpdatePreviewRemainingLeft(video);
+            await UpdatePreviewRemainingLeft();
         });
     }
 
     /**
      * @param {HTMLVideoElement} video
      */
-    async function UpdatePreviewRemainingLeft(video) {
+    async function UpdatePreviewRemainingLeft() {
         const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
         let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
 
         if (!WolfermusQOLTimeRemainingSettings.Active) return;
 
-        if (!video || (video && !document.contains(video))) return;
+        let videoArray = document.getElementsByTagName("video");
+        if (videoArray.length <= 0) return;
+        let video = videoArray[0];
+
+        if (!video) return;
 
         const wlfPreviewToolTipTimeRemainingElementRightFound = wlfPreviewToolTipTimeRemainingElementRight && document.contains(wlfPreviewToolTipTimeRemainingElementRight);
         const wlfPreviewToolTipTimeRemainingElementLeftFound = wlfPreviewToolTipTimeRemainingElementLeft && document.contains(wlfPreviewToolTipTimeRemainingElementLeft);
