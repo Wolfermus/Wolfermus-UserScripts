@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.5
+// @version      2.0.6
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them.
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -261,7 +261,6 @@ function WolfermusCheckLibraryLoaded(key) {
     // }
 
     async function GetScripts() {
-        debugger;
         let gottenBody = JSON.parse(await MakeGetRequest("https://api.github.com/repos/Wolfermus/Wolfermus-UserScripts/git/trees/main"));
         let scriptsFolderItem = gottenBody.tree.find(item => item.path === "Scripts");
 
@@ -278,7 +277,7 @@ function WolfermusCheckLibraryLoaded(key) {
         for (let scriptItem of gottenWebsiteScriptsFolder.tree) {
             if (scriptItem.type === "blob") {
                 scriptsURLS.push(baseScriptURL + scriptItem.path);
-            } else {
+            } else if (scriptItem.type === "tree") {
                 scriptsURLS.push(baseScriptURL + scriptItem.path + "/Main.js");
             }
         }
