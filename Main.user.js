@@ -291,12 +291,12 @@ function WolfermusCheckLibraryLoaded(key) {
         createScriptURL: (string) => string
     });
 
+    let wolfermusPreventLoopLock1 = 10;
     async function LoadScript(path) {
         //console.log("Scripts/Main.js - 3");
-        let wolfermusPreventLoopLock1 = 10;
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path));
-            eval(script)();
+            eval(script);
         } catch (error) {
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
