@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.5
+// @version      2.0.6
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -461,7 +461,7 @@ function GetWolfermusFabImageMenuItem() {
             const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
             if (fabElement === undefined || fabElement === null) return;
 
-            if (WolfermusFabImageMenuItem.oldPositionY === fabElement.style.top && WolfermusFabImageMenuItem.oldPositionX === fabElement.style.left) {
+            if ((fabElement.style.top === undefined || fabElement.style.left === undefined) || (WolfermusFabImageMenuItem.oldPositionY === fabElement.style.top && WolfermusFabImageMenuItem.oldPositionX === fabElement.style.left)) {
                 GetMainMenu().ToggleVisibility();
             }
         };
