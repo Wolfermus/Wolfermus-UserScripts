@@ -16,6 +16,7 @@
 // @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Libraries/StorageManagerLib.user.js
 // @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Libraries/MainMenuLib.user.js
 // @connect      raw.githubusercontent.com
+// @connect      api.github.com
 // @grant        GM_getValue
 // @grant        GM.getValue
 // @grant        GM_setValue
@@ -259,36 +260,70 @@ function WolfermusCheckLibraryLoaded(key) {
     //     })
     // }
 
+    async function GetScripts() {
+        debugger;
+        let gottenBody = JSON.parse(await MakeGetRequest("https://api.github.com/repos/Wolfermus/Wolfermus-UserScripts/git/trees/main"));
+        let scriptsFolderItem = gottenBody.tree.find(item => item.path === "Scripts");
+
+        let gottenScriptsFolder = JSON.parse(await MakeGetRequest(scriptsFolderItem.url));
+
+        const websiteName = window.location.hostname;
+
+        let websiteFolderItem = gottenScriptsFolder.tree.filter(item => item.type === "tree").find(item => item.path === websiteName);
+
+        const baseScriptURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/${websiteName}/`;
+        let scriptsURLS = [];
+
+        let gottenWebsiteScriptsFolder = JSON.parse(await MakeGetRequest(websiteFolderItem.url));
+        for (let scriptItem of gottenWebsiteScriptsFolder.tree) {
+            if (scriptItem.type === "blob") {
+                scriptsURLS.push(baseScriptURL + scriptItem.path);
+            } else {
+                scriptsURLS.push(baseScriptURL + scriptItem.path + "/Main.js");
+            }
+        }
+
+        return scriptsURLS;
+    }
+
     const bypassScriptPolicyMainMenuMain = trustedTypes.createPolicy("bypassScriptMainMenuMain", {
         createScript: (string) => string,
         createScriptURL: (string) => string
     });
 
-    async function LoadScript() {
+    async function LoadScript(path) {
         //console.log("Scripts/Main.js - 3");
-        const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Scripts/Main.js`));
-        return eval(script)();
+        let wolfermusPreventLoopLock1 = 10;
+        try {
+            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path));
+            eval(script)();
+        } catch (error) {
+            if (wolfermusPreventLoopLock1 <= 0) return;
+            wolfermusPreventLoopLock1--;
+            await Sleep(100);
+            await LoadScript(path);
+        }
     }
 
     //await Sleep(1000);
 
-    let wolfermusPreventLoopLock1 = 10;
+
 
     async function AttemptLoadScript() {
-        //console.log("Scripts/Main.js - 2");
-        await LoadScript().then(async () => {
-            //console.log("Scripts/Main.js - 4");
-            await UpdateWolfermusMainMenuStyle();
-            await UpdateMenuItems();
-        }).catch(async (error) => {
-            if (wolfermusPreventLoopLock1 <= 0) return;
-            wolfermusPreventLoopLock1--;
-            await Sleep(500);
-            await AttemptLoadScript();
-        });
+        const fetchedScripts = await GetScripts();
+        for (let scriptURL of fetchedScripts) {
+            //console.log("Scripts/Main.js - 2");
+            await LoadScript(scriptURL).catch(async (error) => {
+                debugger;
+                console.error(`Wolfermus ERROR: Main - Failed To Load Scripts\n${error}`);
+            });
+        }
     }
     //console.log("Scripts/Main.js - 1");
     await AttemptLoadScript();
+
+    await UpdateWolfermusMainMenuStyle();
+    await UpdateMenuItems();
 
     if (wolfermusPreventLoopLock1 <= 0) {
         mainMenuModule["Loading"] = false;
