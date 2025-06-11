@@ -274,6 +274,9 @@ function WolfermusCheckLibraryLoaded(key) {
 
         let scriptsURLS = [];
 
+        if (websiteFolderItem === undefined || websiteFolderItem === null) return scriptsURLS;
+
+
         let gottenWebsiteScriptsFolder = JSON.parse(await MakeGetRequest(websiteFolderItem.url));
         for (let scriptItem of gottenWebsiteScriptsFolder.tree) {
             if (scriptItem.type === "blob") {
@@ -296,7 +299,7 @@ function WolfermusCheckLibraryLoaded(key) {
         //console.log("Scripts/Main.js - 3");
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path));
-            eval(script)(baseScriptURL);
+            await eval(script)(baseScriptURL);
         } catch (error) {
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
@@ -322,20 +325,20 @@ function WolfermusCheckLibraryLoaded(key) {
     //console.log("Scripts/Main.js - 1");
     await AttemptLoadScript();
 
-    {
-        let wolfermusAntiStuckLoop1 = 100;
-        while (document.readyState !== "complete") {
-            await Sleep(100);
+    // {
+    //     let wolfermusAntiStuckLoop1 = 100;
+    //     while (document.readyState !== "complete") {
+    //         await Sleep(100);
 
-            if (wolfermusAntiStuckLoop1 < 0) {
-                alert("ERROR: antiStuckLoop engaged");
-                return;
-            }
-            wolfermusAntiStuckLoop1--;
-        }
-    }
+    //         if (wolfermusAntiStuckLoop1 < 0) {
+    //             alert("ERROR: antiStuckLoop engaged");
+    //             return;
+    //         }
+    //         wolfermusAntiStuckLoop1--;
+    //     }
+    // }
 
-    await Sleep(500);
+    //await Sleep(500);
 
     await UpdateWolfermusMainMenuStyle();
     await UpdateMenuItems();
