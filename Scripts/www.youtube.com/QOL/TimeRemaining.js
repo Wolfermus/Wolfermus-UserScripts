@@ -718,6 +718,7 @@ async (path) => {
     console.log("\nWolfermus UserScripts: Youtube Time Remaining: Loaded!\n");
 
     var lastHref;
+    var lastTimeRemainingParentAutoHideElement;
 
     setInterval(async () => {
         const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
