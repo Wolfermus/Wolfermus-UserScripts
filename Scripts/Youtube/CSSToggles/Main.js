@@ -2,6 +2,7 @@ async () => {
     //debugger;
     if (window.location.href !== "https://www.youtube.com/") return;
 
+    //#region Setting Up ChosenXmlHttpRequest
     let IsGMXmlHttpRequest1 = false;
     // @ts-ignore
     if (typeof GM_xmlHttpRequest !== "undefined" && typeof GM_xmlHttpRequest !== "null" && GM_xmlHttpRequest) IsGMXmlHttpRequest1 = true;
@@ -15,9 +16,8 @@ async () => {
 
     if (!IsGMXmlHttpRequest) {
         const message = "Wolfermus ERROR: Youtube CSSToggles - Please run in a userscript manager";
-        alert(message);
-        console.log(message);
-        return;
+        console.error(message);
+        throw new Error(message);
     }
 
     let ChosenXmlHttpRequest;
@@ -27,16 +27,15 @@ async () => {
         ChosenXmlHttpRequest = GM_xmlHttpRequest;
     } else {
         const message = "Wolfermus ERROR: Youtube CSSToggles - Unexpected Error";
-        alert(message);
-        console.log(message);
-        return;
+        console.error(message);
+        throw new Error(message);
     }
     if (ChosenXmlHttpRequest === undefined || ChosenXmlHttpRequest === null) {
         const message = "Wolfermus ERROR: Youtube CSSToggles - Unexpected Error";
-        alert(message);
-        console.log(message);
-        return;
+        console.error(message);
+        throw new Error(message);
     }
+    //#endregion -Setting Up ChosenXmlHttpRequest
 
     function MakeGetRequest(url) {
         return new Promise((resolve, reject) => {
@@ -92,14 +91,48 @@ async () => {
         }
     }
 
+    //#region Utilities
+    /**
+     * @returns {Window}
+     */
+    function GetWindow() {
+        let gottenWindow = window;
 
+        try {
+            if (unsafeWindow !== undefined) gottenWindow = unsafeWindow;
+        } catch (e) {
 
-    let mainWindow = window;
+        }
 
-    try {
-        if (unsafeWindow !== undefined) mainWindow = unsafeWindow;
-    } catch (e) {
+        return gottenWindow;
+    }
 
+    /**
+     * @description Returns object of said module, if createIfNotFound is true then this function does not return undefined.
+     * 
+     * @param {string} key
+     * @param {boolean} [createIfNotFound=false]
+     * @throws If key is reserved
+     * @returns {any | undefined}
+     */
+    function WolfermusGetModule(key, createIfNotFound = false) {
+        let mainWindow = GetWindow();
+
+        if (key === "Libraries") {
+            throw new Error(`Wolfermus ERROR: MainMenuLib - ${key} is reserved`);
+            return undefined;
+        }
+
+        if (!mainWindow["Wolfermus"]) {
+            if (createIfNotFound) mainWindow["Wolfermus"] = {};
+            else return undefined;
+        }
+
+        if (createIfNotFound && !mainWindow["Wolfermus"][key]) {
+            return mainWindow["Wolfermus"][key] = {};
+        }
+
+        return mainWindow["Wolfermus"][key];
     }
 
     /**
@@ -107,16 +140,37 @@ async () => {
      * @returns {boolean}
      */
     function WolfermusCheckModuleLoaded(key) {
-        if (!mainWindow["Wolfermus"]) {
-            mainWindow["Wolfermus"] = {}
-            return false;
-        }
+        const gottenModule = WolfermusGetModule(key);
 
-        if (!mainWindow["Wolfermus"][key]) return false;
-
-        if (!mainWindow["Wolfermus"][key]["Loaded"]) return false;
+        if (!gottenModule) return false;
+        if (!gottenModule["Loaded"]) return false;
 
         return true;
+    }
+
+    /**
+     * @description Returns object of said library, if createIfNotFound is true then this function does not return undefined.
+     * 
+     * @param {string} key
+     * @param {boolean} [createIfNotFound=false]
+     * @returns {any | undefined}
+     */
+    function WolfermusGetLibrary(key, createIfNotFound = false) {
+        let mainWindow = GetWindow();
+
+        if (!mainWindow["Wolfermus"]) {
+            if (createIfNotFound) mainWindow["Wolfermus"] = {};
+            else return undefined;
+        } else if (!mainWindow["Wolfermus"]["Libraries"]) {
+            if (createIfNotFound) mainWindow["Wolfermus"]["Libraries"] = {};
+            else return undefined;
+        }
+
+        if (createIfNotFound && !mainWindow["Wolfermus"]["Libraries"][key]) {
+            return mainWindow["Wolfermus"]["Libraries"][key] = {};
+        }
+
+        return mainWindow["Wolfermus"]["Libraries"][key];
     }
 
     /**
@@ -124,22 +178,14 @@ async () => {
      * @returns {boolean}
      */
     function WolfermusCheckLibraryLoaded(key) {
-        if (!mainWindow["Wolfermus"]) {
-            mainWindow["Wolfermus"] = {}
-            return false;
-        }
+        const gottenLibrary = WolfermusGetLibrary(key);
 
-        if (!mainWindow["Wolfermus"]["Libraries"]) {
-            mainWindow["Wolfermus"]["Libraries"] = {}
-            return false;
-        }
-
-        if (!mainWindow["Wolfermus"]["Libraries"][key]) return false;
-
-        if (!mainWindow["Wolfermus"]["Libraries"][key]["Loaded"]) return false;
+        if (!gottenLibrary) return false;
+        if (!gottenLibrary["Loaded"]) return false;
 
         return true;
     }
+    //#endregion -Utilities
 
     {
         let wolfermusLoadLoopCounter = 0;
@@ -169,33 +215,47 @@ async () => {
 
     console.log("Wolfermus - Adding CSSToggles");
 
+    const storageManagerLibrary = WolfermusGetLibrary("StorageManager");
+
     /**
      * @async
      * @type {(key: string, value: any) => void}
-     */
-    const SetValue = mainWindow["Wolfermus"]["Libraries"]["StorageManager"]["SetValue"];
+    */
+    const SetValue = storageManagerLibrary["SetValue"];
 
     /**
      * @async
      * @type {(key: string, defaultValue: any) => Promise<any | undefined | null>}
+    */
+    const GetValue = storageManagerLibrary["GetValue"];
+
+
+    const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
+
+    /**
+     * @type {WolfermusMenuItem}
      */
-    const GetValue = mainWindow["Wolfermus"]["Libraries"]["StorageManager"]["GetValue"];
+    const WolfermusMenuItem = mainMenuLibrary["Classes"]["WolfermusMenuItem"];
+
+    /**
+     * @type {WolfermusMenu}
+     */
+    const WolfermusMenu = mainMenuLibrary["Classes"]["WolfermusMenu"];
 
     /**
      * @import {WolfermusMenuItem} from "../Libraries/MainMenuLib.user.js"
      */
 
     /**
-     * @type {WolfermusMenuItem}
+     * @import {WolfermusMenu} from "../Libraries/MainMenuLib.user.js"
      */
-    const WolfermusMenuItemClass = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["WolfermusMenuItem"];
 
     /**
-     * Add/Set a Menu Item to Main Menu
-     * 
-     * @type {(item: WolfermusMenuItem) => void}
+     * Get Main Menu
+     *  
+     * @type {() => WolfermusMenu}
      */
-    const SetMainMenuItem = mainWindow["Wolfermus"]["Libraries"]["MainMenu"]["SetMainMenuItem"];
+    const GetMainMenu = mainMenuLibrary["Menus"]["GetMainMenu"];
 
     const GUIGotten = await GetValue("CSSToggles", "{}");
     let WolfermusCSSTogglesSettings = JSON.parse(GUIGotten);
@@ -208,9 +268,8 @@ async () => {
     let RestoreFrostedGlassBackgroundColor;
 
     async function LoadChangeFrostedGlassStyle() {
-        if (ChangeFrostedGlassStyle !== undefined && ChangeFrostedGlassStyle !== null) {
-            return;
-        }
+        if (ChangeFrostedGlassStyle !== undefined && ChangeFrostedGlassStyle !== null) return;
+
         const bypassScriptPolicy = trustedTypes.createPolicy("bypassScriptChangeFrostedGlassStyle", {
             createScript: (string) => string,
             createScriptURL: (string) => string
@@ -221,9 +280,8 @@ async () => {
     }
 
     async function LoadRestoreFrostedGlassBackgroundColor() {
-        if (RestoreFrostedGlassBackgroundColor !== undefined && RestoreFrostedGlassBackgroundColor !== null) {
-            return;
-        }
+        if (RestoreFrostedGlassBackgroundColor !== undefined && RestoreFrostedGlassBackgroundColor !== null) return;
+
         const bypassScriptPolicy = trustedTypes.createPolicy("bypassScriptRestoreFrostedGlassBackgroundColor", {
             createScript: (string) => string,
             createScriptURL: (string) => string
@@ -284,5 +342,7 @@ async () => {
         SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));
     };
 
-    SetMainMenuItem(ToggleFrostedGlassMenuItem);
+    const mainMenu = GetMainMenu();
+
+    mainMenu.items.push(ToggleFrostedGlassMenuItem);
 };
