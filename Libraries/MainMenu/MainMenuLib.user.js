@@ -128,7 +128,7 @@ function GetVersion() {
  * @returns {boolean}
  */
 function IsBeta() {
-    return GetVersion.includes("beta");
+    return GetVersion().includes("beta");
 }
 
 /**
