@@ -445,5 +445,6 @@
         }
     }
 
+    mainMenuLibrary["Classes"]["Addons"]["Groups"] = {};
     mainMenuLibrary["Classes"]["Addons"]["Groups"]["WolfermusGroupMenuItem"] = WolfermusGroupMenuItem;
 })();
