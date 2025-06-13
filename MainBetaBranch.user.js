@@ -15,7 +15,7 @@
 // @match        http://*/*
 // @match        https://*/*
 // @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Libraries/StorageManagerLib.user.js
-// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Libraries/MainMenuLib.user.js
+// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Libraries/MainMenu/MainMenuLib.user.js
 // @connect      raw.githubusercontent.com
 // @connect      api.github.com
 // @grant        GM_getValue
