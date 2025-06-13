@@ -1,4 +1,4 @@
-async (path) => {
+async (path, branch) => {
     //debugger;
     //if (window.location.href !== "https://www.youtube.com/") return;
 
@@ -233,21 +233,13 @@ async (path) => {
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
     /**
-     * @type {WolfermusMenuItem}
+     * @type {WolfermusToggleButtonMenuItem}
      */
-    const WolfermusMenuItem = mainMenuLibrary["Classes"]["WolfermusMenuItem"];
+    //const WolfermusToggleButtonMenuItem = mainMenuLibrary["Classes"]["Addons"]["Buttons"]["WolfermusToggleButtonMenuItem"];
+
 
     /**
-     * @type {WolfermusMenu}
-     */
-    const WolfermusMenu = mainMenuLibrary["Classes"]["WolfermusMenu"];
-
-    /**
-     * @import {WolfermusMenuItem} from "../../../Libraries/MainMenuLib.user.js"
-     */
-
-    /**
-     * @import {WolfermusMenu} from "../../../Libraries/MainMenuLib.user.js"
+     * @import {WolfermusMenu, WolfermusToggleButtonMenuItem} from "../../../Libraries/MainMenu/MainMenuLib.user.js"
      */
 
     /**
@@ -325,19 +317,23 @@ async (path) => {
         });
     }
 
-    let ToggleFrostedGlassMenuItem = new WolfermusMenuItem("MainPageScrollFrostedGlass", `[${WolfermusCSSTogglesSettings["FrostedGlass"]}] Toggle Scroll Frosted Glass`, "This script toggles the top bar from a frosted transparent\nlook into solid color");
-    ToggleFrostedGlassMenuItem.clickCallback = async () => {
-        WolfermusCSSTogglesSettings["FrostedGlass"] = !WolfermusCSSTogglesSettings["FrostedGlass"];
-        ToggleFrostedGlassMenuItem.title = `[${WolfermusCSSTogglesSettings["FrostedGlass"]}] Toggle Scroll Frosted Glass`;
+    let ToggleFrostedGlassMenuItem = new WolfermusToggleButtonMenuItem("MainPageScrollFrostedGlass", `Toggle Scroll Frosted Glass`, "This script toggles the top bar from a frosted transparent\nlook into solid color");
+    ToggleFrostedGlassMenuItem.toggled = WolfermusCSSTogglesSettings["FrostedGlass"];
+    ToggleFrostedGlassMenuItem.ToggledEventAddCallback(async (toggled) => {
+        const GUIGotten = await GetValue("CSSToggles", "{}");
+        let WolfermusCSSTogglesSettings = JSON.parse(GUIGotten);
+
+        WolfermusCSSTogglesSettings["FrostedGlass"] = toggled;
+
         SetValue("CSSToggles", JSON.stringify(WolfermusCSSTogglesSettings));
 
-        if (WolfermusCSSTogglesSettings["FrostedGlass"]) {
+        if (toggled) {
             await AttemptLoadChangeFrostedGlassStyle();
         } else {
             await AttemptRestoreFrostedGlassBackgroundColor();
         }
 
-    };
+    });
     ToggleFrostedGlassMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/"];
 
     ToggleFrostedGlassMenuItem.CheckUrls();
