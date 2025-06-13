@@ -445,6 +445,9 @@
         }
     }
 
-    mainMenuLibrary["Classes"]["Addons"]["Groups"] = {};
+    if (mainMenuLibrary["Classes"]["Addons"]["Groups"] === undefined || mainMenuLibrary["Classes"]["Addons"]["Groups"] === null) {
+        mainMenuLibrary["Classes"]["Addons"]["Groups"] = {};
+    }
+
     mainMenuLibrary["Classes"]["Addons"]["Groups"]["WolfermusGroupMenuItem"] = WolfermusGroupMenuItem;
 })();
