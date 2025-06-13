@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      3.0.0
+// @version      3.0.0-beta
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -87,6 +87,48 @@ function MakeGetRequest(url) {
             onerror: error => reject(error)
         });
     });
+}
+
+let IsGMInfo1 = false;
+// @ts-ignore
+if (typeof GM_info !== "undefined" && typeof GM_info !== "null" && GM_info) IsGMInfo1 = true;
+
+let IsGMInfo2 = false;
+// @ts-ignore
+if (typeof GM !== "undefined" && typeof GM !== "null" && typeof GM.info !== "undefined" && typeof GM.info !== "null") IsGMInfo2 = true;
+
+let IsGMInfo = false;
+if (IsGMInfo1 || IsGMInfo2) IsGMInfo = true;
+
+/**
+ * @description Gets version of this script.
+ * 
+ * @throws If GM Info dosent exist or unknown error
+ * @returns {string}
+ */
+function GetVersion() {
+    if (!IsGMInfo) {
+        throw new Error("Wolfermus ERROR - MainMenuLib: GM Info dosent exist");
+        return undefined;
+    }
+
+    if (IsGMInfo2) {
+        return GM.info.script.version;
+    } else if (IsGMInfo1) {
+        return GM_info.script.version;
+    } else {
+        throw new Error("Wolfermus ERROR - MainMenuLib: Unknown Error");
+        return undefined;
+    }
+}
+
+/**
+ * @description Returns true if this script is beta.
+ * 
+ * @returns {boolean}
+ */
+function IsBeta() {
+    return GetVersion.includes("beta");
 }
 
 /**
@@ -250,8 +292,13 @@ async function GetWolfermusRoot(forceRequest = false) {
     if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
     let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
+    let branch = "main";
+    if (IsBeta()) {
+        branch = "beta";
+    }
+
     async function GetHTML() {
-        const script = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Resources/MainMenuLibHTML.js`));
+        const script = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Resources/MainMenuLibHTML.js`));
         return script;
     }
 
@@ -592,8 +639,13 @@ async function UpdateWolfermusMainMenuStyle() {
         document.head.append(mainMenuStyle);
     }
 
+    let branch = "main";
+    if (IsBeta()) {
+        branch = "beta";
+    }
+
     async function GetCSS() {
-        const css = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/main/Resources/MainMenuLib.css`));
+        const css = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Resources/MainMenuLib.css`));
         return css;
     }
 
