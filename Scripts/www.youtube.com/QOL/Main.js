@@ -195,24 +195,6 @@ async (path, branch) => {
         }
     }
 
-    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] === undefined) {
-        let preventLoopLock = 10;
-        const baseURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}`;
-        async function LoadWolfermusGroupMenuItem() {
-            try {
-                const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseURL}/Libraries/MainMenu/Addons/Groups/Group.js`));
-                await eval(script);
-            } catch (error) {
-                if (preventLoopLock <= 0) return;
-                preventLoopLock--;
-                await Sleep(100);
-                await LoadWolfermusGroupMenuItem();
-            }
-        }
-        await LoadWolfermusGroupMenuItem();
-    }
-    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] === undefined) return;
-
     console.log("Wolfermus: Youtube - QOL Running");
 
     const storageManagerLibrary = WolfermusGetLibrary("StorageManager");
@@ -231,6 +213,25 @@ async (path, branch) => {
 
 
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
+
+    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] === undefined) {
+        let preventLoopLock = 10;
+        const baseURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}`;
+        async function LoadWolfermusGroupMenuItem() {
+            try {
+                const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseURL}/Libraries/MainMenu/Addons/Groups/Group.js`));
+                await eval(script);
+            } catch (error) {
+                if (preventLoopLock <= 0) return;
+                preventLoopLock--;
+                await Sleep(100);
+                await LoadWolfermusGroupMenuItem();
+            }
+        }
+        await LoadWolfermusGroupMenuItem();
+    }
+    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] === undefined) return;
+
 
     /**
      * @type {WolfermusToggleButtonMenuItem}
