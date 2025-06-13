@@ -1,4 +1,4 @@
-async (path) => {
+async (path, branch) => {
     //#region Setting Up ChosenXmlHttpRequest
     let IsGMXmlHttpRequest1 = false;
     // @ts-ignore
@@ -195,6 +195,24 @@ async (path) => {
         }
     }
 
+    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] === undefined) {
+        let preventLoopLock = 10;
+        const baseURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}`;
+        async function LoadWolfermusGroupMenuItem() {
+            try {
+                const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseURL}/Libraries/MainMenu/Addons/Groups/Group.js`));
+                await eval(script);
+            } catch (error) {
+                if (preventLoopLock <= 0) return;
+                preventLoopLock--;
+                await Sleep(100);
+                await LoadWolfermusGroupMenuItem();
+            }
+        }
+        await LoadWolfermusGroupMenuItem();
+    }
+    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] === undefined) return;
+
     console.log("Wolfermus: Youtube - QOL Running");
 
     const storageManagerLibrary = WolfermusGetLibrary("StorageManager");
@@ -215,21 +233,18 @@ async (path) => {
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
     /**
-     * @type {WolfermusMenuItem}
+     * @type {WolfermusToggleButtonMenuItem}
      */
-    const WolfermusMenuItem = mainMenuLibrary["Classes"]["WolfermusMenuItem"];
+    const WolfermusToggleButtonMenuItem = mainMenuLibrary["Classes"]["Addons"]["Buttons"]["WolfermusToggleButtonMenuItem"];
 
     /**
-     * @type {WolfermusMenu}
+     * @type {WolfermusGroupMenuItem}
      */
-    const WolfermusMenu = mainMenuLibrary["Classes"]["WolfermusMenu"];
+    const WolfermusGroupMenuItem = mainMenuLibrary["Classes"]["Addons"]["Groups"]["WolfermusGroupMenuItem"];
 
     /**
-     * @import {WolfermusMenuItem} from "../Libraries/MainMenuLib.user.js"
-     */
-
-    /**
-     * @import {WolfermusMenu} from "../Libraries/MainMenuLib.user.js"
+     * @import {WolfermusMenu, WolfermusToggleButtonMenuItem} from "../Libraries/MainMenu/MainMenuLib.user.js"
+     * @import {WolfermusGroupMenuItem} from "../Libraries/MainMenu/Addons/Groups/Group.js"
      */
 
     /**
@@ -253,7 +268,7 @@ async (path) => {
         //console.log("Scripts/Main.js - 3");
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${path}/QOL/${scriptName}.js`));
-            // TODO: Allow scripts to return an object detailing to only load script once, a menuitem 
+            // TODO: Allow scripts to return an object detailing to only load script once, a menuitem.
             await eval(script)(baseScriptURL);
             wolfermusPreventLoopLock1[scriptName].once = true;
         } catch (error) {
@@ -273,25 +288,20 @@ async (path) => {
 
     if (WolfermusQOLTimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
 
-    const QOLTimeRemainingMenuItem = new WolfermusMenuItem("WolfermusQOLTimeRemainingMenuItem", `[${WolfermusQOLTimeRemainingSettings.Active}] Toggle Time Remaining`);
-    QOLTimeRemainingMenuItem.clickCallback = async (event) => {
+    const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem("WolfermusQOLTimeRemainingMenuItem", `Toggle Time Remaining`);
+    QOLTimeRemainingMenuItem.toggled = WolfermusQOLTimeRemainingSettings.Active;
+    QOLTimeRemainingMenuItem.ToggledEventAddCallback(async (toggled) => {
         const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
         let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
 
-        WolfermusQOLTimeRemainingSettings.Active ??= false;
-
-        WolfermusQOLTimeRemainingSettings.Active = !WolfermusQOLTimeRemainingSettings.Active;
+        WolfermusQOLTimeRemainingSettings.Active = toggled;
 
         SetValue("QOLTimeRemaining", JSON.stringify(WolfermusQOLTimeRemainingSettings));
 
-        QOLTimeRemainingMenuItem.title = `[${WolfermusQOLTimeRemainingSettings.Active}] Toggle Time Remaining`;
+        if (toggled) LoadScriptOnce("TimeRemaining");
+    });
 
-        if (WolfermusQOLTimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
-    };
-
-
-
-    let QOLMenuItem = new WolfermusMenuItem("WolfermusQOLMenuItem", "Quality Of Life");
+    let QOLMenuItem = new WolfermusGroupMenuItem("WolfermusQOLMenuItem", "Quality Of Life");
     QOLMenuItem.items.push(QOLTimeRemainingMenuItem);
 
     const mainMenu = GetMainMenu();
