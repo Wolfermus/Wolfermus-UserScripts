@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      3.0.0
+// @version      3.0.1
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -1378,7 +1378,7 @@ class WolfermusToggleButtonMenuItem extends WolfermusButtonMenuItem {
     /**
      * @type {boolean}
      */
-    #toggled = false;
+    #toggledValue = false;
 
     /**
      * @type {Array<(toggled: boolean) => void>}
@@ -1394,15 +1394,22 @@ class WolfermusToggleButtonMenuItem extends WolfermusButtonMenuItem {
     #toggledFalseEvent = [];
 
     /**
+     * @param {PointerEvent} event 
+     */
+    #toggledClickCallback = (event) => {
+        this.Toggle();
+    };
+
+    /**
      * @param {boolean} newValue
      */
     set toggled(newValue) {
         if (typeof newValue !== "boolean") return;
-        this.#toggled = newValue;
+        this.#toggledValue = newValue;
 
         this.RemoveClass("WolfermusTrue");
         this.RemoveClass("WolfermusFalse");
-        if (this.#toggled) {
+        if (this.#toggledValue) {
             this.AddClass("WolfermusTrue");
         } else {
             this.AddClass("WolfermusFalse");
@@ -1411,10 +1418,10 @@ class WolfermusToggleButtonMenuItem extends WolfermusButtonMenuItem {
         this.UpdateClasses();
 
         for (const callback of this.#toggledEvent) {
-            callback?.();
+            callback?.(this.#toggledValue);
         }
 
-        if (this.#toggled) {
+        if (this.#toggledValue) {
             for (const callback of this.#toggledTrueEvent) {
                 callback?.();
             }
@@ -1424,7 +1431,7 @@ class WolfermusToggleButtonMenuItem extends WolfermusButtonMenuItem {
             }
         }
     }
-    get toggled() { return this.#toggled; }
+    get toggled() { return this.#toggledValue; }
 
     Toggle() {
         this.toggled = !this.toggled;
@@ -1437,7 +1444,7 @@ class WolfermusToggleButtonMenuItem extends WolfermusButtonMenuItem {
     async SetupEvents(menu) {
         if (!super.SetupEvents(menu)) return false;
 
-        this.element.addEventListener("click", this.Toggle);
+        this.element.addEventListener("click", this.#toggledClickCallback);
 
         return true;
     }
@@ -1450,7 +1457,7 @@ class WolfermusToggleButtonMenuItem extends WolfermusButtonMenuItem {
 
         if (this.element === undefined || this.element === null) return;
 
-        this.element.removeEventListener("click", this.Toggle);
+        this.element.removeEventListener("click", this.#toggledClickCallback);
     }
 
     /**
