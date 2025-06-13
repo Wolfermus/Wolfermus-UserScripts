@@ -8,7 +8,43 @@
     visibility: visible !important;
 }
 
+@property --wlfToggleBackgroundColour1 {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #272727;
+}
+
+@property --wlfToggleBackgroundColour2 {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: #bf6363;
+}
+
+@property --wlfToggleBackgroundNum1 {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 40%;
+}
+
+@property --wlfToggleBackgroundNum2 {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 100%;
+}
+
+@property --wlfTransitionSpeed {
+    syntax: "<time>";
+    inherits: false;
+    initial-value: 0.2s;
+}
+
 .WolfermusPopUpMenu {
+    /* needed for firefox to have a valid output */
+    --wlfToggleBackgroundColour1: #272727;
+    --wlfToggleBackgroundColour2: #bf6363;
+    --wlfToggleBackgroundNum1: 40%;
+    --wlfToggleBackgroundNum2: 100%;
+
     pointer-events: all;
     background-color: #0f0f0f;
     border-radius: 20px;
@@ -65,12 +101,87 @@
         border-radius: 15px;
 
         li {
-            &:hover {
-                background-color: #3d3d3d;
+
+            &.WolfermusToggleable {
+                -webkit-transition: --wlfToggleBackgroundColour1 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundColour2 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundNum1 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundNum2 var(--wlfTransitionSpeed) ease;
+                -moz-transition: --wlfToggleBackgroundColour1 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundColour2 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundNum1 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundNum2 var(--wlfTransitionSpeed) ease;
+                -o-transition: --wlfToggleBackgroundColour1 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundColour2 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundNum1 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundNum2 var(--wlfTransitionSpeed) ease;
+                transition: --wlfToggleBackgroundColour1 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundColour2 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundNum1 var(--wlfTransitionSpeed) ease,
+                    --wlfToggleBackgroundNum2 var(--wlfTransitionSpeed) ease;
+
+                &.WolfermusTrue {
+                    --wlfToggleBackgroundColour1: #63bf75;
+                    --wlfToggleBackgroundColour2: #272727;
+                    --wlfToggleBackgroundNum1: 0%;
+                    --wlfToggleBackgroundNum2: 60%;
+                }
+
+                &.WolfermusFalse {
+                    --wlfToggleBackgroundColour1: #272727;
+                    --wlfToggleBackgroundColour2: #bf6363;
+                    --wlfToggleBackgroundNum1: 40%;
+                    --wlfToggleBackgroundNum2: 100%;
+                }
             }
 
-            &.WolfermusActivable:active {
-                background-color: #505050;
+
+            &:hover {
+                background-color: #3d3d3d;
+
+                &.WolfermusToggleable {
+                    &.WolfermusTrue {
+                        --wlfToggleBackgroundColour1: #63bf75;
+                        --wlfToggleBackgroundColour2: #3d3d3d;
+                        --wlfToggleBackgroundNum1: 0%;
+                        --wlfToggleBackgroundNum2: 60%;
+                    }
+
+                    &.WolfermusFalse {
+                        --wlfToggleBackgroundColour1: #3d3d3d;
+                        --wlfToggleBackgroundColour2: #bf6363;
+                        --wlfToggleBackgroundNum1: 40%;
+                        --wlfToggleBackgroundNum2: 100%;
+                    }
+                }
+            }
+
+            &.WolfermusActivable {
+                &:active {
+                    background: #505050;
+
+                    &.WolfermusToggleable {
+                        &.WolfermusTrue {
+                            --wlfToggleBackgroundColour1: #63bf75;
+                            --wlfToggleBackgroundColour2: #505050;
+                            --wlfToggleBackgroundNum1: 0%;
+                            --wlfToggleBackgroundNum2: 60%;
+                        }
+
+                        &.WolfermusFalse {
+                            --wlfToggleBackgroundColour1: #505050;
+                            --wlfToggleBackgroundColour2: #bf6363;
+                            --wlfToggleBackgroundNum1: 40%;
+                            --wlfToggleBackgroundNum2: 100%;
+                        }
+                    }
+                }
+
+                &.WolfermusToggleable {
+                    background: linear-gradient(0deg,
+                            var(--wlfToggleBackgroundColour1) var(--wlfToggleBackgroundNum1),
+                            var(--wlfToggleBackgroundColour2) var(--wlfToggleBackgroundNum2));
+                }
             }
 
             cursor: pointer;
