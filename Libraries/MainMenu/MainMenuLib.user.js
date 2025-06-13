@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.1.3
+// @version      3.0.0
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
