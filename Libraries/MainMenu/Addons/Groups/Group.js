@@ -101,11 +101,6 @@
         }
 
         /**
-         * @type {Array<WolfermusMenuItem>}
-         */
-        items = [];
-
-        /**
          * @type {(PointerEvent) => void}
          */
         #menuPointerEnterCallback = undefined;
