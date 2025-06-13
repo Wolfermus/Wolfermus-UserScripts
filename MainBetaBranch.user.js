@@ -298,7 +298,7 @@ function WolfermusCheckLibraryLoaded(key) {
     async function LoadScript(path) {
         //console.log("Scripts/Main.js - 3");
         try {
-            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path));
+            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path, branch));
             await eval(script)(baseScriptURL);
         } catch (error) {
             if (wolfermusPreventLoopLock1 <= 0) return;
