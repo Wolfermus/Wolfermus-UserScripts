@@ -247,6 +247,18 @@
 
                 if (menu.element === undefined || menu.element.style["visibility"] === "hidden") return;
 
+                let preventInfLoop = 10;
+                while (menu?.attached?.menu?.element?.style?.transition !== undefined && menu.attached.menu.element.style.transition !== "0s" && preventInfLoop > 0) {
+                    await Sleep(100);
+                    preventInfLoop--;
+                }
+
+                menu.attached.menu.Hide();
+
+                if (this.element === undefined || this.element === null) return;
+
+                if (menu.element === undefined || menu.element.style["visibility"] === "hidden") return;
+
                 const menuItemGroupCollection = this.element.getElementsByClassName("WolfermusGroup");
                 if (menuItemGroupCollection === undefined || menuItemGroupCollection === null || menuItemGroupCollection.length <= 0) return;
 
