@@ -58,6 +58,7 @@ The reason why a userscript manager is required is because of CSP and `fetch` be
 	
 #### Step 2: Goto the user script
 [Wolfermus Main Menu Auto Update](Main.user.js)
+
 [(Beta) Wolfermus Main Menu Auto Update](MainBetaBranch.user.js)
 
 <br>
