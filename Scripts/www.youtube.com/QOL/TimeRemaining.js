@@ -812,6 +812,7 @@ async (path) => {
         if (!WolfermusQOLTimeRemainingSettings.Active) {
             if (wlfPreviewToolTipTimeRemainingElementRight && document.contains(wlfPreviewToolTipTimeRemainingElementRight)) wlfPreviewToolTipTimeRemainingElementRight.style.display = "none";
             if (wlfPreviewToolTipTimeRemainingElementLeft && document.contains(wlfPreviewToolTipTimeRemainingElementLeft)) wlfPreviewToolTipTimeRemainingElementLeft.style.display = "none";
+            lastClassValue = undefined;
             return;
         }
 

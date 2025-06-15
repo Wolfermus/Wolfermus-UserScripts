@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu (Beta)
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.9
+// @version      2.0.11-beta
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them. (Beta)
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -15,7 +15,7 @@
 // @match        http://*/*
 // @match        https://*/*
 // @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Libraries/StorageManagerLib.user.js
-// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Libraries/MainMenuLib.user.js
+// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Libraries/MainMenu/MainMenuLib.user.js
 // @connect      raw.githubusercontent.com
 // @connect      api.github.com
 // @grant        GM_getValue
@@ -299,7 +299,7 @@ function WolfermusCheckLibraryLoaded(key) {
         //console.log("Scripts/Main.js - 3");
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path));
-            await eval(script)(baseScriptURL);
+            await eval(script)(baseScriptURL, branch);
         } catch (error) {
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
