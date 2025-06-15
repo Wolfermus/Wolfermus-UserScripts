@@ -150,6 +150,11 @@
             this.#menuPointerEnterCallback = (event) => {
                 if (this.id === undefined) return;
 
+                if (menu.timeoutID !== undefined && menu.timeoutID !== null) {
+                    clearTimeout(menu.timeoutID);
+                    menu.timeoutID = undefined;
+                }
+
                 if (menu.attached?.menu?.attachedId !== this.id) {
                     if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
                     return;
