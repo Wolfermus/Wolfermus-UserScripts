@@ -1132,6 +1132,7 @@ class WolfermusMenuItem {
         }, this.tooltipTimeOut);
     };
     /**
+     * @param {PointerEvent} event
      * @type {(PointerEvent) => void}
      */
     #toolTipPointerLeaveCallback = async (event) => { await WolfermusMenuItem.HideToolTip(); };
@@ -1242,7 +1243,6 @@ class WolfermusMenuItem {
         this.element.addEventListener("pointerenter", this.#toolTipPointerEnterCallback);
         this.element.addEventListener("pointerleave", this.#toolTipPointerLeaveCallback);
         this.element.addEventListener("pointercancel", this.#toolTipPointerLeaveCallback);
-
 
         /**
          * 
@@ -1559,7 +1559,10 @@ class WolfermusMenu {
         this.id = WolfermusMenu.id;
         WolfermusMenu.id++;
 
-        wolfermusRootRefreshesEvent.push(() => { this.element = null; });
+        wolfermusRootRefreshesEvent.push(() => {
+            this.RemoveEvents();
+            this.element = null;
+        });
     }
     /**
      * @type {Number}
@@ -1615,6 +1618,56 @@ class WolfermusMenu {
      * @type {boolean} 
      */
     #showing = false;
+    /**
+     * @type {boolean}
+     */
+    #transitioningValue = false;
+
+    /**
+    * @returns {boolean}
+    */
+    get transitioning() {
+        return this.#transitioningValue;
+    }
+
+    /**
+     * @param {TransitionEvent} event
+     * @type {(TransitionEvent) => void}
+     */
+    #transitionStartCallback = (event) => {
+        this.#transitioningValue = true;
+    };
+    /**
+    * @param {TransitionEvent} event
+    * @type {(TransitionEvent) => void}
+    */
+    #transitionEndCallback = (event) => {
+        this.#transitioningValue = false;
+    };
+
+    /**
+     * @returns {Boolean}
+     */
+    async SetupEvents() {
+        if (this.id === undefined) return false;
+        if (this.element === undefined || this.element === null) return false;
+
+        this.element.addEventListener("transitionstart", this.#transitionStartCallback);
+        this.element.addEventListener("transitionend", this.#transitionEndCallback);
+        this.element.addEventListener("transitioncancel", this.#transitionEndCallback);
+
+        return true;
+    }
+
+    RemoveEvents() {
+        if (this.element !== undefined && this.element !== null) {
+            this.element.removeEventListener("transitionstart", this.#transitionStartCallback);
+            this.element.removeEventListener("transitionend", this.#transitionEndCallback);
+            this.element.removeEventListener("transitioncancel", this.#transitionEndCallback);
+        }
+
+        this.#transitioningValue = false;
+    }
 
     UpdateClasses() {
         if (this.element === undefined || this.element === null) return;
@@ -1650,6 +1703,8 @@ class WolfermusMenu {
         }
 
         elementToAppendTo.append(this.element);
+
+        this.SetupEvents();
     }
 
     /**
