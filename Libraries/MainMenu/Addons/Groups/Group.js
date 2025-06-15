@@ -182,10 +182,10 @@
                             if (menu?.attached?.menu?.attached?.menu !== undefined) {
                                 menu.attached.menu.attached.menu.Hide();
 
-                                let gottenItem = menu.attached.menu.attached.menu.items.find((item) => item.id === menu.attached.menu.attached.menu.attachedId);
+                                let gottenItem = menu.attached.menu.items.find((item) => item.id === menu.attached.menu.attachedId);
                                 if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
 
-                                menu.attached.menu.attached.menu.attachedId = undefined;
+                                menu.attached.menu.attachedId = undefined;
                             }
                             return;
                         }
