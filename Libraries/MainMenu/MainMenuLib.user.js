@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      3.1.3
+// @version      3.1.4
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -554,7 +554,6 @@ function GetWolfermusFabImageMenuItem() {
             await WolfermusMenuItem.HideToolTip();
         };
 
-        // TODO: Change to a toggle menu item
         const toggleMovementMenuItem = new WolfermusToggleButtonMenuItem(
             "WolfermusToggleMovementMenuItem",
             `Toggle Movement (On This Page)`,
@@ -931,6 +930,8 @@ class WolfermusMenuItem {
             if (this.element !== undefined && this.element !== null) {
                 this.element.style.display = "none";
             }
+            this.contextMenu.Hide();
+            this.contextMenu.attachedId = undefined;
         }
     }
 
@@ -1281,7 +1282,7 @@ class WolfermusMenuItem {
         this.#closeWolfermusContextMenu = (event) => {
             if (this.id === undefined) return;
 
-            if (this.contextMenu.IsHoveringAnyMenu()) return; // TODO: Detect if hovering over any contextmenu using :hover instead of this function.
+            if (this.contextMenu.IsHoveringAnyMenu()) return;
             this.contextMenu.Hide();
             menu.attached.contextMenu = undefined;
             this.contextMenu.attachedId = undefined;
@@ -1590,10 +1591,8 @@ class WolfermusMenu {
     element = null;
     /**
      * @type {{
-     *  id: any,
      *  menu: WolfermusMenu,
-     *  timeoutID: Number | undefined,
-     *  cooldownTimeoutID: Number | undefined
+     *  contextMenu: WolfermusMenu
      * }}
      */
     attached = {
