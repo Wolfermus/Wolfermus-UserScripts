@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      3.1.0
+// @version      3.1.1
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -1835,7 +1835,7 @@ function ResetItemBackgroundColor(event) {
     if (menu.attached?.menu?.id === undefined) return;
 
     const foundItem = menu.items.find((item) => item.id === menu.attached.menu.attachedId);
-    if (foundItem.element !== undefined) foundItem.element.style["background-color"] = "";
+    if (foundItem?.element !== undefined) foundItem.element.style["background-color"] = "";
 }
 
 /**
@@ -1845,8 +1845,8 @@ function CloseWolfermusMainMenu(event) {
     const menu = GetMainMenu();
     if (menu.IsHoveringAnyMenu()) return;
     ResetItemBackgroundColor();
-    if (menu.attached !== undefined) {
-        menu.attached.menu?.Hide();
+    if (menu.attached?.menu !== undefined) {
+        menu.attached.menu.Hide();
         menu.attached.menu.attachedId = undefined;
     }
 }
@@ -1857,8 +1857,8 @@ function CloseWolfermusMainMenu(event) {
 function HideWolfermusMainMenu(event) {
     const menu = GetMainMenu();
     ResetItemBackgroundColor();
-    if (menu.attached !== undefined) {
-        menu.attached.menu?.Hide();
+    if (menu.attached?.menu !== undefined) {
+        menu.attached.menu.Hide();
         menu.attached.menu.attachedId = undefined;
     }
 }
