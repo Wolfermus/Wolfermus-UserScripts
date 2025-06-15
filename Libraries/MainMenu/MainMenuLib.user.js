@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      3.0.1
+// @version      3.1.0
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -353,24 +353,6 @@ function GetMainMenu() {
 }
 
 /**
- * @type {WolfermusMenu | undefined}
- */
-let ContextMenu = undefined;
-/**
- * If you want to have a context menu on a WolfermusMenuItem use .contextItems under that WolfermusMenuItem for automatic proper use.
- * 
- * The items within this context menu is changed every time a WolfermusMenuItem with any .contextItems is right clicked.
- * @returns {WolfermusMenu}
- */
-function GetContextMenu() {
-    if (ContextMenu === undefined) {
-        ContextMenu = new WolfermusMenu();
-        ContextMenu.AddClass("WolfermusMainMenuContextMenu");
-    }
-    return ContextMenu;
-}
-
-/**
  * @type {WolfermusMenuItem | undefined}
  */
 let WolfermusFabImageMenuItem = undefined;
@@ -540,9 +522,7 @@ function GetWolfermusFabImageMenuItem() {
         updateMenuItemsContextMenuItem.clickCallback = async (event) => {
             await UpdateMenuItems();
 
-            const contextMenu = GetContextMenu();
-
-            contextMenu.Hide();
+            updateMenuItemsContextMenuItem.contextMenu.Hide();
         };
 
         const forceRefreshWolfermusRootItem = new WolfermusButtonMenuItem(
@@ -556,9 +536,7 @@ function GetWolfermusFabImageMenuItem() {
 
             await UpdateMenuItems();
 
-            const contextMenu = GetContextMenu();
-
-            contextMenu.Hide();
+            updateMenuItemsContextMenuItem.contextMenu.Hide();
 
             await WolfermusMenuItem.HideToolTip();
         };
@@ -571,9 +549,7 @@ function GetWolfermusFabImageMenuItem() {
         updateWolfermusMainMenuStyleContextMenuItem.clickCallback = async (event) => {
             await UpdateWolfermusMainMenuStyle();
 
-            const contextMenu = GetContextMenu();
-
-            contextMenu.Hide();
+            updateMenuItemsContextMenuItem.contextMenu.Hide();
 
             await WolfermusMenuItem.HideToolTip();
         };
@@ -596,10 +572,10 @@ function GetWolfermusFabImageMenuItem() {
             localStorage["WolfermusMainMenu"] = JSON.stringify(WolfermusMainMenuSettings);
         });
 
-        WolfermusFabImageMenuItem.contextItems.push(updateMenuItemsContextMenuItem);
-        WolfermusFabImageMenuItem.contextItems.push(forceRefreshWolfermusRootItem);
-        WolfermusFabImageMenuItem.contextItems.push(updateWolfermusMainMenuStyleContextMenuItem);
-        WolfermusFabImageMenuItem.contextItems.push(toggleMovementMenuItem);
+        WolfermusFabImageMenuItem.contextMenu.items.push(updateMenuItemsContextMenuItem);
+        WolfermusFabImageMenuItem.contextMenu.items.push(forceRefreshWolfermusRootItem);
+        WolfermusFabImageMenuItem.contextMenu.items.push(updateWolfermusMainMenuStyleContextMenuItem);
+        WolfermusFabImageMenuItem.contextMenu.items.push(toggleMovementMenuItem);
     }
     return WolfermusFabImageMenuItem;
 }
@@ -798,6 +774,8 @@ class WolfermusMenuItem {
         this.title = title;
         this.tooltip = tooltip;
 
+        this.contextMenu.AddClass("WolfermusMainMenuContextMenu");
+
         wolfermusRootRefreshesEvent.push(() => {
             this.element = null;
             if (WolfermusMenuItem.#tooltipTimeoutID !== undefined) {
@@ -820,9 +798,9 @@ class WolfermusMenuItem {
      */
     element = null;
     /**
-     * @type {Array<WolfermusMenuItem>}
+     * @type {WolfermusMenu}
      */
-    contextItems = []; // TODO: Change to a menu
+    contextMenu = new WolfermusMenu();
     /**
      * @type {string}
      */
@@ -1159,31 +1137,14 @@ class WolfermusMenuItem {
     #toolTipPointerLeaveCallback = async (event) => { await WolfermusMenuItem.HideToolTip(); };
 
     /**
-     * 
-     * @param {PointerEvent} event 
-     * @type {(PointerEvent) => void}
+     * @type {((PointerEvent) => void) | undefined}
      */
-    #contextMenuCallback = async (event) => {
-        const contextMenu = GetContextMenu();
-        contextMenu.Hide();
+    #contextMenuCallback = undefined;
 
-        if (this.contextItems.length <= 0) return;
-
-        event.preventDefault();
-
-        const x = event.clientX;
-        const y = event.clientY;
-
-
-        contextMenu.items = this.contextItems;
-
-        contextMenu.UpdateClasses();
-        await contextMenu.Generate(await GetWolfermusRoot());
-
-        contextMenu.Show();
-
-        ContrainElementViaPosition(contextMenu.element, new Position(x, y), false, false);
-    };
+    /**
+     * @type {((PointerEvent) => void) | undefined}
+     */
+    #closeWolfermusContextMenu = undefined;
 
     UpdateClasses() {
         if (this.element === undefined || this.element === null) return;
@@ -1281,7 +1242,57 @@ class WolfermusMenuItem {
         this.element.addEventListener("pointerenter", this.#toolTipPointerEnterCallback);
         this.element.addEventListener("pointerleave", this.#toolTipPointerLeaveCallback);
         this.element.addEventListener("pointercancel", this.#toolTipPointerLeaveCallback);
+
+
+        /**
+         * 
+         * @param {PointerEvent} event 
+         * @type {(PointerEvent) => void}
+         */
+        this.#contextMenuCallback = async (event) => {
+            if (this.id === undefined || this.id === null) return;
+            if (this.contextMenu.attachedId === this.id) return;
+
+            this.contextMenu.Hide();
+            menu.attached.contextMenu = undefined;
+            this.contextMenu.attachedId = undefined;
+
+            if (this.contextMenu.items.length <= 0) return;
+
+            event.preventDefault();
+
+            const x = event.clientX;
+            const y = event.clientY;
+
+            this.contextMenu.attachedId = this.id;
+            menu.attached.contextMenu = this.contextMenu;
+
+            this.contextMenu.UpdateClasses();
+            await this.contextMenu.Generate(await GetWolfermusRoot());
+            this.contextMenu.Show();
+
+            ContrainElementViaPosition(this.contextMenu.element, new Position(x, y), false, false);
+        };
+
+        /**
+         * @param {PointerEvent} event 
+         * @type {(PointerEvent) => void}
+         */
+        this.#closeWolfermusContextMenu = (event) => {
+            if (this.id === undefined) return;
+
+            if (this.contextMenu.IsHoveringAnyMenu()) return; // TODO: Detect if hovering over any contextmenu using :hover instead of this function.
+            this.contextMenu.Hide();
+            menu.attached.contextMenu = undefined;
+            this.contextMenu.attachedId = undefined;
+        }
+
         this.element.addEventListener("contextmenu", this.#contextMenuCallback);
+
+        window.addEventListener("pointerclick", this.#closeWolfermusContextMenu);
+        window.addEventListener("pointerup", this.#closeWolfermusContextMenu);
+        window.addEventListener("pointerleave", this.#closeWolfermusContextMenu);
+        window.addEventListener("pointercancel", this.#closeWolfermusContextMenu);
 
         this.CheckUrls();
 
@@ -1316,6 +1327,15 @@ class WolfermusMenuItem {
         this.#currentPointerUpCallback = undefined;
         this.#currentPointerMoveCallback = undefined;
         this.#currentPointerCancelCallback = undefined;
+
+
+        window.removeEventListener("pointerclick", this.#closeWolfermusContextMenu);
+        window.removeEventListener("pointerup", this.#closeWolfermusContextMenu);
+        window.removeEventListener("pointerleave", this.#closeWolfermusContextMenu);
+        window.removeEventListener("pointercancel", this.#closeWolfermusContextMenu);
+
+        this.#contextMenuCallback = undefined;
+        this.#closeWolfermusContextMenu = undefined;
     }
 }
 
@@ -1550,6 +1570,10 @@ class WolfermusMenu {
      */
     id = 0;
     /**
+     * @type {Number}
+     */
+    attachedId = 0;
+    /**
      * @type {Array<WolfermusMenuItem>}
      */
     items = [];
@@ -1570,8 +1594,8 @@ class WolfermusMenu {
      * }}
      */
     attached = {
-        id: undefined,
         menu: undefined,
+        contextMenu: undefined,
         timeoutID: undefined,
         cooldownTimeoutID: undefined
     };
@@ -1646,7 +1670,15 @@ class WolfermusMenu {
             clearTimeout(this.attached.cooldownTimeoutID);
             this.attached.cooldownTimeoutID = undefined;
         }
-        this.attached.id = undefined;
+        if (this.attached.menu !== undefined && this.attached.menu !== null) {
+            this.attached.menu.Hide();
+            this.attached.menu.attachedId = undefined;
+        }
+        if (this.attached.contextMenu !== undefined && this.attached.contextMenu !== null) {
+            this.attached.contextMenu.Hide();
+            this.attached.contextMenu.attachedId = undefined;
+            this.attached.contextMenu = undefined;
+        }
 
         for (const menuItem of this.#currentItems) {
             menuItem.RemoveEvents(this);
@@ -1724,9 +1756,15 @@ class WolfermusMenu {
     }
 
     Hide() {
+        if (this.attached?.contextMenu !== undefined) {
+            this.attached.contextMenu.Hide();
+            this.attached.contextMenu.attachedId = undefined;
+            this.attached.contextMenu = undefined;
+        }
+
         if (this.attached?.menu !== undefined) {
             this.attached.menu.Hide();
-            this.attached.id = undefined;
+            this.attached.menu.attachedId = undefined;
         }
 
         if (this.element !== undefined && this.element !== null) {
@@ -1760,7 +1798,11 @@ class WolfermusMenu {
         }
 
         if (this.attached?.menu !== undefined) {
-            return this.attached.menu.IsHoveringAnyMenu();
+            if (this.attached.menu.IsHoveringAnyMenu()) return true;
+        }
+
+        if (this.attached?.contextMenu !== undefined) {
+            if (this.attached.contextMenu.IsHoveringAnyMenu()) return true;
         }
 
         return false;
@@ -1790,9 +1832,9 @@ async function ToolTipPointerMove(event) {
  */
 function ResetItemBackgroundColor(event) {
     const menu = GetMainMenu();
-    if (menu.attached?.id === undefined) return;
+    if (menu.attached?.menu?.id === undefined) return;
 
-    const foundItem = menu.items.find((item) => item.id === menu.attached.id);
+    const foundItem = menu.items.find((item) => item.id === menu.attached.menu.attachedId);
     if (foundItem.element !== undefined) foundItem.element.style["background-color"] = "";
 }
 
@@ -1805,7 +1847,7 @@ function CloseWolfermusMainMenu(event) {
     ResetItemBackgroundColor();
     if (menu.attached !== undefined) {
         menu.attached.menu?.Hide();
-        menu.attached.id = undefined;
+        menu.attached.menu.attachedId = undefined;
     }
 }
 
@@ -1817,25 +1859,8 @@ function HideWolfermusMainMenu(event) {
     ResetItemBackgroundColor();
     if (menu.attached !== undefined) {
         menu.attached.menu?.Hide();
-        menu.attached.id = undefined;
+        menu.attached.menu.attachedId = undefined;
     }
-}
-
-/**
- * @param {PointerEvent} event 
- */
-function CloseWolfermusContextMenu(event) {
-    const menu = GetContextMenu();
-    if (menu.IsHoveringAnyMenu()) return;
-    menu.Hide();
-}
-
-/**
- * @param {PointerEvent} event 
- */
-function HideWolfermusContextMenu(event) {
-    const menu = GetContextMenu();
-    menu.Hide();
 }
 
 async function FullscreenChangeMainMenu() {
@@ -1861,11 +1886,6 @@ function AttachInteractionEventsToMainMenu() {
     window.addEventListener("pointerleave", HideWolfermusMainMenu);
     window.addEventListener("pointercancel", HideWolfermusMainMenu);
     window.addEventListener('pointermove', ToolTipPointerMove);
-
-    window.addEventListener("pointerclick", CloseWolfermusContextMenu);
-    window.addEventListener("pointerup", CloseWolfermusContextMenu);
-    window.addEventListener("pointerleave", HideWolfermusContextMenu);
-    window.addEventListener("pointercancel", HideWolfermusContextMenu);
 
     document.addEventListener('fullscreenchange', FullscreenChangeMainMenu);
     window.addEventListener('resize', ContrainMainMenu);
@@ -1986,7 +2006,6 @@ async function UpdateMenuItems() {
     MainMenuLibrary["Menus"] = {};
     MainMenuLibrary["Menus"]["GetMainMenu"] = GetMainMenu;
     MainMenuLibrary["Menus"]["GetFloatingButtonMenu"] = GetFloatingButtonMenu;
-    MainMenuLibrary["Menus"]["GetContextMenu"] = GetContextMenu;
 
     MainMenuLibrary["Elements"] = {};
     MainMenuLibrary["Elements"]["GetWolfermusRoot"] = GetWolfermusRoot;
