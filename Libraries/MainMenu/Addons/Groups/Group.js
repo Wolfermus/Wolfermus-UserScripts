@@ -180,8 +180,6 @@
                     if (this.element !== undefined && this.element !== null) {
                         if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") {
                             if (menu?.attached?.menu?.attached?.menu !== undefined) {
-                                debugger;
-
                                 let gottenItem = menu.attached.menu.items.find((item) => item.id === menu.attached.menu.attached.menu.attachedId);
                                 if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
 
@@ -266,7 +264,6 @@
 
                 let preventInfLoop = 10;
                 while (menu.transitioning && preventInfLoop > 0) {
-                    debugger;
                     await Sleep(100);
                     preventInfLoop--;
                 }
