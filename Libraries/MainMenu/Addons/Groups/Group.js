@@ -179,9 +179,9 @@
 
                     if (this.element !== undefined && this.element !== null) {
                         if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") {
-                            if (menu.attached.menu?.attached?.menu !== undefined) {
-                                menu.attached.menu?.attached?.menu.Hide();
-                                menu.attached.menu?.attached?.menu.attachedId = undefined;
+                            if (menu?.attached?.menu?.attached?.menu !== undefined) {
+                                menu.attached.menu.attached.menu.Hide();
+                                menu.attached.menu.attached.menu.attachedId = undefined;
                             }
                             return;
                         }
