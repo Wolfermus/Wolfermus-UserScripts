@@ -150,7 +150,7 @@
             this.#menuPointerEnterCallback = (event) => {
                 if (this.id === undefined) return;
 
-                if (menu.attached?.id !== this.id) {
+                if (menu.attached?.menu?.attachedId !== this.id) {
                     if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
                     return;
                 }
@@ -164,7 +164,7 @@
                 }
 
                 menu.attached.cooldownTimeoutID = setTimeout(() => {
-                    if (menu.attached?.id !== this.id) {
+                    if (menu.attached?.menu?.attachedId !== this.id) {
                         if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
                         return;
                     }
@@ -182,7 +182,7 @@
                     //console.log(`${menu.attached.menu.id} Closing Via menuPointerEnterCallback`);
 
                     menu.attached.menu.Hide();
-                    menu.attached.id = undefined;
+                    menu.attached.menu.attachedId = undefined;
                     if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
                 }, 500);
             }
@@ -193,7 +193,7 @@
             this.#menuPointerLeaveCallback = (event) => {
                 if (this.id === undefined) return;
 
-                if (menu.attached?.id !== this.id) {
+                if (menu.attached?.menu?.attachedId !== this.id) {
                     if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
                     return;
                 }
@@ -228,16 +228,16 @@
                     menu.attached.menu.AddClass("WolfermusGroupMenuWindow");
                 }
 
-                if (menu.attached.id === this.id) return;
+                if (menu.attached.menu.attachedId === this.id) return;
 
-                if (menu.attached.id !== undefined) {
+                if (menu.attached.menu.attachedId !== undefined) {
                     this.element.style["background-color"] = "";
                 }
 
                 if (menu.attached?.cooldownTimeoutID !== undefined) {
                     clearTimeout(menu.attached.cooldownTimeoutID);
                     menu.attached.cooldownTimeoutID = undefined;
-                    let gottenItem = menu.items.find((item) => item.id === menu.attached.id);
+                    let gottenItem = menu.items.find((item) => item.id === menu.attached.menu.attachedId);
                     if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
                 }
 
@@ -262,7 +262,7 @@
 
                 menu.attached.menu.ValidateElement(wolfermusRoot);
 
-                menu.attached.id = this.id;
+                menu.attached.menu.attachedId = this.id;
 
                 const clientRect = menuItemGroup.getBoundingClientRect();
                 let position = new Position(clientRect.left + clientRect.width / 2, clientRect.top + clientRect.height / 2);
@@ -349,7 +349,7 @@
                 if (menu.attached?.cooldownTimeoutID !== undefined) {
                     clearTimeout(menu.attached.cooldownTimeoutID);
                     menu.attached.cooldownTimeoutID = undefined;
-                    let gottenItem = menu.items.find((item) => item.id === menu.attached.id);
+                    let gottenItem = menu.items.find((item) => item.id === menu.attached.menu.attachedId);
                     if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
                 }
 
@@ -365,7 +365,7 @@
             this.#groupPointerLeaveCallback = (event) => {
                 if (this.id === undefined) return;
 
-                if (menu.attached?.id !== this.id) {
+                if (menu.attached?.menu?.attachedId !== this.id) {
                     if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
                     return;
                 }
@@ -377,17 +377,17 @@
                     menu.attached.cooldownTimeoutID = undefined;
                 }
 
-                if (menu.attached.menu.attached?.id !== undefined) return;
+                if (menu.attached.menu.attached?.menu?.attachedId !== undefined) return;
 
                 menu.attached.cooldownTimeoutID = setTimeout(() => {
-                    if (menu.attached?.id !== this.id) {
+                    if (menu.attached?.menu?.attachedId !== this.id) {
                         if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
                         return;
                     }
                     if (menu.attached?.menu === undefined) return;
                     if (menu.attached.menu.element === undefined) return;
 
-                    if (menu.attached.menu.attached.id !== undefined) return;
+                    if (menu.attached.menu.attached.menu.attachedId !== undefined) return;
 
                     if (this.element !== undefined && this.element !== null) {
                         if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
@@ -397,7 +397,7 @@
                     //console.log(`${menu.attached.menu.id} Closing Via elementPointerLeaveCallback setTimeout 0`);
 
                     menu.attached.menu.Hide();
-                    menu.attached.id = undefined;
+                    menu.attached.menu.attachedId = undefined;
                     if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
                 }, 500);
 
