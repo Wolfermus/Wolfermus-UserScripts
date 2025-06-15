@@ -1595,10 +1595,18 @@ class WolfermusMenu {
      */
     attached = {
         menu: undefined,
-        contextMenu: undefined,
-        timeoutID: undefined,
-        cooldownTimeoutID: undefined
+        contextMenu: undefined
     };
+
+    /**
+     * @type {Number | undefined}
+     */
+    timeoutID = undefined;
+    /**
+     * @type {Number | undefined}
+     */
+    cooldownTimeoutID = undefined;
+
     /**
      * @type {Array<String>}
      */
@@ -1662,13 +1670,13 @@ class WolfermusMenu {
     }
 
     UnloadItems() {
-        if (this.attached.timeoutID !== undefined) {
-            clearTimeout(this.attached.timeoutID);
-            this.attached.timeoutID = undefined;
+        if (this.attached?.menu?.timeoutID !== undefined) {
+            clearTimeout(this.attached.menu.timeoutID);
+            this.attached.menu.timeoutID = undefined;
         }
-        if (this.attached.cooldownTimeoutID !== undefined) {
-            clearTimeout(this.attached.cooldownTimeoutID);
-            this.attached.cooldownTimeoutID = undefined;
+        if (this.attached?.menu?.cooldownTimeoutID !== undefined) {
+            clearTimeout(this.attached.menu.cooldownTimeoutID);
+            this.attached.menu.cooldownTimeoutID = undefined;
         }
         if (this.attached.menu !== undefined && this.attached.menu !== null) {
             this.attached.menu.Hide();
