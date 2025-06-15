@@ -248,7 +248,7 @@
                 if (menu.element === undefined || menu.element.style["visibility"] === "hidden") return;
 
                 let preventInfLoop = 10;
-                while (menu?.attached?.menu?.element?.style?.transition !== undefined && menu.attached.menu.element.style.transition !== "0s" && preventInfLoop > 0) {
+                while (menu?.element?.style?.transition !== undefined && menu.element.style.transition !== "0s" && preventInfLoop > 0) {
                     await Sleep(100);
                     preventInfLoop--;
                 }
