@@ -181,6 +181,10 @@
                         if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") {
                             if (menu?.attached?.menu?.attached?.menu !== undefined) {
                                 menu.attached.menu.attached.menu.Hide();
+
+                                let gottenItem = menu.attached.menu.attached.menu.items.find((item) => item.id === menu.attached.menu.attached.menu.attachedId);
+                                if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
+
                                 menu.attached.menu.attached.menu.attachedId = undefined;
                             }
                             return;
@@ -397,12 +401,12 @@
                 if (menu.attached?.menu === undefined) return;
                 if (menu.attached.menu.element === undefined) return;
 
+                if (menu.attached.menu.attached?.menu?.attachedId !== undefined) return;
+
                 if (menu.attached?.menu?.cooldownTimeoutID !== undefined) {
                     clearTimeout(menu.attached.menu.cooldownTimeoutID);
                     menu.attached.menu.cooldownTimeoutID = undefined;
                 }
-
-                if (menu.attached.menu.attached?.menu?.attachedId !== undefined) return;
 
                 menu.attached.menu.cooldownTimeoutID = setTimeout(() => {
                     if (menu.attached?.menu?.attachedId !== this.id) {
