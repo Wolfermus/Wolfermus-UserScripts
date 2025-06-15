@@ -249,6 +249,7 @@
 
                 let preventInfLoop = 10;
                 while (menu?.element?.style?.transition !== undefined && menu.element.style.transition !== "0s" && preventInfLoop > 0) {
+                    debugger;
                     await Sleep(100);
                     preventInfLoop--;
                 }
@@ -399,7 +400,7 @@
                     if (menu.attached?.menu === undefined) return;
                     if (menu.attached.menu.element === undefined) return;
 
-                    if (menu.attached.menu.attached.menu.attachedId !== undefined) return;
+                    if (menu.attached.menu.attached?.menu?.attachedId !== undefined) return;
 
                     if (this.element !== undefined && this.element !== null) {
                         if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
