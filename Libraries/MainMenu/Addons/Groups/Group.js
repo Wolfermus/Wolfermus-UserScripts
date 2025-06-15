@@ -158,12 +158,12 @@
                 if (menu.attached?.menu.element === undefined) return;
                 if (menu.attached.menu.IsHoveringAnyMenu()) return;
 
-                if (menu.attached?.cooldownTimeoutID !== undefined) {
-                    clearTimeout(menu.attached.cooldownTimeoutID);
-                    menu.attached.cooldownTimeoutID = undefined;
+                if (menu.attached?.menu?.cooldownTimeoutID !== undefined) {
+                    clearTimeout(menu.attached.menu.cooldownTimeoutID);
+                    menu.attached.menu.cooldownTimeoutID = undefined;
                 }
 
-                menu.attached.cooldownTimeoutID = setTimeout(() => {
+                menu.attached.menu.cooldownTimeoutID = setTimeout(() => {
                     if (menu.attached?.menu?.attachedId !== this.id) {
                         if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
                         return;
@@ -184,6 +184,7 @@
                     menu.attached.menu.Hide();
                     menu.attached.menu.attachedId = undefined;
                     if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+                    menu.attached.menu.cooldownTimeoutID = undefined;
                 }, 500);
             }
 
@@ -199,9 +200,9 @@
                 }
                 if (menu.attached?.menu === undefined) return;
 
-                if (menu.attached?.cooldownTimeoutID !== undefined) {
-                    clearTimeout(menu.attached.cooldownTimeoutID);
-                    menu.attached.cooldownTimeoutID = undefined;
+                if (menu.attached?.menu?.cooldownTimeoutID !== undefined) {
+                    clearTimeout(menu.attached.menu.cooldownTimeoutID);
+                    menu.attached.menu.cooldownTimeoutID = undefined;
                 }
             }
 
@@ -209,15 +210,15 @@
              * @param {PointerEvent} event 
              */
             this.#groupPointerEnterCallback = async (event) => {
-                if (menu.attached?.timeoutID !== undefined) {
-                    clearTimeout(menu.attached.timeoutID);
-                    menu.attached.timeoutID = undefined;
+                if (menu.attached?.menu?.timeoutID !== undefined) {
+                    clearTimeout(menu.attached.menu.timeoutID);
+                    menu.attached.menu.timeoutID = undefined;
                 }
 
                 if (this.id === undefined) {
-                    if (menu.attached?.cooldownTimeoutID !== undefined) {
-                        clearTimeout(menu.attached.cooldownTimeoutID);
-                        menu.attached.cooldownTimeoutID = undefined;
+                    if (menu.attached?.menu?.cooldownTimeoutID !== undefined) {
+                        clearTimeout(menu.attached.menu.cooldownTimeoutID);
+                        menu.attached.menu.cooldownTimeoutID = undefined;
                     }
                     return;
                 }
@@ -236,9 +237,9 @@
                     if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
                 }
 
-                if (menu.attached?.cooldownTimeoutID !== undefined) {
-                    clearTimeout(menu.attached.cooldownTimeoutID);
-                    menu.attached.cooldownTimeoutID = undefined;
+                if (menu.attached?.menu?.cooldownTimeoutID !== undefined) {
+                    clearTimeout(menu.attached.menu.cooldownTimeoutID);
+                    menu.attached.menu.cooldownTimeoutID = undefined;
                 }
 
                 menu.attached.menu.Hide();
@@ -248,7 +249,7 @@
                 if (menu.element === undefined || menu.element.style["visibility"] === "hidden") return;
 
                 let preventInfLoop = 10;
-                while (menu?.element?.style?.transition !== undefined && menu.element.style.transition !== "0s" && preventInfLoop > 0) {
+                while (menu.timeoutID !== undefined && menu.timeoutID !== null && preventInfLoop > 0) {
                     debugger;
                     await Sleep(100);
                     preventInfLoop--;
@@ -359,9 +360,9 @@
 
                 menu.attached.menu.UpdateClasses();
 
-                if (menu.attached?.cooldownTimeoutID !== undefined) {
-                    clearTimeout(menu.attached.cooldownTimeoutID);
-                    menu.attached.cooldownTimeoutID = undefined;
+                if (menu.attached?.menu?.cooldownTimeoutID !== undefined) {
+                    clearTimeout(menu.attached.menu.cooldownTimeoutID);
+                    menu.attached.menu.cooldownTimeoutID = undefined;
                     let gottenItem = menu.items.find((item) => item.id === menu.attached.menu.attachedId);
                     if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
                 }
@@ -385,14 +386,14 @@
                 if (menu.attached?.menu === undefined) return;
                 if (menu.attached.menu.element === undefined) return;
 
-                if (menu.attached?.cooldownTimeoutID !== undefined) {
-                    clearTimeout(menu.attached.cooldownTimeoutID);
-                    menu.attached.cooldownTimeoutID = undefined;
+                if (menu.attached?.menu?.cooldownTimeoutID !== undefined) {
+                    clearTimeout(menu.attached.menu.cooldownTimeoutID);
+                    menu.attached.menu.cooldownTimeoutID = undefined;
                 }
 
                 if (menu.attached.menu.attached?.menu?.attachedId !== undefined) return;
 
-                menu.attached.cooldownTimeoutID = setTimeout(() => {
+                menu.attached.menu.cooldownTimeoutID = setTimeout(() => {
                     if (menu.attached?.menu?.attachedId !== this.id) {
                         if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
                         return;
@@ -412,13 +413,15 @@
                     menu.attached.menu.Hide();
                     menu.attached.menu.attachedId = undefined;
                     if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+                    menu.attached.menu.cooldownTimeoutID = undefined;
                 }, 500);
 
                 menu.attached.menu.element.style["transition"] = "";
 
-                menu.attached.timeoutID = setTimeout(() => {
+                menu.attached.menu.timeoutID = setTimeout(() => {
                     if (menu.attached?.menu?.element === undefined) return;
                     menu.attached.menu.element.style["transition"] = "0s";
+                    menu.attached.menu.timeoutID = undefined;
                 }, 200);
             };
 
