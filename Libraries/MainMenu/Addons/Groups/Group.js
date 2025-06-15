@@ -178,7 +178,13 @@
                     if (menu.attached.menu.IsHoveringAnyMenu()) return;
 
                     if (this.element !== undefined && this.element !== null) {
-                        if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
+                        if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") {
+                            if (menu.attached.menu?.attached?.menu !== undefined) {
+                                menu.attached.menu?.attached?.menu.Hide();
+                                menu.attached.menu?.attached?.menu.attachedId = undefined;
+                            }
+                            return;
+                        }
                     }
                     if (menu.element !== undefined && menu.element !== null) {
                         if (!menu.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
