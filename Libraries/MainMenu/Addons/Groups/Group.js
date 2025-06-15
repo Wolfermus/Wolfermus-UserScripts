@@ -232,13 +232,13 @@
 
                 if (menu.attached.menu.attachedId !== undefined) {
                     this.element.style["background-color"] = "";
+                    let gottenItem = menu.items.find((item) => item.id === menu.attached.menu.attachedId);
+                    if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
                 }
 
                 if (menu.attached?.cooldownTimeoutID !== undefined) {
                     clearTimeout(menu.attached.cooldownTimeoutID);
                     menu.attached.cooldownTimeoutID = undefined;
-                    let gottenItem = menu.items.find((item) => item.id === menu.attached.menu.attachedId);
-                    if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
                 }
 
                 menu.attached.menu.Hide();
