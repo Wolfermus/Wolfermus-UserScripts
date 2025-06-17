@@ -288,7 +288,7 @@ async (path, branch) => {
     if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
     let QOLSettings = YoutubeSettings["QOL"];
 
-    if (!YoutubeSettings["TimeRemaining"]) YoutubeSettings["TimeRemaining"] = {};
+    if (!QOLSettings["TimeRemaining"]) QOLSettings["TimeRemaining"] = {};
     let TimeRemainingSettings = QOLSettings["TimeRemaining"];
 
     TimeRemainingSettings.Active ??= false;
@@ -304,7 +304,7 @@ async (path, branch) => {
         if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
         let QOLSettings = YoutubeSettings["QOL"];
 
-        if (!YoutubeSettings["TimeRemaining"]) YoutubeSettings["TimeRemaining"] = {};
+        if (!QOLSettings["TimeRemaining"]) QOLSettings["TimeRemaining"] = {};
         let TimeRemainingSettings = QOLSettings["TimeRemaining"];
 
         TimeRemainingSettings.Active = toggled;
