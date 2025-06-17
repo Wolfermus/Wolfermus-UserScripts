@@ -293,23 +293,25 @@ async (path, branch) => {
 
     TimeRemainingSettings.Active ??= false;
 
+    SetValue("Youtube", JSON.stringify(YoutubeGotten));
+
     if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
 
     const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Time Remaining`);
     QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
     QOLTimeRemainingMenuItem.ToggledEventAddCallback(async (toggled) => {
-        const YoutubeGotten = await GetValue("Youtube", "{}");
-        let YoutubeSettings = JSON.parse(YoutubeGotten);
+        const YoutubeGottenInner = await GetValue("Youtube", "{}");
+        let YoutubeSettingsInner = JSON.parse(YoutubeGottenInner);
 
-        if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
-        let QOLSettings = YoutubeSettings["QOL"];
+        if (!YoutubeSettingsInner["QOL"]) YoutubeSettingsInner["QOL"] = {};
+        let QOLSettingsInner = YoutubeSettingsInner["QOL"];
 
-        if (!QOLSettings["TimeRemaining"]) QOLSettings["TimeRemaining"] = {};
-        let TimeRemainingSettings = QOLSettings["TimeRemaining"];
+        if (!QOLSettingsInner["TimeRemaining"]) QOLSettingsInner["TimeRemaining"] = {};
+        let TimeRemainingSettingsInner = QOLSettingsInner["TimeRemaining"];
 
-        TimeRemainingSettings.Active = toggled;
+        TimeRemainingSettingsInner.Active = toggled;
 
-        SetValue("Youtube", JSON.stringify(YoutubeGotten));
+        SetValue("Youtube", JSON.stringify(YoutubeGottenInner));
 
         if (toggled) LoadScriptOnce("TimeRemaining");
     });
@@ -319,15 +321,15 @@ async (path, branch) => {
     let QOLMenuItem = new WolfermusGroupMenuItem("Quality Of Life");
     QOLMenuItem.collapsed = QOLSettings.Collapsed;
     QOLMenuItem.CollapsedAddCallback(async (newCollapsed) => {
-        const YoutubeGotten = await GetValue("Youtube", "{}");
-        let YoutubeSettings = JSON.parse(YoutubeGotten);
+        const YoutubeGottenInner = await GetValue("Youtube", "{}");
+        let YoutubeSettingsInner = JSON.parse(YoutubeGottenInner);
 
-        if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
-        let QOLSettings = YoutubeSettings["QOL"];
+        if (!YoutubeSettingsInner["QOL"]) YoutubeSettingsInner["QOL"] = {};
+        let QOLSettingsInner = YoutubeSettingsInner["QOL"];
 
-        QOLSettings.Collapsed = newCollapsed;
+        QOLSettingsInner.Collapsed = newCollapsed;
 
-        SetValue("Youtube", JSON.stringify(YoutubeGotten));
+        SetValue("Youtube", JSON.stringify(YoutubeGottenInner));
     });
     QOLMenuItem.items.push(QOLTimeRemainingMenuItem);
 
