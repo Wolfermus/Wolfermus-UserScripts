@@ -294,6 +294,8 @@ async (path, branch) => {
 
     TimeRemainingSettings.Active ??= false;
 
+    QOLSettings.Collapsed ??= true;
+
     SetValue("Youtube", JSON.stringify(YoutubeSettings));
 
     if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
@@ -317,8 +319,6 @@ async (path, branch) => {
 
         if (toggled) LoadScriptOnce("TimeRemaining");
     });
-
-    QOLSettings.Collapsed ??= true;
 
     let QOLMenuItem = new WolfermusGroupMenuItem("Quality Of Life");
     QOLMenuItem.collapsed = QOLSettings.Collapsed;

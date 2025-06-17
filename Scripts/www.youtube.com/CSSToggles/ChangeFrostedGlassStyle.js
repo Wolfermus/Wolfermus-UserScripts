@@ -51,6 +51,7 @@ async () => {
         gottenElement = document.getElementById("frosted-glass");
         if (gottenElement === null) return;
 
+        // TODO: Fix bug when no background colour for example when opening youtube in private and there is not videos.
         // Get the current background-color value:
         value = getComputedStyle(gottenElement).getPropertyValue("background-color");
 
