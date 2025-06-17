@@ -317,7 +317,7 @@ async (path, branch) => {
         });
     }
 
-    let ToggleFrostedGlassMenuItem = new WolfermusToggleButtonMenuItem("MainPageScrollFrostedGlass", `Toggle Scroll Frosted Glass`, "This script toggles the top bar from a frosted transparent\nlook into solid color");
+    let ToggleFrostedGlassMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Scroll Frosted Glass`, "This script toggles the top bar from a frosted transparent\nlook into solid color");
     ToggleFrostedGlassMenuItem.toggled = WolfermusCSSTogglesSettings["FrostedGlass"];
     ToggleFrostedGlassMenuItem.ToggledEventAddCallback(async (toggled) => {
         const GUIGotten = await GetValue("CSSToggles", "{}");
