@@ -284,6 +284,7 @@ async (path, branch) => {
 
     const YoutubeGotten = await GetValue("Youtube", "{}");
     let YoutubeSettings = JSON.parse(YoutubeGotten);
+    if (!YoutubeSettings || typeof YoutubeSettings !== "object") YoutubeSettings = {};
 
     if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
     let QOLSettings = YoutubeSettings["QOL"];
@@ -302,6 +303,7 @@ async (path, branch) => {
     QOLTimeRemainingMenuItem.ToggledEventAddCallback(async (toggled) => {
         const YoutubeGottenInner = await GetValue("Youtube", "{}");
         let YoutubeSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!YoutubeSettingsInner || typeof YoutubeSettingsInner !== "object") YoutubeSettingsInner = {};
 
         if (!YoutubeSettingsInner["QOL"]) YoutubeSettingsInner["QOL"] = {};
         let QOLSettingsInner = YoutubeSettingsInner["QOL"];
@@ -323,6 +325,7 @@ async (path, branch) => {
     QOLMenuItem.CollapsedAddCallback(async (newCollapsed) => {
         const YoutubeGottenInner = await GetValue("Youtube", "{}");
         let YoutubeSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!YoutubeSettingsInner || typeof YoutubeSettingsInner !== "object") YoutubeSettingsInner = {};
 
         if (!YoutubeSettingsInner["QOL"]) YoutubeSettingsInner["QOL"] = {};
         let QOLSettingsInner = YoutubeSettingsInner["QOL"];
