@@ -4,7 +4,7 @@
     box-sizing: border-box;
 }
 
-.WolfermusActive {
+.WolfermusVisable {
     visibility: visible !important;
 }
 
@@ -99,6 +99,14 @@
         padding-bottom: 2%;
         overflow: auto;
         border-radius: 15px;
+
+        .WolfermusActive {
+            li {
+                &.WolfermusGroupItem {
+                    background: #3d3d3d;
+                }
+            }
+        }
 
         li {
 
@@ -395,7 +403,7 @@
             }
         }
 
-        &.WolfermusActive {
+        &.WolfermusVisable {
             .WolfermusActivatedMainMenuWindow {
                 transition: 0.5s;
                 visibility: visible;
