@@ -85,7 +85,7 @@ function MakeGetRequest(url) {
             url: url,
             onload: (response) => {
                 if (response.status !== 200) {
-                    reject(statusText);
+                    reject(response.statusText);
                     return;
                 }
                 resolve(response.responseText);
@@ -208,7 +208,6 @@ function WolfermusCheckLibraryLoaded(key) {
             return;
         }
         wolfermusAntiStuckLoop1--;
-
     }
 
     if (WolfermusCheckModuleLoaded("MainMenu")) return;
@@ -265,28 +264,78 @@ function WolfermusCheckLibraryLoaded(key) {
 
     const websiteName = window.location.hostname;
     const branch = "beta";
-    const baseScriptURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Scripts/${websiteName}`;
+    const baseScriptURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Scripts/`;
+    const baseWebsiteScriptURL = `${baseScriptURL}${websiteName}/`;
     async function GetScripts() {
-        let gottenBody = JSON.parse(await MakeGetRequest(`https://api.github.com/repos/Wolfermus/Wolfermus-UserScripts/git/trees/${branch}`));
-        let scriptsFolderItem = gottenBody.tree.find(item => item.path === "Scripts");
+        // TODO: Optimise Function
 
-        let gottenScriptsFolder = JSON.parse(await MakeGetRequest(scriptsFolderItem.url));
+        debugger;
 
-        let websiteFolderItem = gottenScriptsFolder.tree.filter(item => item.type === "tree").find(item => item.path === websiteName);
-
+        let startsWithString = "Scripts/";
+        let websiteNameStartsWithString = `${websiteName}/`;
         let scriptsURLS = [];
 
-        if (websiteFolderItem === undefined || websiteFolderItem === null) return scriptsURLS;
+        const wholeFunctionStartTime = performance.now();
 
+        let gottenBody = JSON.parse(await MakeGetRequest(`https://api.github.com/repos/Wolfermus/Wolfermus-UserScripts/git/trees/${branch}?recursive=true`));
+        // let gottenBody = JSON.parse(await MakeGetRequest(`https://api.github.com/repos/Wolfermus/Wolfermus-UserScripts/git/trees/${branch}`));
 
-        let gottenWebsiteScriptsFolder = JSON.parse(await MakeGetRequest(websiteFolderItem.url));
-        for (let scriptItem of gottenWebsiteScriptsFolder.tree) {
-            if (scriptItem.type === "blob") {
-                scriptsURLS.push(`${baseScriptURL}/${scriptItem.path}`);
-            } else if (scriptItem.type === "tree") {
-                scriptsURLS.push(`${baseScriptURL}/${scriptItem.path}/Main.js`);
-            }
+        // 835ms
+        console.info(`Wolfermus Main Menu Loaded - GetScripts - 1 - Took ${performance.now() - wholeFunctionStartTime}ms`);
+        let startTimeChange = performance.now();
+
+        let scriptsItems = gottenBody.tree.filter(item => item.path.startsWith(startsWithString));
+
+        // Unkown
+        console.info(`Wolfermus Main Menu Loaded - GetScripts - 1.5 - Took ${performance.now() - startTimeChange}ms`);
+        startTimeChange = performance.now();
+
+        scriptsItems.forEach(item => item.path = item.path.slice(startsWithString.length));
+
+        // 0.1ms
+        console.info(`Wolfermus Main Menu Loaded - GetScripts - 2 - Took ${performance.now() - startTimeChange}ms`);
+        startTimeChange = performance.now();
+
+        {
+            let everyWhereScripts = scriptsItems.filter(item => (!item.path.includes("/") && item.type === "blob"));
+            scriptsURLS.push(...everyWhereScripts.map(item => baseScriptURL + item.path));
         }
+
+        // 989ms
+        console.info(`Wolfermus Main Menu Loaded - GetScripts - 3 - Took ${performance.now() - startTimeChange}ms`);
+        startTimeChange = performance.now();
+
+        let websiteFolderItems = scriptsItems.filter(item => item.path.startsWith(websiteNameStartsWithString));
+
+        // 0ms
+        console.info(`Wolfermus Main Menu Loaded - GetScripts - 4 - Took ${performance.now() - startTimeChange}ms`);
+        startTimeChange = performance.now();
+
+        websiteFolderItems.forEach(item => item.path = item.path.slice(websiteNameStartsWithString.length));
+
+        // 0ms
+        console.info(`Wolfermus Main Menu Loaded - GetScripts - 5 - Took ${performance.now() - startTimeChange}ms`);
+        startTimeChange = performance.now();
+
+        {
+            let youtubeSingleScripts = websiteFolderItems.filter(item => (!item.path.includes("/") && item.type === "blob"));
+            scriptsURLS.push(...youtubeSingleScripts.map(item => baseWebsiteScriptURL + item.path));
+        }
+
+        // 114.5ms
+        console.info(`Wolfermus Main Menu Loaded - GetScripts - 6 - Took ${performance.now() - startTimeChange}ms`);
+        startTimeChange = performance.now();
+
+        {
+            let youtubeModuleScripts = websiteFolderItems.filter(item => (item.path.endsWith("/Main.js") && item.type === "blob"));
+            scriptsURLS.push(...youtubeModuleScripts.map(item => baseWebsiteScriptURL + item.path));
+        }
+
+        // 0ms
+        console.info(`Wolfermus Main Menu Loaded - GetScripts - 7 - Took ${performance.now() - startTimeChange}ms`);
+
+        // 1939.8ms
+        console.info(`Wolfermus Main Menu Loaded - GetScripts - wholeFunction - Took ${performance.now() - wholeFunctionStartTime}ms`);
 
         return scriptsURLS;
     }
@@ -301,7 +350,7 @@ function WolfermusCheckLibraryLoaded(key) {
         //console.log("Scripts/Main.js - 3");
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path));
-            await eval(script)(baseScriptURL, branch);
+            await eval(script)(baseScriptURL, baseWebsiteScriptURL, branch);
         } catch (error) {
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
@@ -312,16 +361,25 @@ function WolfermusCheckLibraryLoaded(key) {
 
     //await Sleep(1000);
 
-
-
     async function AttemptLoadScript() {
         const fetchedScripts = await GetScripts();
+
+        {
+            const endTime = performance.now();
+            console.info(`Wolfermus Main Menu Loaded - 1 - Took ${endTime - wolfermusMainMenuStartTime}ms`);
+        }
+
         for (let scriptURL of fetchedScripts) {
             //console.log("Scripts/Main.js - 2");
             await LoadScript(scriptURL).catch(async (error) => {
                 debugger;
                 console.error(`Wolfermus ERROR: Main - Failed To Load Scripts\n${error}`);
             });
+        }
+
+        {
+            const endTime = performance.now();
+            console.info(`Wolfermus Main Menu Loaded - 2 - Took ${endTime - wolfermusMainMenuStartTime}ms`);
         }
     }
     //console.log("Scripts/Main.js - 1");
