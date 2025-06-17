@@ -1890,8 +1890,10 @@ function ResetItemBackgroundColor(event) {
     const menu = GetMainMenu();
     if (menu.attached?.menu?.id === undefined) return;
 
-    const foundItem = menu.items.find((item) => item.id === menu.attached.menu.attachedId);
-    if (foundItem?.element !== undefined) foundItem.element.style["background-color"] = "";
+    if (menu.attached.menu?.attachedItem?.ContainsClass?.("WolfermusActive")) {
+        menu.attached.menu.attachedItem.RemoveClass("WolfermusActive");
+        menu.attached.menu.attachedItem.UpdateClasses();
+    }
 }
 
 /**
