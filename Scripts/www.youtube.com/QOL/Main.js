@@ -62,6 +62,11 @@ async (path, branch) => {
     }
 
     {
+        const endTime = performance.now();
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 1 - Took ${endTime - startTime}ms`);
+    }
+
+    {
         let wolfermusAntiStuckLoop1 = 100;
         while (window === undefined || window === null) {
             await Sleep(100);
@@ -72,6 +77,11 @@ async (path, branch) => {
             }
             wolfermusAntiStuckLoop1--;
         }
+    }
+
+    {
+        const endTime = performance.now();
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 2 - Took ${endTime - startTime}ms`);
     }
 
     //#region Utilities
@@ -171,6 +181,11 @@ async (path, branch) => {
     //#endregion -Utilities
 
     {
+        const endTime = performance.now();
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 3 - Took ${endTime - startTime}ms`);
+    }
+
+    {
         let wolfermusLoadLoopCounter = 0;
         while (!WolfermusCheckLibraryLoaded("StorageManager")) {
             await Sleep(100);
@@ -181,6 +196,11 @@ async (path, branch) => {
             }
             wolfermusLoadLoopCounter++;
         }
+    }
+
+    {
+        const endTime = performance.now();
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 4 - Took ${endTime - startTime}ms`);
     }
 
     {
@@ -196,7 +216,12 @@ async (path, branch) => {
         }
     }
 
-    console.log("Wolfermus: Youtube - QOL Loading");
+    {
+        const endTime = performance.now();
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 5 - Took ${endTime - startTime}ms`);
+    }
+
+    console.info("Wolfermus Scripts: Youtube - QOL Loading");
 
     const storageManagerLibrary = WolfermusGetLibrary("StorageManager");
 
@@ -215,6 +240,11 @@ async (path, branch) => {
 
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
+    {
+        const endTime = performance.now();
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 6 - Took ${endTime - startTime}ms`);
+    }
+
     if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) {
         let preventLoopLock = 20;
         const baseURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}`;
@@ -232,6 +262,11 @@ async (path, branch) => {
         await LoadWolfermusGroupMenuItem();
     }
     if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) return;
+
+    {
+        const endTime = performance.now();
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 7 - Took ${endTime - startTime}ms`);
+    }
 
 
     /**
@@ -255,8 +290,6 @@ async (path, branch) => {
      * @type {() => WolfermusMenu}
      */
     const GetMainMenu = mainMenuLibrary["Menus"]["GetMainMenu"];
-
-
 
     let wolfermusPreventLoopLock1 = {};
     async function LoadScriptOnce(scriptName) {
@@ -282,6 +315,10 @@ async (path, branch) => {
         }
     }
 
+    {
+        const endTime = performance.now();
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 8 - Took ${endTime - startTime}ms`);
+    }
 
     const YoutubeGotten = await GetValue("Youtube", "{}");
     let YoutubeSettings = JSON.parse(YoutubeGotten);
@@ -299,7 +336,17 @@ async (path, branch) => {
 
     SetValue("Youtube", JSON.stringify(YoutubeSettings));
 
+    {
+        const endTime = performance.now();
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 9 - Took ${endTime - startTime}ms`);
+    }
+
     if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
+
+    {
+        const endTime = performance.now();
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 10 - Took ${endTime - startTime}ms`);
+    }
 
     const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Time Remaining`);
     QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
@@ -342,5 +389,5 @@ async (path, branch) => {
     mainMenu.items.push(QOLMenuItem);
 
     const endTime = performance.now();
-    console.log(`Wolfermus: Youtube - QOL Loaded - Took ${endTime - startTime}ms`);
+    console.info(`Wolfermus Scripts: Youtube - QOL Loaded - Took ${endTime - startTime}ms`);
 };
