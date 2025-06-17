@@ -294,7 +294,7 @@ async (path, branch) => {
 
     TimeRemainingSettings.Active ??= false;
 
-    SetValue("Youtube", JSON.stringify(YoutubeGotten));
+    SetValue("Youtube", JSON.stringify(YoutubeSettings));
 
     if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
 
@@ -313,7 +313,7 @@ async (path, branch) => {
 
         TimeRemainingSettingsInner.Active = toggled;
 
-        SetValue("Youtube", JSON.stringify(YoutubeGottenInner));
+        SetValue("Youtube", JSON.stringify(YoutubeSettingsInner));
 
         if (toggled) LoadScriptOnce("TimeRemaining");
     });
@@ -332,7 +332,7 @@ async (path, branch) => {
 
         QOLSettingsInner.Collapsed = newCollapsed;
 
-        SetValue("Youtube", JSON.stringify(YoutubeGottenInner));
+        SetValue("Youtube", JSON.stringify(YoutubeSettingsInner));
     });
     QOLMenuItem.items.push(QOLTimeRemainingMenuItem);
 
