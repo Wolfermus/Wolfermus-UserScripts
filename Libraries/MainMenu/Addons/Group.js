@@ -154,6 +154,16 @@
             this.#collapsed = false;
         }
 
+        set collapsed(newValue) {
+            if (typeof newValue !== "boolean") return;
+            if (newValue === this.#collapsed) return;
+
+            if (newValue) {
+                this.Collapse();
+            } else {
+                this.Expand();
+            }
+        }
         get collapsed() { return this.#collapsed; }
 
         /**
