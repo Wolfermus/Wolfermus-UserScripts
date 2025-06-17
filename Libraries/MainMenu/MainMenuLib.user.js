@@ -83,7 +83,7 @@ function MakeGetRequest(url) {
             url: url,
             onload: (response) => {
                 if (response.status !== 200) {
-                    reject(statusText);
+                    reject(response.statusText);
                     return;
                 }
                 resolve(response.responseText);
