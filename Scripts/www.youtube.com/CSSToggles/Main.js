@@ -267,7 +267,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
             createScriptURL: (string) => string
         });
 
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}/CSSToggles/ChangeFrostedGlassStyle.js`));
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}CSSToggles/ChangeFrostedGlassStyle.js`));
         ChangeFrostedGlassStyle = eval(script);
     }
 
@@ -279,7 +279,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
             createScriptURL: (string) => string
         });
 
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}/CSSToggles/RestoreFrostedGlassBackgroundColor.js`));
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}CSSToggles/RestoreFrostedGlassBackgroundColor.js`));
         RestoreFrostedGlassBackgroundColor = eval(script);
     }
 

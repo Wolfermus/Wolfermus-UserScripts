@@ -219,7 +219,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         let preventLoopLock = 20;
         async function LoadWolfermusGroupMenuItem() {
             try {
-                const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseURL}/Libraries/MainMenu/Addons/Group.js`));
+                const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseURL}Libraries/MainMenu/Addons/Group.js`));
                 await eval(script);
             } catch (error) {
                 if (preventLoopLock <= 0) return;
@@ -265,7 +265,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (wolfermusPreventLoopLock1[scriptName].once) return;
         //console.log("Scripts/Main.js - 3");
         try {
-            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}/QOL/${scriptName}.js`));
+            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}QOL/${scriptName}.js`));
             // TODO: Allow scripts to return an object detailing to only load script once, a menuitem.
             await eval(script)(baseScriptURL);
             wolfermusPreventLoopLock1[scriptName].once = true;
