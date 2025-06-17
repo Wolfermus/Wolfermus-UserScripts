@@ -1,4 +1,4 @@
-async (path, branch) => {
+async (baseScriptPath, baseWebsiteScriptPath, branch) => {
     const startTime = performance.now();
     //#region Setting Up ChosenXmlHttpRequest
     let IsGMXmlHttpRequest1 = false;
@@ -42,7 +42,7 @@ async (path, branch) => {
                 url: url,
                 onload: (response) => {
                     if (response.status !== 200) {
-                        reject(statusText);
+                        reject(response.statusText);
                         return;
                     }
                     resolve(response.responseText);
@@ -62,11 +62,6 @@ async (path, branch) => {
     }
 
     {
-        const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 1 - Took ${endTime - startTime}ms`);
-    }
-
-    {
         let wolfermusAntiStuckLoop1 = 100;
         while (window === undefined || window === null) {
             await Sleep(100);
@@ -77,11 +72,6 @@ async (path, branch) => {
             }
             wolfermusAntiStuckLoop1--;
         }
-    }
-
-    {
-        const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 2 - Took ${endTime - startTime}ms`);
     }
 
     //#region Utilities
@@ -181,11 +171,6 @@ async (path, branch) => {
     //#endregion -Utilities
 
     {
-        const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 3 - Took ${endTime - startTime}ms`);
-    }
-
-    {
         let wolfermusLoadLoopCounter = 0;
         while (!WolfermusCheckLibraryLoaded("StorageManager")) {
             await Sleep(100);
@@ -199,11 +184,6 @@ async (path, branch) => {
     }
 
     {
-        const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 4 - Took ${endTime - startTime}ms`);
-    }
-
-    {
         let wolfermusLoadLoopCounter = 0;
         while (!WolfermusCheckLibraryLoaded("MainMenu")) {
             await Sleep(100);
@@ -214,11 +194,6 @@ async (path, branch) => {
             }
             wolfermusLoadLoopCounter++;
         }
-    }
-
-    {
-        const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 5 - Took ${endTime - startTime}ms`);
     }
 
     console.info("Wolfermus Scripts: Youtube - QOL Loading");
@@ -242,7 +217,7 @@ async (path, branch) => {
 
     {
         const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 6 - Took ${endTime - startTime}ms`);
+        console.info(`Wolfermus Scripts: Youtube - QOL Loading - Group [Before] - Took ${endTime - startTime}ms`);
     }
 
     if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) {
@@ -260,14 +235,13 @@ async (path, branch) => {
             }
         }
         await LoadWolfermusGroupMenuItem();
+
+        {
+            const endTime = performance.now();
+            console.info(`Wolfermus Scripts: Youtube - QOL Loading - Group [After] - Took ${endTime - startTime}ms`);
+        }
     }
     if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) return;
-
-    {
-        const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 7 - Took ${endTime - startTime}ms`);
-    }
-
 
     /**
      * @type {WolfermusToggleButtonMenuItem}
@@ -302,7 +276,7 @@ async (path, branch) => {
         if (wolfermusPreventLoopLock1[scriptName].once) return;
         //console.log("Scripts/Main.js - 3");
         try {
-            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${path}/QOL/${scriptName}.js`));
+            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseWebsiteScriptPath}/QOL/${scriptName}.js`));
             // TODO: Allow scripts to return an object detailing to only load script once, a menuitem.
             await eval(script)(baseScriptURL);
             wolfermusPreventLoopLock1[scriptName].once = true;
@@ -313,11 +287,6 @@ async (path, branch) => {
             await Sleep(100);
             await LoadScriptOnce(scriptName);
         }
-    }
-
-    {
-        const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 8 - Took ${endTime - startTime}ms`);
     }
 
     const YoutubeGotten = await GetValue("Youtube", "{}");
@@ -336,17 +305,7 @@ async (path, branch) => {
 
     SetValue("Youtube", JSON.stringify(YoutubeSettings));
 
-    {
-        const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 9 - Took ${endTime - startTime}ms`);
-    }
-
     if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
-
-    {
-        const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - 10 - Took ${endTime - startTime}ms`);
-    }
 
     const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Time Remaining`);
     QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
