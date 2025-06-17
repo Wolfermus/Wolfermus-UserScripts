@@ -250,11 +250,36 @@ async (path) => {
         return document.getElementsByClassName("wlfYTTimeRemaining");
     }
 
-    async function CreateRemainingLeft() {
-        const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-        let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
+    /**
+     * @async
+     * @returns {{Active: boolean}}
+     */
+    async function GetTimeRemainingSettings() {
+        const YoutubeGotten = await GetValue("Youtube", "{}");
+        let YoutubeSettings = JSON.parse(YoutubeGotten);
+        if (!YoutubeSettings || typeof YoutubeSettings !== "object") YoutubeSettings = {};
 
-        if (!WolfermusQOLTimeRemainingSettings.Active) return;
+        if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
+        let QOLSettings = YoutubeSettings["QOL"];
+
+        if (!QOLSettings["TimeRemaining"]) QOLSettings["TimeRemaining"] = {};
+        let TimeRemainingSettings = QOLSettings["TimeRemaining"];
+
+        TimeRemainingSettings.Active ??= false;
+
+        return TimeRemainingSettings;
+    }
+
+    /**
+     * @async
+     * @returns {boolean}
+     */
+    async function IsTimeRemainingActive() {
+        return GetTimeRemainingSettings().Active;
+    }
+
+    async function CreateRemainingLeft() {
+        if (!(await IsTimeRemainingActive())) return;
 
         let videoArray = document.getElementsByTagName("video");
         if (videoArray.length <= 0) return;
@@ -312,10 +337,7 @@ async (path) => {
 
         let lastValue;
         video.addEventListener("timeupdate", async (event) => {
-            const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-            let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-            if (!WolfermusQOLTimeRemainingSettings.Active) return;
+            if (!(await IsTimeRemainingActive())) return;
 
             if (lastValue !== video.currentTime) {
                 lastValue = video.currentTime;
@@ -324,19 +346,13 @@ async (path) => {
             }
         });
         video.addEventListener("ratechange", async (event) => {
-            const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-            let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-            if (!WolfermusQOLTimeRemainingSettings.Active) return;
+            if (!(await IsTimeRemainingActive())) return;
 
             await UpdateRemainingLeft();
         });
 
         video.addEventListener("durationchange", async (event) => {
-            const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-            let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-            if (!WolfermusQOLTimeRemainingSettings.Active) return;
+            if (!(await IsTimeRemainingActive())) return;
 
             await UpdateRemainingLeft();
         });
@@ -345,10 +361,7 @@ async (path) => {
     var shouldUpdate = true;
 
     async function UpdateRemainingLeft() {
-        const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-        let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-        if (!WolfermusQOLTimeRemainingSettings.Active) return;
+        if (!(await IsTimeRemainingActive())) return;
 
         let videoArray = document.getElementsByTagName("video");
         if (videoArray.length <= 0) return;
@@ -436,10 +449,7 @@ async (path) => {
      * @param {Element} elementToInsertAfter
      */
     async function CreatePreviewRemaingLeft(elementToInsertAfter) {
-        const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-        let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-        if (!WolfermusQOLTimeRemainingSettings.Active) return;
+        if (!(await IsTimeRemainingActive())) return;
 
         let player = document.getElementById("player");
         if (!player) return;
@@ -553,10 +563,7 @@ async (path) => {
         // @ts-ignore
         const MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
         const observer = new MutationObserver(async () => {
-            const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-            let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-            if (!WolfermusQOLTimeRemainingSettings.Active) return;
+            if (!(await IsTimeRemainingActive())) return;
 
             if (lastValue !== elementToInsertAfter.innerHTML) {
                 lastValue = remainingTimeFromElementTime;
@@ -584,28 +591,19 @@ async (path) => {
         });
 
         video.addEventListener("ratechange", async (event) => {
-            const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-            let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-            if (!WolfermusQOLTimeRemainingSettings.Active) return;
+            if (!(await IsTimeRemainingActive())) return;
 
             await UpdatePreviewRemainingLeft();
         });
 
         video.addEventListener("durationchange", async (event) => {
-            const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-            let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-            if (!WolfermusQOLTimeRemainingSettings.Active) return;
+            if (!(await IsTimeRemainingActive())) return;
 
             await UpdatePreviewRemainingLeft();
         });
 
         video.addEventListener("timeupdate", async (event) => {
-            const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-            let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-            if (!WolfermusQOLTimeRemainingSettings.Active) return;
+            if (!(await IsTimeRemainingActive())) return;
 
             await UpdatePreviewRemainingLeft();
         });
@@ -615,10 +613,7 @@ async (path) => {
      * @param {HTMLVideoElement} video
      */
     async function UpdatePreviewRemainingLeft() {
-        const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-        let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-        if (!WolfermusQOLTimeRemainingSettings.Active) return;
+        if (!(await IsTimeRemainingActive())) return;
 
         let videoArray = document.getElementsByTagName("video");
         if (videoArray.length <= 0) return;
@@ -721,12 +716,9 @@ async (path) => {
     var lastTimeRemainingParentAutoHideElement;
 
     setInterval(async () => {
-        const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-        let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
         const timeRemainingModule = WolfermusGetModule("QOLTimeRemaining", true);
 
-        if (!WolfermusQOLTimeRemainingSettings.Active) {
+        if (!(await IsTimeRemainingActive())) {
             for (let element of GetTimeRemainingElements()) {
                 element.style.display = "none";
             }
@@ -788,10 +780,7 @@ async (path) => {
     // @ts-ignore
     const MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver;
     const wlfYTPPreviewObserver = new MutationObserver(async () => {
-        const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-        let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-        if (!WolfermusQOLTimeRemainingSettings.Active) return;
+        if (!(await IsTimeRemainingActive())) return;
 
         if (lastClassValue !== lastPreviewElement.className) {
             lastClassValue = lastPreviewElement.className;
@@ -806,10 +795,7 @@ async (path) => {
     });
 
     setInterval(async () => {
-        const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-        let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
-
-        if (!WolfermusQOLTimeRemainingSettings.Active) {
+        if (!(await IsTimeRemainingActive())) {
             if (wlfPreviewToolTipTimeRemainingElementRight && document.contains(wlfPreviewToolTipTimeRemainingElementRight)) wlfPreviewToolTipTimeRemainingElementRight.style.display = "none";
             if (wlfPreviewToolTipTimeRemainingElementLeft && document.contains(wlfPreviewToolTipTimeRemainingElementLeft)) wlfPreviewToolTipTimeRemainingElementLeft.style.display = "none";
             lastClassValue = undefined;
