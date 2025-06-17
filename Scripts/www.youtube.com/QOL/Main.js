@@ -215,11 +215,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
-    {
-        const endTime = performance.now();
-        console.info(`Wolfermus Scripts: Youtube - QOL Loading - Group [Before] - Took ${endTime - startTime}ms`);
-    }
-
     if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) {
         let preventLoopLock = 20;
         async function LoadWolfermusGroupMenuItem() {
@@ -234,11 +229,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
             }
         }
         await LoadWolfermusGroupMenuItem();
-
-        {
-            const endTime = performance.now();
-            console.info(`Wolfermus Scripts: Youtube - QOL Loading - Group [After] - Took ${endTime - startTime}ms`);
-        }
     }
     if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) return;
 
