@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.0.1
+// @version      4.0.2
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -29,7 +29,7 @@
 // @icon         https://i.imgur.com/XFeWfV0.png
 // ==/UserScript== 
 
-const startTime = performance.now();
+const wolfermusMainMenuLibStartTime = performance.now();
 
 if (typeof wolfermusBypassScriptPolicy === "undefined" || typeof wolfermusBypassScriptPolicy === "null") {
     var wolfermusBypassScriptPolicy = trustedTypes.createPolicy("wolfermusBypassScript", {
@@ -2074,5 +2074,5 @@ async function UpdateMenuItems() {
     MainMenuLibrary["Loaded"] = true;
 
     const endTime = performance.now();
-    console.info(`Wolfermus MainMenu Library: Loaded - Took ${endTime - startTime}ms`);
+    console.info(`Wolfermus MainMenu Library: Loaded - Took ${endTime - wolfermusMainMenuLibStartTime}ms`);
 })();
