@@ -275,7 +275,7 @@ async (path) => {
      * @returns {boolean}
      */
     async function IsTimeRemainingActive() {
-        return GetTimeRemainingSettings().Active;
+        return (await GetTimeRemainingSettings()).Active;
     }
 
     async function CreateRemainingLeft() {
