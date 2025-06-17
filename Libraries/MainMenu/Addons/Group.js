@@ -1,4 +1,6 @@
 (async () => {
+    const startTime = performance.now();
+
     //#region Utilities
     /**
      * @param {number | undefined} ms
@@ -65,7 +67,7 @@
 
     let antiStuckLoop = 50;
     while (!WolfermusCheckLibraryLoaded("MainMenu") && antiStuckLoop > 0) {
-        await Sleep(200);
+        await Sleep(50);
         antiStuckLoop--;
     }
 
@@ -710,4 +712,7 @@
     }
 
     mainMenuLibrary["Classes"]["Addons"]["WolfermusGroupMenuItem"] = WolfermusGroupMenuItem;
+
+    const endTime = performance.now();
+    console.info(`Wolfermus MainMenu: Addons - GroupMenuItem Added - Took ${endTime - startTime}ms`);
 })();

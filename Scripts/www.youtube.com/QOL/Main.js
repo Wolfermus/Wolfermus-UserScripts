@@ -1,4 +1,5 @@
 async (path, branch) => {
+    const startTime = performance.now();
     //#region Setting Up ChosenXmlHttpRequest
     let IsGMXmlHttpRequest1 = false;
     // @ts-ignore
@@ -195,7 +196,7 @@ async (path, branch) => {
         }
     }
 
-    console.log("Wolfermus: Youtube - QOL Running");
+    console.log("Wolfermus: Youtube - QOL Loading");
 
     const storageManagerLibrary = WolfermusGetLibrary("StorageManager");
 
@@ -215,7 +216,7 @@ async (path, branch) => {
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
     if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) {
-        let preventLoopLock = 10;
+        let preventLoopLock = 20;
         const baseURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}`;
         async function LoadWolfermusGroupMenuItem() {
             try {
@@ -224,7 +225,7 @@ async (path, branch) => {
             } catch (error) {
                 if (preventLoopLock <= 0) return;
                 preventLoopLock--;
-                await Sleep(100);
+                await Sleep(50);
                 await LoadWolfermusGroupMenuItem();
             }
         }
@@ -339,4 +340,7 @@ async (path, branch) => {
     const mainMenu = GetMainMenu();
 
     mainMenu.items.push(QOLMenuItem);
+
+    const endTime = performance.now();
+    console.log(`Wolfermus: Youtube - QOL Loaded - Took ${endTime - startTime}ms`);
 };

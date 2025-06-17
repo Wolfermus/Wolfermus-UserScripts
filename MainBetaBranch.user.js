@@ -31,6 +31,8 @@
 // @icon         https://i.imgur.com/XFeWfV0.png
 // ==/UserScript== 
 
+const startTime = performance.now();
+
 if (typeof wolfermusBypassScriptPolicy === "undefined" || typeof wolfermusBypassScriptPolicy === "null") {
     var wolfermusBypassScriptPolicy = trustedTypes.createPolicy("wolfermusBypassScript", {
         createHTML: (string) => string,
@@ -213,7 +215,7 @@ function WolfermusCheckLibraryLoaded(key) {
     let mainMenuModule = WolfermusGetModule("MainMenu", true);
 
     while (mainMenuModule["Loading"] === true) {
-        await Sleep(500);
+        await Sleep(100);
     }
 
     if (WolfermusCheckModuleLoaded("MainMenu")) return;
@@ -221,11 +223,11 @@ function WolfermusCheckLibraryLoaded(key) {
     mainMenuModule["Loaded"] = false;
     mainMenuModule["Loading"] = true;
 
-    console.log("Wolfermus Main Menu Loading...");
+    console.info("Wolfermus Main Menu Loading...");
 
     let wolfermusLoadLoopCounter = 0;
     while (!WolfermusCheckLibraryLoaded("MainMenu")) {
-        await Sleep(500);
+        await Sleep(50);
 
         if (wolfermusLoadLoopCounter >= 100) {
             alert("ERROR: antiStuckLoop engaged");
@@ -350,7 +352,9 @@ function WolfermusCheckLibraryLoaded(key) {
 
     //console.log("Scripts/Main.js - 5");
 
-    console.log("Wolfermus Loaded Scripts/Main.js");
+    const endTime = performance.now();
+
+    console.info(`Wolfermus Main Menu Loaded - Took ${endTime - startTime}ms`);
 
     mainMenuModule["Loaded"] = true;
     mainMenuModule["Loading"] = false;

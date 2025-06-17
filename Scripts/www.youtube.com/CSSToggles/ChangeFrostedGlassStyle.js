@@ -30,7 +30,6 @@ async () => {
 
     // Get the current background-color value:
     let value = getComputedStyle(gottenElement).getPropertyValue("background-color");
-    console.log(value);
 
     // Get all color components (alpha may not be there if = 1):
     let parts = value.match(/[\d.]+/g);

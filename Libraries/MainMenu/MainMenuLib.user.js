@@ -29,6 +29,8 @@
 // @icon         https://i.imgur.com/XFeWfV0.png
 // ==/UserScript== 
 
+const startTime = performance.now();
+
 if (typeof wolfermusBypassScriptPolicy === "undefined" || typeof wolfermusBypassScriptPolicy === "null") {
     var wolfermusBypassScriptPolicy = trustedTypes.createPolicy("wolfermusBypassScript", {
         createHTML: (string) => string,
@@ -2038,7 +2040,7 @@ async function UpdateMenuItems() {
 
     if (WolfermusCheckLibraryLoaded("MainMenu")) return;
 
-    console.log("Wolfermus Main Menu Library Loading...");
+    console.info("Wolfermus MainMenu Library - Loading...");
 
     let MainMenuLibrary = WolfermusGetLibrary("MainMenu", true);
 
@@ -2070,4 +2072,7 @@ async function UpdateMenuItems() {
     MainMenuLibrary["UpdateMenuItems"] = UpdateMenuItems;
 
     MainMenuLibrary["Loaded"] = true;
+
+    const endTime = performance.now();
+    console.info(`Wolfermus MainMenu Library: Loaded - Took ${endTime - startTime}ms`);
 })();

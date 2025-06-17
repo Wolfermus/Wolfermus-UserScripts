@@ -2,6 +2,8 @@ async (path, branch) => {
     //debugger;
     //if (window.location.href !== "https://www.youtube.com/") return;
 
+    const startTime = performance.now();
+
     //#region Setting Up ChosenXmlHttpRequest
     let IsGMXmlHttpRequest1 = false;
     // @ts-ignore
@@ -53,8 +55,6 @@ async (path, branch) => {
             });
         });
     }
-
-    console.log("Wolfermus: Youtube - CSSToggles Running");
 
     /**
      * @param {number | undefined} ms
@@ -213,7 +213,7 @@ async (path, branch) => {
         }
     }
 
-    console.log("Wolfermus - Adding CSSToggles");
+    console.info(`Wolfermus Scripts: Youtube - CSSToggles Loading`);
 
     const storageManagerLibrary = WolfermusGetLibrary("StorageManager");
 
@@ -345,4 +345,7 @@ async (path, branch) => {
     const mainMenu = GetMainMenu();
 
     mainMenu.items.push(ToggleFrostedGlassMenuItem);
+
+    const endTime = performance.now();
+    console.info(`Wolfermus Scripts: Youtube - CSSToggles Loaded - Took ${endTime - startTime}ms`);
 };
