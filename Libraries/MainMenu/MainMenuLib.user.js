@@ -1,11 +1,13 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      3.1.4
+// @version      4.0.0
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
 // @supportURL   https://github.com/Wolfermus/Wolfermus-UserScripts/issues
+// @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Libraries/MainMenu/MainMenuLib.user.js
+// @downloadURL  https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/main/Libraries/MainMenu/MainMenuLib.user.js
 // @license      GPLv3
 // @noframes
 // @match        *
@@ -379,7 +381,7 @@ function GetWolfermusFabImageMenuItem() {
         if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
         let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
-        WolfermusFabImageMenuItem = new WolfermusImageMenuItem("WolfermusFabImage", imgSrc);
+        WolfermusFabImageMenuItem = new WolfermusImageMenuItem(imgSrc);
 
         WolfermusMainMenuSettings.FloatingButton ??= {};
         WolfermusMainMenuSettings.FloatingButton.ToggleMovement ??= true;
@@ -515,7 +517,6 @@ function GetWolfermusFabImageMenuItem() {
         };
 
         const updateMenuItemsContextMenuItem = new WolfermusButtonMenuItem(
-            "WolfermusUpdateMenuItemsContextMenuItem",
             "Update Menu Items",
             "This Updates this whole menu and the floating button itself"
         );
@@ -526,7 +527,6 @@ function GetWolfermusFabImageMenuItem() {
         };
 
         const forceRefreshWolfermusRootItem = new WolfermusButtonMenuItem(
-            "WolfermusForceRefreshWolfermusRootItem",
             "Force Refresh WolfermusRoot HTMLElement",
             `This forces HTTP request latest WolfermusRoot HTML
             and refreshes the WolfermusRoot HTML`
@@ -542,7 +542,6 @@ function GetWolfermusFabImageMenuItem() {
         };
 
         const updateWolfermusMainMenuStyleContextMenuItem = new WolfermusButtonMenuItem(
-            "WolfermusUpdateWolfermusMainMenuStyleContextMenuItem",
             "Update Wolfermus Main Menu Style CSS",
             `This Refreshes/Updates the Wolfermus Main Menu Style CSS`
         );
@@ -555,7 +554,6 @@ function GetWolfermusFabImageMenuItem() {
         };
 
         const toggleMovementMenuItem = new WolfermusToggleButtonMenuItem(
-            "WolfermusToggleMovementMenuItem",
             `Toggle Movement (On This Page)`,
             `Toggles the ability to move the floating button (per page setting)`
         );
@@ -768,8 +766,10 @@ class WolfermusMenuItem {
      * @param {string} title
      * @param {string} tooltip
      */
-    constructor(id, title, tooltip = "") {
-        this.id = id;
+    constructor(title, tooltip = "") {
+        WolfermusMenu.id++;
+        this.id = WolfermusMenu.id;
+
         this.title = title;
         this.tooltip = tooltip;
 
@@ -785,9 +785,13 @@ class WolfermusMenuItem {
         wolfermusHrefChangesEvent.push(this.CheckUrls);
     }
     /**
-     * @type {any}
+     * @type {Number}
      */
-    id;
+    static id = 0;
+    /**
+     * @type {Number}
+     */
+    id = 0;
     /**
      * @type {string}
      */
@@ -931,7 +935,6 @@ class WolfermusMenuItem {
                 this.element.style.display = "none";
             }
             this.contextMenu.Hide();
-            this.contextMenu.attachedId = undefined;
         }
     }
 
@@ -973,7 +976,7 @@ class WolfermusMenuItem {
      */
     static GetToolTipMenuItem() {
         if (this.#ToolTipMenuItem === undefined) {
-            this.#ToolTipMenuItem = new WolfermusMenuItem("ToolTipText", "");
+            this.#ToolTipMenuItem = new WolfermusMenuItem("");
         }
         return this.#ToolTipMenuItem;
     }
@@ -1001,8 +1004,8 @@ class WolfermusMenuItem {
 
         toolTipsText.title = "";
 
-        toolTips.RemoveClass("WolfermusToolTipSetActive");
-        toolTips.RemoveClass("WolfermusActive");
+        toolTips.RemoveClass("WolfermusToolTipSetVisable");
+        toolTips.RemoveClass("WolfermusVisable");
         toolTips.UpdateClasses();
 
         await toolTips.Generate(await GetWolfermusRoot());
@@ -1103,7 +1106,7 @@ class WolfermusMenuItem {
 
         toolTipsText.title = this.tooltip;
 
-        toolTips.AddClass("WolfermusToolTipSetActive");
+        toolTips.AddClass("WolfermusToolTipSetVisable");
         toolTips.UpdateClasses();
         await toolTips.Generate(await GetWolfermusRoot());
 
@@ -1125,8 +1128,8 @@ class WolfermusMenuItem {
 
             toolTipsText.title = this.tooltip;
 
-            toolTips.AddClass("WolfermusActive");
-            toolTips.RemoveClass("WolfermusToolTipSetActive");
+            toolTips.AddClass("WolfermusVisable");
+            toolTips.RemoveClass("WolfermusToolTipSetVisable");
             toolTips.UpdateClasses();
 
             await toolTips.Generate(await GetWolfermusRoot());
@@ -1252,11 +1255,10 @@ class WolfermusMenuItem {
          */
         this.#contextMenuCallback = async (event) => {
             if (this.id === undefined || this.id === null) return;
-            if (this.contextMenu.attachedId === this.id) return;
+            if (this.contextMenu.attachedItem === this) return;
 
             this.contextMenu.Hide();
             menu.attached.contextMenu = undefined;
-            this.contextMenu.attachedId = undefined;
 
             if (this.contextMenu.items.length <= 0) return;
 
@@ -1265,7 +1267,7 @@ class WolfermusMenuItem {
             const x = event.clientX;
             const y = event.clientY;
 
-            this.contextMenu.attachedId = this.id;
+            this.contextMenu.attachedItem = this;
             menu.attached.contextMenu = this.contextMenu;
 
             this.contextMenu.UpdateClasses();
@@ -1285,7 +1287,6 @@ class WolfermusMenuItem {
             if (this.contextMenu.IsHoveringAnyMenu()) return;
             this.contextMenu.Hide();
             menu.attached.contextMenu = undefined;
-            this.contextMenu.attachedId = undefined;
         }
 
         this.element.addEventListener("contextmenu", this.#contextMenuCallback);
@@ -1342,12 +1343,11 @@ class WolfermusMenuItem {
 
 class WolfermusImageMenuItem extends WolfermusMenuItem {
     /**
-     * @param {any} id
      * @param {string} imageSource
      * @param {string} tooltip
      */
-    constructor(id, imageSource, tooltip = "") {
-        super(id, "", tooltip);
+    constructor(imageSource, tooltip = "") {
+        super("", tooltip);
         this.imageSource = imageSource;
         this.RemoveClass("WolfermusTextItem");
     }
@@ -1373,12 +1373,11 @@ class WolfermusImageMenuItem extends WolfermusMenuItem {
 
 class WolfermusButtonMenuItem extends WolfermusMenuItem {
     /**
-     * @param {any} id
      * @param {string} title
      * @param {string} tooltip
      */
-    constructor(id, title, tooltip = "") {
-        super(id, title, tooltip);
+    constructor(title, tooltip = "") {
+        super(title, tooltip);
         this.RemoveClass("WolfermusTextItem");
         this.AddClass("WolfermusActivable");
     }
@@ -1386,12 +1385,11 @@ class WolfermusButtonMenuItem extends WolfermusMenuItem {
 
 class WolfermusToggleButtonMenuItem extends WolfermusButtonMenuItem {
     /**
-     * @param {any} id
      * @param {string} title
      * @param {string} tooltip
      */
-    constructor(id, title, tooltip = "") {
-        super(id, title, tooltip);
+    constructor(title, tooltip = "") {
+        super(title, tooltip);
         this.AddClass("WolfermusToggleable");
         this.AddClass("WolfermusFalse");
     }
@@ -1541,12 +1539,11 @@ class WolfermusToggleButtonMenuItem extends WolfermusButtonMenuItem {
 
 class WolfermusBaseGroupMenuItem extends WolfermusMenuItem {
     /**
-     * @param {any} id
      * @param {string} title
      * @param {string} tooltip
      */
-    constructor(id, title, tooltip = "") {
-        super(id, title, tooltip);
+    constructor(title, tooltip = "") {
+        super(title, tooltip);
     }
 
     /**
@@ -1557,8 +1554,8 @@ class WolfermusBaseGroupMenuItem extends WolfermusMenuItem {
 
 class WolfermusMenu {
     constructor() {
-        this.id = WolfermusMenu.id;
         WolfermusMenu.id++;
+        this.id = WolfermusMenu.id;
 
         wolfermusRootRefreshesEvent.push(() => {
             this.RemoveEvents();
@@ -1574,9 +1571,9 @@ class WolfermusMenu {
      */
     id = 0;
     /**
-     * @type {Number}
+     * @type {WolfermusMenuItem | undefined}
      */
-    attachedId = 0;
+    attachedItem = undefined;
     /**
      * @type {Array<WolfermusMenuItem>}
      */
@@ -1584,7 +1581,7 @@ class WolfermusMenu {
     /**
      * @type {Array<WolfermusMenuItem>}
      */
-    #currentItems = [];
+    #currentItems = []; // TODO: Remove and have add/remove/set for items instead for live updating, instead of UpdateMenuItems being required. But still allow items to be added without having to regenerate with pass in variable.
     /**
      * @type {HTMLElement | null}
      */
@@ -1734,11 +1731,9 @@ class WolfermusMenu {
         }
         if (this.attached.menu !== undefined && this.attached.menu !== null) {
             this.attached.menu.Hide();
-            this.attached.menu.attachedId = undefined;
         }
         if (this.attached.contextMenu !== undefined && this.attached.contextMenu !== null) {
             this.attached.contextMenu.Hide();
-            this.attached.contextMenu.attachedId = undefined;
             this.attached.contextMenu = undefined;
         }
 
@@ -1820,13 +1815,11 @@ class WolfermusMenu {
     Hide() {
         if (this.attached?.contextMenu !== undefined) {
             this.attached.contextMenu.Hide();
-            this.attached.contextMenu.attachedId = undefined;
             this.attached.contextMenu = undefined;
         }
 
         if (this.attached?.menu !== undefined) {
             this.attached.menu.Hide();
-            this.attached.menu.attachedId = undefined;
         }
 
         if (this.element !== undefined && this.element !== null) {
@@ -1834,6 +1827,7 @@ class WolfermusMenu {
         }
 
         this.#showing = false;
+        this.attachedItem = undefined;
     }
 
     ToggleVisibility() {
@@ -1879,7 +1873,7 @@ async function ToolTipPointerMove(event) {
 
     const toolTips = WolfermusMenuItem.GetToolTipMenu();
 
-    if (!toolTips.ContainsClass("WolfermusActive") && !toolTips.ContainsClass("WolfermusToolTipSetActive")) return;
+    if (!toolTips.ContainsClass("WolfermusVisable") && !toolTips.ContainsClass("WolfermusToolTipSetVisable")) return;
 
     await toolTips.Generate(await GetWolfermusRoot());
 
@@ -1909,7 +1903,6 @@ function CloseWolfermusMainMenu(event) {
     ResetItemBackgroundColor();
     if (menu.attached?.menu !== undefined) {
         menu.attached.menu.Hide();
-        menu.attached.menu.attachedId = undefined;
     }
 }
 
@@ -1921,7 +1914,6 @@ function HideWolfermusMainMenu(event) {
     ResetItemBackgroundColor();
     if (menu.attached?.menu !== undefined) {
         menu.attached.menu.Hide();
-        menu.attached.menu.attachedId = undefined;
     }
 }
 
