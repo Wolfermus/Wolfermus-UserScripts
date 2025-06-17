@@ -282,27 +282,53 @@ async (path, branch) => {
     }
 
 
-    const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-    let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
+    const YoutubeGotten = await GetValue("Youtube", "{}");
+    let YoutubeSettings = JSON.parse(YoutubeGotten);
 
-    WolfermusQOLTimeRemainingSettings.Active ??= false;
+    if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
+    let QOLSettings = YoutubeSettings["QOL"];
 
-    if (WolfermusQOLTimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
+    if (!YoutubeSettings["TimeRemaining"]) YoutubeSettings["TimeRemaining"] = {};
+    let TimeRemainingSettings = QOLSettings["TimeRemaining"];
+
+    TimeRemainingSettings.Active ??= false;
+
+    if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
 
     const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Time Remaining`);
-    QOLTimeRemainingMenuItem.toggled = WolfermusQOLTimeRemainingSettings.Active;
+    QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
     QOLTimeRemainingMenuItem.ToggledEventAddCallback(async (toggled) => {
-        const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-        let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
+        const YoutubeGotten = await GetValue("Youtube", "{}");
+        let YoutubeSettings = JSON.parse(YoutubeGotten);
 
-        WolfermusQOLTimeRemainingSettings.Active = toggled;
+        if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
+        let QOLSettings = YoutubeSettings["QOL"];
 
-        SetValue("QOLTimeRemaining", JSON.stringify(WolfermusQOLTimeRemainingSettings));
+        if (!YoutubeSettings["TimeRemaining"]) YoutubeSettings["TimeRemaining"] = {};
+        let TimeRemainingSettings = QOLSettings["TimeRemaining"];
+
+        TimeRemainingSettings.Active = toggled;
+
+        SetValue("Youtube", JSON.stringify(YoutubeGotten));
 
         if (toggled) LoadScriptOnce("TimeRemaining");
     });
 
+    QOLSettings.Collapsed ??= true;
+
     let QOLMenuItem = new WolfermusGroupMenuItem("Quality Of Life");
+    QOLMenuItem.collapsed = QOLSettings.Collapsed;
+    QOLMenuItem.CollapsedAddCallback(async (newCollapsed) => {
+        const YoutubeGotten = await GetValue("Youtube", "{}");
+        let YoutubeSettings = JSON.parse(YoutubeGotten);
+
+        if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
+        let QOLSettings = YoutubeSettings["QOL"];
+
+        QOLSettings.Collapsed = newCollapsed;
+
+        SetValue("Youtube", JSON.stringify(YoutubeGotten));
+    });
     QOLMenuItem.items.push(QOLTimeRemainingMenuItem);
 
     const mainMenu = GetMainMenu();
