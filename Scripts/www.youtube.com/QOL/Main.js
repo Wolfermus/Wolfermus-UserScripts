@@ -214,12 +214,12 @@ async (path, branch) => {
 
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
-    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] === undefined) {
+    if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) {
         let preventLoopLock = 10;
         const baseURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}`;
         async function LoadWolfermusGroupMenuItem() {
             try {
-                const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseURL}/Libraries/MainMenu/Addons/Groups/Group.js`));
+                const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseURL}/Libraries/MainMenu/Addons/Group.js`));
                 await eval(script);
             } catch (error) {
                 if (preventLoopLock <= 0) return;
@@ -230,7 +230,7 @@ async (path, branch) => {
         }
         await LoadWolfermusGroupMenuItem();
     }
-    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] === undefined) return;
+    if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) return;
 
 
     /**
@@ -241,11 +241,11 @@ async (path, branch) => {
     /**
      * @type {WolfermusGroupMenuItem}
      */
-    const WolfermusGroupMenuItem = mainMenuLibrary["Classes"]["Addons"]["Groups"]["WolfermusGroupMenuItem"];
+    const WolfermusGroupMenuItem = mainMenuLibrary["Classes"]["Addons"]["WolfermusGroupMenuItem"];
 
     /**
-     * @import {WolfermusMenu, WolfermusToggleButtonMenuItem} from "../Libraries/MainMenu/MainMenuLib.user.js"
-     * @import {WolfermusGroupMenuItem} from "../Libraries/MainMenu/Addons/Groups/Group.js"
+     * @import {WolfermusMenu, WolfermusToggleButtonMenuItem} from "../../../Libraries/MainMenu/MainMenuLib.user.js"
+     * @import {WolfermusGroupMenuItem} from "../../../Libraries/MainMenu/Addons/Group.js"
      */
 
     /**
@@ -289,7 +289,7 @@ async (path, branch) => {
 
     if (WolfermusQOLTimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
 
-    const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem("WolfermusQOLTimeRemainingMenuItem", `Toggle Time Remaining`);
+    const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Time Remaining`);
     QOLTimeRemainingMenuItem.toggled = WolfermusQOLTimeRemainingSettings.Active;
     QOLTimeRemainingMenuItem.ToggledEventAddCallback(async (toggled) => {
         const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
@@ -302,7 +302,7 @@ async (path, branch) => {
         if (toggled) LoadScriptOnce("TimeRemaining");
     });
 
-    let QOLMenuItem = new WolfermusGroupMenuItem("WolfermusQOLMenuItem", "Quality Of Life");
+    let QOLMenuItem = new WolfermusGroupMenuItem("Quality Of Life");
     QOLMenuItem.items.push(QOLTimeRemainingMenuItem);
 
     const mainMenu = GetMainMenu();
