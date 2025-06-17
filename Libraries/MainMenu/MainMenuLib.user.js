@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.0.3
+// @version      4.0.4
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -1294,6 +1294,7 @@ class WolfermusMenuItem {
         this.element.addEventListener("contextmenu", this.#contextMenuCallback);
 
         window.addEventListener("pointerclick", this.#closeWolfermusContextMenu);
+        window.addEventListener("pointerdown", this.#closeWolfermusContextMenu);
         window.addEventListener("pointerup", this.#closeWolfermusContextMenu);
         window.addEventListener("pointerleave", this.#closeWolfermusContextMenu);
         window.addEventListener("pointercancel", this.#closeWolfermusContextMenu);
@@ -1334,6 +1335,7 @@ class WolfermusMenuItem {
 
 
         window.removeEventListener("pointerclick", this.#closeWolfermusContextMenu);
+        window.removeEventListener("pointerdown", this.#closeWolfermusContextMenu);
         window.removeEventListener("pointerup", this.#closeWolfermusContextMenu);
         window.removeEventListener("pointerleave", this.#closeWolfermusContextMenu);
         window.removeEventListener("pointercancel", this.#closeWolfermusContextMenu);
@@ -1940,6 +1942,7 @@ async function FullscreenChangeMainMenu() {
 
 function AttachInteractionEventsToMainMenu() {
     window.addEventListener("pointerclick", CloseWolfermusMainMenu);
+    window.addEventListener("pointerdown", CloseWolfermusMainMenu);
     window.addEventListener("pointerup", CloseWolfermusMainMenu);
     window.addEventListener("pointerleave", HideWolfermusMainMenu);
     window.addEventListener("pointercancel", HideWolfermusMainMenu);
@@ -1951,6 +1954,7 @@ function AttachInteractionEventsToMainMenu() {
 
 function RemoveInteractionEventsToMainMenu() {
     window.removeEventListener("pointerclick", CloseWolfermusMainMenu);
+    window.removeEventListener("pointerdown", CloseWolfermusMainMenu);
     window.removeEventListener("pointerup", CloseWolfermusMainMenu);
     window.removeEventListener("pointerleave", HideWolfermusMainMenu);
     window.removeEventListener("pointercancel", HideWolfermusMainMenu);
