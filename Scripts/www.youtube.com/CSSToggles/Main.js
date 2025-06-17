@@ -1,4 +1,4 @@
-async (baseScriptPath, baseWebsiteScriptPath, branch) => {
+async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     //debugger;
     //if (window.location.href !== "https://www.youtube.com/") return;
 
@@ -267,7 +267,7 @@ async (baseScriptPath, baseWebsiteScriptPath, branch) => {
             createScriptURL: (string) => string
         });
 
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${baseWebsiteScriptPath}/CSSToggles/ChangeFrostedGlassStyle.js`));
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}/CSSToggles/ChangeFrostedGlassStyle.js`));
         ChangeFrostedGlassStyle = eval(script);
     }
 
@@ -279,7 +279,7 @@ async (baseScriptPath, baseWebsiteScriptPath, branch) => {
             createScriptURL: (string) => string
         });
 
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${baseWebsiteScriptPath}/CSSToggles/RestoreFrostedGlassBackgroundColor.js`));
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}/CSSToggles/RestoreFrostedGlassBackgroundColor.js`));
         RestoreFrostedGlassBackgroundColor = eval(script);
     }
 
