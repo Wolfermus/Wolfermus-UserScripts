@@ -123,6 +123,11 @@
         #collapsed = true;
 
         /**
+         * @type {Array<(collapsed: boolean) => void>}
+         */
+        #collapsedEvent = [];
+
+        /**
          * @param {WolfermusMenu} menu
          * @returns {string}
          */
@@ -145,13 +150,21 @@
         #expand = undefined;
 
         Collapse() {
-            this.#collapse?.();
-            this.#collapsed = true;
+            if (this.#collapse !== undefined && this.#collapse !== null) {
+                this.#collapse();
+            } else {
+                this.#collapsed = true;
+                this.#ExecuteCollapsedEvent();
+            }
         }
 
         Expand() {
-            this.#expand?.();
-            this.#collapsed = false;
+            if (this.#expand !== undefined && this.#expand !== null) {
+                this.#expand();
+            } else {
+                this.#collapsed = false;
+                this.#ExecuteCollapsedEvent();
+            }
         }
 
         set collapsed(newValue) {
@@ -165,6 +178,33 @@
             }
         }
         get collapsed() { return this.#collapsed; }
+
+        #ExecuteCollapsedEvent() {
+            for (let callback of this.#collapsedEvent) {
+                callback?.(this.#collapsed);
+            }
+        }
+
+        /**
+         * @param {(collapsed: boolean) => void} callback 
+         */
+        CollapsedAddCallback(callback) {
+            if (callback === undefined || callback === null) return;
+            if (this.#collapsedEvent.includes(callback)) return;
+
+            this.#collapsedEvent.push(callback);
+        }
+
+        /**
+         * @param {(collapsed: boolean) => void} callback 
+         */
+        CollapsedRemoveCallback(callback) {
+            if (callback === undefined || callback === null) return;
+            const foundIndex = this.#collapsedEvent.findIndex((callbackItem) => callbackItem === callback);
+            if (foundIndex <= -1) return;
+
+            this.#collapsedEvent.splice(foundIndex, 1);
+        }
 
         /**
          * @param {WolfermusMenu} menu
@@ -573,6 +613,8 @@
                 this.#collapsed = true;
                 gottenGroup.style.display = "";
                 gottenSection.style.display = "none";
+
+                this.#ExecuteCollapsedEvent();
             };
 
             /**
@@ -592,6 +634,8 @@
 
                 this.#UnloadItems(menu);
                 await this.#SetupItems(menu);
+
+                this.#ExecuteCollapsedEvent();
             };
 
             gottenCollapseButton.addEventListener("click", this.#collapse);
