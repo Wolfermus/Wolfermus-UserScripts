@@ -71,7 +71,7 @@
 
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
-    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] !== undefined) return;
+    if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] !== undefined) return;
 
     /**
      * @import {WolfermusMenu, WolfermusBaseGroupMenuItem} from "../..//MainMenuLib.user.js"
@@ -655,9 +655,5 @@
         }
     }
 
-    if (mainMenuLibrary["Classes"]["Addons"]["Groups"] === undefined || mainMenuLibrary["Classes"]["Addons"]["Groups"] === null) {
-        mainMenuLibrary["Classes"]["Addons"]["Groups"] = {};
-    }
-
-    mainMenuLibrary["Classes"]["Addons"]["Groups"]["WolfermusGroupMenuItem"] = WolfermusGroupMenuItem;
+    mainMenuLibrary["Classes"]["Addons"]["WolfermusGroupMenuItem"] = WolfermusGroupMenuItem;
 })();
