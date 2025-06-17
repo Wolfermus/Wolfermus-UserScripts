@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.0.4
+// @version      4.0.5
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -721,8 +721,11 @@ async function ContrainMainMenu() {
     if (mainMenuRoot === undefined || mainMenuRoot === null) return;
     if (fabElement === undefined || fabElement === null) return;
 
-    if (fabElement.style.left === undefined || fabElement.style.left === null) return;
-    if (fabElement.style.top === undefined || fabElement.style.top === null) return;
+    if (mainMenuRoot.style.display === "none") return;
+    if (fabElement.style.display === "none") return;
+
+    if (fabElement.style.left === undefined || fabElement.style.left === null || fabElement.style.left === "" || !fabElement.style.left) return;
+    if (fabElement.style.top === undefined || fabElement.style.top === null || fabElement.style.top === "" || !fabElement.style.top) return;
 
     const windowWidth = mainMenuRoot.getBoundingClientRect().width;
     const windowHeight = mainMenuRoot.getBoundingClientRect().height;
@@ -1924,16 +1927,16 @@ function HideWolfermusMainMenu(event) {
 }
 
 async function FullscreenChangeMainMenu() {
-    if (GetMainMenu().items.length <= 0) return;
+    const mainMenu = GetMainMenu();
+    if (mainMenu.items.length <= 0) return;
 
     const mainMenuRoot = await GetWolfermusRoot();
-    const menu1 = GetMainMenu();
     const floatingButtonMenu = GetFloatingButtonMenu();
 
     if (document.fullscreenElement !== null) {
         mainMenuRoot.style.display = "none";
         floatingButtonMenu.Hide();
-        menu1.Hide();
+        mainMenu.Hide();
     } else {
         mainMenuRoot.style.display = "block";
         floatingButtonMenu.Show();
