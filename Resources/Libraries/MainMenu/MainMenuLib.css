@@ -223,6 +223,9 @@
                 text-align: center;
                 flex-shrink: 0;
                 max-width: 200px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
 
                 &.WolfermusGroup {
                     visibility: hidden;
@@ -300,6 +303,8 @@
         line-height: 12px;
         letter-spacing: 0.5px;
         overflow-wrap: break-word;
+        flex-shrink: inherit;
+        white-space: inherit;
     }
 }
 
