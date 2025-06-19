@@ -88,15 +88,15 @@
     const MakeGetRequest = UtilitiesLibrary["MakeGetRequest"];
 
     /**
-     * @import {WolfermusMenu, WolfermusMenuItem} from "../MainMenuLib.user.js"
+     * @import {WolfermusMenu, WolfermusInputMenuItem} from "../MainMenuLib.user.js"
      */
 
     /**
-     * @type {WolfermusMenuItem}
+     * @type {WolfermusInputMenuItem}
      */
-    const WolfermusMenuItem = mainMenuLibrary["Classes"]["WolfermusMenuItem"];
+    const WolfermusInputMenuItem = mainMenuLibrary["Classes"]["WolfermusInputMenuItem"];
 
-    class WolfermusSliderMenuItem extends WolfermusMenuItem {
+    class WolfermusSliderMenuItem extends WolfermusInputMenuItem {
         /**
          * @param {any} id
          * @param {string} title
@@ -107,88 +107,79 @@
          * @param {any} [step=1]
          */
         constructor(title, tooltip = "", value = 0, min = 0, max = 100, step = 1) {
-            super(title, tooltip);
+            super("range", title, tooltip, value, min, max, step);
             this.AddClass("WolfermusSliderItem");
 
-            this.#min = min;
-            this.#max = max;
-            this.#step = step;
-            this.value = value;
+            this.ValueChangeAddCallback(() => {
+                if (this.type !== "text") {
+                    this.#UpdateSliderToolTip();
+                    return;
+                }
+
+                this.type = "range";
+                this.#UpdateSliderToolTip();
+
+                if (this.element === undefined || this.element === null) return;
+
+                const gottonWolfermusSliderElements = this.element.getElementsByClassName("WolfermusSlider");
+                if (gottonWolfermusSliderElements.length <= 0) return;
+
+                const wolfermusSliderElement = gottonWolfermusSliderElements[0];
+                wolfermusSliderElement.removeEventListener("focusout", this.#focusOutCallback);
+            });
         }
 
         /**
-         * @type {any}
+         * @param {string} newValue
          */
-        #value = 0;
-        /**
-         * @type {any}
-         */
-        #min = 0;
-        /**
-         * @type {any}
-         */
-        #max = 100;
-        /**
-         * @type {any}
-         */
-        #step = 1;
+        set type(newValue) {
+            if (newValue !== "text" && newValue !== "range") return;
+            super.type = newValue;
+        }
+        get type() { return super.type; }
 
         /**
-         * @type {Array<(void) => void>}
+         * @returns {Array<string>}
          */
-        #valueChangeEvent = [];
-
-        /**
-         * @param {InputEvent} event 
-         * @type {(event: InputEvent) => voud}
-         */
-        #inputCallback = (event) => {
-            this.value = event.target.value;
-        };
-
-        /**
-         * @param {(void) => void} callback 
-         */
-        ValueChangeAddCallback(callback) {
-            if (callback === undefined || callback === null) return;
-            if (this.#valueChangeEvent.includes(callback)) return;
-
-            this.#valueChangeEvent.push(callback);
+        GetCssURL() {
+            let gottenCssURL = super.GetCssURL();
+            gottenCssURL.push("/Libraries/MainMenu/Addons/Input/Slider.css");
+            return gottenCssURL;
         }
 
-        /**
-         * @param {(void) => void} callback 
-         */
-        ValueChangeRemoveCallback(callback) {
-            if (callback === undefined || callback === null) return;
-            const foundIndex = this.#valueChangeEvent.findIndex((callbackItem) => callbackItem === callback);
-            if (foundIndex <= -1) return;
+        #focusOutCallback = (event) => {
+            if (this.type !== "text") return;
+            this.type = "range";
 
-            this.#valueChangeEvent.splice(foundIndex, 1);
-        }
+            this.#UpdateSliderToolTip();
 
-        /**
-         * @type {(void) => void}
-         */
-        #ValidateValue = () => {
-            if (this.#value < this.#min) this.value = this.#min;
-            else if (this.#value > this.#max) this.value = this.#max;
-        };
-
-        /**
-         * @type {(void) => void}
-         */
-        #UpdateSlider = () => {
             if (this.element === undefined || this.element === null) return;
 
             const gottonWolfermusSliderElements = this.element.getElementsByClassName("WolfermusSlider");
             if (gottonWolfermusSliderElements.length <= 0) return;
 
             const wolfermusSliderElement = gottonWolfermusSliderElements[0];
-            wolfermusSliderElement.value = this.#value;
-            wolfermusSliderElement.min = this.#min;
-            wolfermusSliderElement.max = this.#max;
-            wolfermusSliderElement.step = this.#step;
+            wolfermusSliderElement.removeEventListener("focusout", this.#focusOutCallback);
+        };
+
+        /**
+         * @param {MouseEvent} event
+         * @type {(MouseEvent) => void}
+         */
+        #doubleClickCallback = (event) => {
+            if (this.type === "text") return;
+
+            this.type = "text";
+
+            this.#UpdateSliderToolTip();
+
+            if (this.element === undefined || this.element === null) return;
+
+            const gottonWolfermusSliderElements = this.element.getElementsByClassName("WolfermusSlider");
+            if (gottonWolfermusSliderElements.length <= 0) return;
+
+            const wolfermusSliderElement = gottonWolfermusSliderElements[0];
+            wolfermusSliderElement.addEventListener("focusout", this.#focusOutCallback);
         };
 
         /**
@@ -201,65 +192,12 @@
             if (gottonWolfermusSliderToolTipElements.length <= 0) return;
 
             const wolfermusSliderToolTipElement = gottonWolfermusSliderToolTipElements[0];
-            wolfermusSliderToolTipElement.innerText = this.#value;
+            wolfermusSliderToolTipElement.innerText = this.value;
+
+            if (this.type === "range") {
+                wolfermusSliderToolTipElement.style.display = "";
+            } else wolfermusSliderToolTipElement.style.display = "none";
         };
-
-        /**
-         * @param {any} newValue
-         */
-        set value(newValue) {
-            if (newValue === this.#value) return;
-
-            if (newValue < this.#min) this.value = this.#min;
-            else if (newValue > this.#max) this.value = this.#max;
-            else this.#value = newValue;
-
-            this.#UpdateSlider();
-            this.#UpdateSliderToolTip();
-
-            for (let callback of this.#valueChangeEvent) {
-                callback?.();
-            }
-        }
-        get value() { return this.#value; }
-
-        /**
-         * @param {any} newValue
-         */
-        set min(newValue) {
-            if (newValue === this.#min) return;
-
-            this.#min = newValue;
-            this.#ValidateValue();
-
-            this.#UpdateSlider();
-        }
-        get min() { return this.#min; }
-
-        /**
-         * @param {any} newValue
-         */
-        set max(newValue) {
-            if (newValue === this.#max) return;
-
-            this.#max = newValue;
-            this.#ValidateValue();
-
-            this.#UpdateSlider();
-        }
-        get max() { return this.#max; }
-
-        /**
-         * @param {any} newValue
-         */
-        set step(newValue) {
-            if (newValue === this.#step) return;
-
-            this.#step = newValue;
-
-            this.#UpdateSlider();
-        }
-        get step() { return this.#step; }
 
         /**
          * @param {WolfermusMenu} menu
@@ -268,14 +206,16 @@
         Generate(menu) {
             if (this.id === undefined) return "";
 
+            this.ValidateCSS();
+
             const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
 
             return `
                 <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
                     <a class="WolfermusTitle Wolfermus${this.id}Title Wolfermus${this.id}TitleItem" style="${validTitle ? "" : "display: none;"}">${this.title}</a>
                     <div>
-                        <input class="WolfermusSlider" type="range" value="${this.#value}" min="${this.#min}" max="${this.max}" step="${this.step}">
-                        <span class="WolfermusSliderToolTip">${this.#value}</span>
+                        <input class="WolfermusInput WolfermusSlider WolfermusText" type="range" value="${this.value}" min="${this.min}" max="${this.max}" step="${this.step}">
+                        <span class="WolfermusSliderToolTip">${this.value}</span>
                     </div>
                 </li>
             `;
@@ -295,7 +235,7 @@
 
             const wolfermusSliderElement = gottonWolfermusSliderElements[0];
 
-            wolfermusSliderElement.addEventListener("input", this.#inputCallback);
+            wolfermusSliderElement.addEventListener("dblclick", this.#doubleClickCallback);
 
             return true;
         }
@@ -311,7 +251,8 @@
                 if (gottonWolfermusSliderElements.length > 0) {
                     const wolfermusSliderElement = gottonWolfermusSliderElements[0];
 
-                    wolfermusSliderElement.removeEventListener("input", this.#inputCallback);
+                    wolfermusSliderElement.removeEventListener("dblclick", this.#doubleClickCallback);
+                    wolfermusSliderElement.removeEventListener("focusout", this.#focusOutCallback);
                 }
             }
         }
@@ -334,7 +275,7 @@
 
     async function GetCSS() {
         const baseResourcesURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Resources/`;
-        const css = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`${baseResourcesURL}Libraries/MainMenu/Addons/Slider.css`));
+        const css = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`${baseResourcesURL}Libraries/MainMenu/Addons/Input/Slider.css`));
         return css;
     }
 
