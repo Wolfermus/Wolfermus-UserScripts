@@ -216,7 +216,7 @@
                 align-items: center;
                 justify-content: center;
                 padding: 6px 12px;
-                min-width: 12px;
+                /* min-width: 12px; */
                 font-size: 14px;
                 line-height: 20px;
                 text-align: center;
