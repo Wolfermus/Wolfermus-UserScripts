@@ -1,4 +1,5 @@
-async (path, branch) => {
+async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
+    const startTime = performance.now();
     //#region Setting Up ChosenXmlHttpRequest
     let IsGMXmlHttpRequest1 = false;
     // @ts-ignore
@@ -41,7 +42,7 @@ async (path, branch) => {
                 url: url,
                 onload: (response) => {
                     if (response.status !== 200) {
-                        reject(statusText);
+                        reject(response.statusText);
                         return;
                     }
                     resolve(response.responseText);
@@ -195,7 +196,7 @@ async (path, branch) => {
         }
     }
 
-    console.log("Wolfermus: Youtube - QOL Running");
+    console.info("Wolfermus Scripts: Youtube - QOL Loading");
 
     const storageManagerLibrary = WolfermusGetLibrary("StorageManager");
 
@@ -214,24 +215,22 @@ async (path, branch) => {
 
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
-    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] === undefined) {
-        let preventLoopLock = 10;
-        const baseURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}`;
+    if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) {
+        let preventLoopLock = 20;
         async function LoadWolfermusGroupMenuItem() {
             try {
-                const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseURL}/Libraries/MainMenu/Addons/Groups/Group.js`));
+                const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseURL}Libraries/MainMenu/Addons/Group.js`));
                 await eval(script);
             } catch (error) {
                 if (preventLoopLock <= 0) return;
                 preventLoopLock--;
-                await Sleep(100);
+                await Sleep(50);
                 await LoadWolfermusGroupMenuItem();
             }
         }
         await LoadWolfermusGroupMenuItem();
     }
-    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] === undefined) return;
-
+    if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] === undefined) return;
 
     /**
      * @type {WolfermusToggleButtonMenuItem}
@@ -241,11 +240,11 @@ async (path, branch) => {
     /**
      * @type {WolfermusGroupMenuItem}
      */
-    const WolfermusGroupMenuItem = mainMenuLibrary["Classes"]["Addons"]["Groups"]["WolfermusGroupMenuItem"];
+    const WolfermusGroupMenuItem = mainMenuLibrary["Classes"]["Addons"]["WolfermusGroupMenuItem"];
 
     /**
-     * @import {WolfermusMenu, WolfermusToggleButtonMenuItem} from "../Libraries/MainMenu/MainMenuLib.user.js"
-     * @import {WolfermusGroupMenuItem} from "../Libraries/MainMenu/Addons/Groups/Group.js"
+     * @import {WolfermusMenu, WolfermusToggleButtonMenuItem} from "../../../Libraries/MainMenu/MainMenuLib.user.js"
+     * @import {WolfermusGroupMenuItem} from "../../../Libraries/MainMenu/Addons/Group.js"
      */
 
     /**
@@ -254,8 +253,6 @@ async (path, branch) => {
      * @type {() => WolfermusMenu}
      */
     const GetMainMenu = mainMenuLibrary["Menus"]["GetMainMenu"];
-
-
 
     let wolfermusPreventLoopLock1 = {};
     async function LoadScriptOnce(scriptName) {
@@ -268,7 +265,7 @@ async (path, branch) => {
         if (wolfermusPreventLoopLock1[scriptName].once) return;
         //console.log("Scripts/Main.js - 3");
         try {
-            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${path}/QOL/${scriptName}.js`));
+            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}QOL/${scriptName}.js`));
             // TODO: Allow scripts to return an object detailing to only load script once, a menuitem.
             await eval(script)(baseScriptURL);
             wolfermusPreventLoopLock1[scriptName].once = true;
@@ -281,31 +278,64 @@ async (path, branch) => {
         }
     }
 
+    const YoutubeGotten = await GetValue("Youtube", "{}");
+    let YoutubeSettings = JSON.parse(YoutubeGotten);
+    if (!YoutubeSettings || typeof YoutubeSettings !== "object") YoutubeSettings = {};
 
-    const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-    let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
+    if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
+    let QOLSettings = YoutubeSettings["QOL"];
 
-    WolfermusQOLTimeRemainingSettings.Active ??= false;
+    if (!QOLSettings["TimeRemaining"]) QOLSettings["TimeRemaining"] = {};
+    let TimeRemainingSettings = QOLSettings["TimeRemaining"];
 
-    if (WolfermusQOLTimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
+    TimeRemainingSettings.Active ??= false;
 
-    const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem("WolfermusQOLTimeRemainingMenuItem", `Toggle Time Remaining`);
-    QOLTimeRemainingMenuItem.toggled = WolfermusQOLTimeRemainingSettings.Active;
+    QOLSettings.Collapsed ??= true;
+
+    SetValue("Youtube", JSON.stringify(YoutubeSettings));
+
+    if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
+
+    const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Time Remaining`);
+    QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
     QOLTimeRemainingMenuItem.ToggledEventAddCallback(async (toggled) => {
-        const GUIGotten = await GetValue("QOLTimeRemaining", "{}");
-        let WolfermusQOLTimeRemainingSettings = JSON.parse(GUIGotten);
+        const YoutubeGottenInner = await GetValue("Youtube", "{}");
+        let YoutubeSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!YoutubeSettingsInner || typeof YoutubeSettingsInner !== "object") YoutubeSettingsInner = {};
 
-        WolfermusQOLTimeRemainingSettings.Active = toggled;
+        if (!YoutubeSettingsInner["QOL"]) YoutubeSettingsInner["QOL"] = {};
+        let QOLSettingsInner = YoutubeSettingsInner["QOL"];
 
-        SetValue("QOLTimeRemaining", JSON.stringify(WolfermusQOLTimeRemainingSettings));
+        if (!QOLSettingsInner["TimeRemaining"]) QOLSettingsInner["TimeRemaining"] = {};
+        let TimeRemainingSettingsInner = QOLSettingsInner["TimeRemaining"];
+
+        TimeRemainingSettingsInner.Active = toggled;
+
+        SetValue("Youtube", JSON.stringify(YoutubeSettingsInner));
 
         if (toggled) LoadScriptOnce("TimeRemaining");
     });
 
-    let QOLMenuItem = new WolfermusGroupMenuItem("WolfermusQOLMenuItem", "Quality Of Life");
+    let QOLMenuItem = new WolfermusGroupMenuItem("Quality Of Life");
+    QOLMenuItem.collapsed = QOLSettings.Collapsed;
+    QOLMenuItem.CollapsedAddCallback(async (newCollapsed) => {
+        const YoutubeGottenInner = await GetValue("Youtube", "{}");
+        let YoutubeSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!YoutubeSettingsInner || typeof YoutubeSettingsInner !== "object") YoutubeSettingsInner = {};
+
+        if (!YoutubeSettingsInner["QOL"]) YoutubeSettingsInner["QOL"] = {};
+        let QOLSettingsInner = YoutubeSettingsInner["QOL"];
+
+        QOLSettingsInner.Collapsed = newCollapsed;
+
+        SetValue("Youtube", JSON.stringify(YoutubeSettingsInner));
+    });
     QOLMenuItem.items.push(QOLTimeRemainingMenuItem);
 
     const mainMenu = GetMainMenu();
 
     mainMenu.items.push(QOLMenuItem);
+
+    const endTime = performance.now();
+    console.info(`Wolfermus Scripts: Youtube - QOL Loaded - Took ${endTime - startTime}ms`);
 };

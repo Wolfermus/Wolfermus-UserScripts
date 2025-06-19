@@ -1,4 +1,6 @@
 (async () => {
+    const startTime = performance.now();
+
     //#region Utilities
     /**
      * @param {number | undefined} ms
@@ -65,13 +67,13 @@
 
     let antiStuckLoop = 50;
     while (!WolfermusCheckLibraryLoaded("MainMenu") && antiStuckLoop > 0) {
-        await Sleep(200);
+        await Sleep(50);
         antiStuckLoop--;
     }
 
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
-    if (mainMenuLibrary["Classes"]["Addons"]?.["Groups"]?.["WolfermusGroupMenuItem"] !== undefined) return;
+    if (mainMenuLibrary["Classes"]["Addons"]?.["WolfermusGroupMenuItem"] !== undefined) return;
 
     /**
      * @import {WolfermusMenu, WolfermusBaseGroupMenuItem} from "../..//MainMenuLib.user.js"
@@ -95,8 +97,8 @@
          * @param {string} title
          * @param {string} tooltip
          */
-        constructor(id, title, tooltip = "") {
-            super(id, title, tooltip);
+        constructor(title, tooltip = "") {
+            super(title, tooltip);
             this.RemoveClass("WolfermusTextItem");
         }
 
@@ -118,19 +120,134 @@
         #groupPointerLeaveCallback = undefined;
 
         /**
+         * @type {boolean}
+         */
+        #collapsed = true;
+
+        /**
+         * @type {Array<(collapsed: boolean) => void>}
+         */
+        #collapsedEvent = [];
+
+        /**
+         * @param {WolfermusMenu} menu
+         * @returns {string}
+         */
+        #GenerateItems(menu) {
+            let menuItemsConverted = "";
+            for (const menuItem of this.items) {
+                menuItemsConverted += menuItem.Generate(menu);
+            }
+            return menuItemsConverted;
+        }
+
+        /**
+         * @type {((event: InputEvent) => void) | undefined}
+         */
+        #collapse = undefined;
+
+        /**
+         * @type {((event: InputEvent) => void) | undefined}
+         */
+        #expand = undefined;
+
+        Collapse() {
+            if (this.#collapse !== undefined && this.#collapse !== null) {
+                this.#collapse();
+            } else {
+                this.#collapsed = true;
+                this.#ExecuteCollapsedEvent();
+            }
+        }
+
+        Expand() {
+            if (this.#expand !== undefined && this.#expand !== null) {
+                this.#expand();
+            } else {
+                this.#collapsed = false;
+                this.#ExecuteCollapsedEvent();
+            }
+        }
+
+        set collapsed(newValue) {
+            if (typeof newValue !== "boolean") return;
+            if (newValue === this.#collapsed) return;
+
+            if (newValue) {
+                this.Collapse();
+            } else {
+                this.Expand();
+            }
+        }
+        get collapsed() { return this.#collapsed; }
+
+        #ExecuteCollapsedEvent() {
+            for (let callback of this.#collapsedEvent) {
+                callback?.(this.#collapsed);
+            }
+        }
+
+        /**
+         * @param {(collapsed: boolean) => void} callback 
+         */
+        CollapsedAddCallback(callback) {
+            if (callback === undefined || callback === null) return;
+            if (this.#collapsedEvent.includes(callback)) return;
+
+            this.#collapsedEvent.push(callback);
+        }
+
+        /**
+         * @param {(collapsed: boolean) => void} callback 
+         */
+        CollapsedRemoveCallback(callback) {
+            if (callback === undefined || callback === null) return;
+            const foundIndex = this.#collapsedEvent.findIndex((callbackItem) => callbackItem === callback);
+            if (foundIndex <= -1) return;
+
+            this.#collapsedEvent.splice(foundIndex, 1);
+        }
+
+        /**
          * @param {WolfermusMenu} menu
          * @returns {string}
          */
         Generate(menu) {
             if (this.id === undefined) return "";
 
+            const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
+
             return `
-                <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
-                    <a class="WolfermusGroup WolfermusGroupRightPosition"><</a>    
-                    <a class="WolfermusTitle">${this.title}</a>
-                    <a class="WolfermusGroup WolfermusGroupLeftPosition">></a>
-                </li>
+                <div id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
+                    <li id="WolfermusMenu${menu.id}${this.id}Group" class="WolfermusGroupItem" style="${this.#collapsed ? "" : "display: none;"}">
+                        <a class="WolfermusGroup WolfermusGroupRightPosition"><</a>
+                        <a class="WolfermusTitle Wolfermus${this.id}Title">${this.title}</a>
+                        <a class="WolfermusGroup WolfermusGroupLeftPosition">></a>
+                    </li>
+                    <li id="WolfermusMenu${menu.id}${this.id}Section" style="background: transparent;
+                    border-radius: 20px;
+                    border-color: #272727;
+                    border-width: 4px;
+                    border-style: solid;
+                    ${!this.#collapsed ? "" : "display: none;"}">
+                        <a id="WolfermusMenu${menu.id}${this.id}GroupCollapseButton" style="position: absolute;top: 0; right: 0;pointer-events: all !important;cursor: pointer;z-index: 9600;">x</a>
+                        <ul class="WolfermusDefaultCSS">
+                            <li class="WolfermusDefaultCSS WolfermusTextItem Wolfermus${this.id}TitleItem" style="${validTitle ? "" : "display: none;"}">
+                                <a class="WolfermusTitle Wolfermus${this.id}Title" style="font-size: 18px;">${this.title}</a>
+                            </li>
+                            ${this.#GenerateItems(menu)}
+                        </ul>
+                    </li>
+                </div>
             `;
+
+            // return `
+            //     <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
+            //         <a class="WolfermusGroup WolfermusGroupRightPosition"><</a>    
+            //         <a class="WolfermusTitle">${this.title}</a>
+            //         <a class="WolfermusGroup WolfermusGroupLeftPosition">></a>
+            //     </li>
+            // `;
         }
 
         /**
@@ -138,11 +255,18 @@
          * @returns {Boolean}
          */
         async SetupEvents(menu) {
-            // TODO: Check which RemoveEvents gets called within super.SetupEvents
             if (!super.SetupEvents(menu)) return false;
 
             const wolfermusRoot = await GetWolfermusRoot();
             if (wolfermusRoot === undefined || wolfermusRoot === null) return false;
+
+            const gottenGroup = document.getElementById(`WolfermusMenu${menu.id}${this.id}Group`);
+            const gottenSection = document.getElementById(`WolfermusMenu${menu.id}${this.id}Section`);
+            if (gottenGroup === undefined || gottenGroup === null) return false;
+            if (gottenSection === undefined || gottenSection === null) return false;
+
+            const gottenCollapseButton = document.getElementById(`WolfermusMenu${menu.id}${this.id}GroupCollapseButton`);
+            if (gottenCollapseButton === undefined || gottenCollapseButton === null) return false;
 
             /**
              * @param {PointerEvent} event 
@@ -155,8 +279,11 @@
                     menu.timeoutID = undefined;
                 }
 
-                if (menu.attached?.menu?.attachedId !== this.id) {
-                    if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+                if (menu.attached?.menu?.attachedItem !== this) {
+                    if (this.ContainsClass("WolfermusActive")) {
+                        this.RemoveClass("WolfermusActive");
+                        this.UpdateClasses();
+                    }
                     return;
                 }
                 if (menu.attached?.menu === undefined) return;
@@ -169,22 +296,26 @@
                 }
 
                 menu.attached.menu.cooldownTimeoutID = setTimeout(() => {
-                    if (menu.attached?.menu?.attachedId !== this.id) {
-                        if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+                    if (menu.attached?.menu?.attachedItem !== this) {
+                        if (this.ContainsClass("WolfermusActive")) {
+                            this.RemoveClass("WolfermusActive");
+                            this.UpdateClasses();
+                        }
                         return;
                     }
                     if (menu.attached?.menu === undefined) return;
                     if (menu.attached?.menu.element === undefined) return;
                     if (menu.attached.menu.IsHoveringAnyMenu()) return;
 
-                    if (this.element !== undefined && this.element !== null) {
-                        if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") {
+                    if (gottenGroup !== undefined && gottenGroup !== null) {
+                        if (gottenGroup.matches(":hover") && menu.element.style["visibility"] !== "hidden") {
                             if (menu?.attached?.menu?.attached?.menu !== undefined) {
-                                let gottenItem = menu.attached.menu.items.find((item) => item.id === menu.attached.menu.attached.menu.attachedId);
-                                if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
+                                if (menu.attached.menu.attached.menu?.attachedItem?.ContainsClass?.("WolfermusActive")) {
+                                    menu.attached.menu.attached.menu.attachedItem.RemoveClass("WolfermusActive");
+                                    menu.attached.menu.attached.menu.attachedItem.UpdateClasses();
+                                }
 
                                 menu.attached.menu.attached.menu.Hide();
-                                menu.attached.menu.attached.menu.attachedId = undefined;
                             }
                             return;
                         }
@@ -196,8 +327,10 @@
                     //console.log(`${menu.attached.menu.id} Closing Via menuPointerEnterCallback`);
 
                     menu.attached.menu.Hide();
-                    menu.attached.menu.attachedId = undefined;
-                    if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+                    if (this.ContainsClass("WolfermusActive")) {
+                        this.RemoveClass("WolfermusActive");
+                        this.UpdateClasses();
+                    }
                     menu.attached.menu.cooldownTimeoutID = undefined;
                 }, 500);
             }
@@ -208,8 +341,11 @@
             this.#menuPointerLeaveCallback = (event) => {
                 if (this.id === undefined) return;
 
-                if (menu.attached?.menu?.attachedId !== this.id) {
-                    if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+                if (menu.attached?.menu?.attachedItem !== this) {
+                    if (this.ContainsClass("WolfermusActive")) {
+                        this.RemoveClass("WolfermusActive");
+                        this.UpdateClasses();
+                    }
                     return;
                 }
                 if (menu.attached?.menu === undefined) return;
@@ -243,12 +379,17 @@
                     menu.attached.menu.AddClass("WolfermusGroupMenuWindow");
                 }
 
-                if (menu.attached.menu.attachedId === this.id) return;
+                if (menu.attached.menu.attachedItem === this) return;
 
-                if (menu.attached.menu.attachedId !== undefined) {
-                    this.element.style["background-color"] = "";
-                    let gottenItem = menu.items.find((item) => item.id === menu.attached.menu.attachedId);
-                    if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
+                if (menu.attached.menu.attachedItem !== undefined) {
+                    if (this.ContainsClass("WolfermusActive")) {
+                        this.RemoveClass("WolfermusActive");
+                        this.UpdateClasses();
+                    }
+                    if (menu.attached.menu.attachedItem.ContainsClass("WolfermusActive")) {
+                        menu.attached.menu.attachedItem.RemoveClass("WolfermusActive");
+                        menu.attached.menu.attachedItem.UpdateClasses();
+                    }
                 }
 
                 if (menu.attached?.menu?.cooldownTimeoutID !== undefined) {
@@ -274,7 +415,7 @@
 
                 if (menu.element === undefined || menu.element.style["visibility"] === "hidden") return;
 
-                const menuItemGroupCollection = this.element.getElementsByClassName("WolfermusGroup");
+                const menuItemGroupCollection = gottenGroup.getElementsByClassName("WolfermusGroup");
                 if (menuItemGroupCollection === undefined || menuItemGroupCollection === null || menuItemGroupCollection.length <= 0) return;
 
                 let menuItemGroup = undefined;
@@ -288,8 +429,6 @@
                 if (menuItemGroup === undefined || menuItemGroup === null) return;
 
                 menu.attached.menu.ValidateElement(wolfermusRoot);
-
-                menu.attached.menu.attachedId = this.id;
 
                 const clientRect = menuItemGroup.getBoundingClientRect();
                 let position = new Position(clientRect.left + clientRect.width / 2, clientRect.top + clientRect.height / 2);
@@ -376,12 +515,19 @@
                 if (menu.attached?.menu?.cooldownTimeoutID !== undefined) {
                     clearTimeout(menu.attached.menu.cooldownTimeoutID);
                     menu.attached.menu.cooldownTimeoutID = undefined;
-                    let gottenItem = menu.items.find((item) => item.id === menu.attached.menu.attachedId);
-                    if (gottenItem !== undefined && gottenItem.element !== undefined && gottenItem.element !== null) gottenItem.element.style["background-color"] = "";
+                    if (menu.attached.menu.attachedItem.ContainsClass("WolfermusActive")) {
+                        menu.attached.menu.attachedItem.RemoveClass("WolfermusActive");
+                        menu.attached.menu.attachedItem.UpdateClasses();
+                    }
                 }
 
+                menu.attached.menu.attachedItem = this;
+
                 menu.attached.menu.Show();
-                this.element.style["background-color"] = "#3d3d3d";
+                if (!this.ContainsClass("WolfermusActive")) {
+                    this.AddClass("WolfermusActive");
+                    this.UpdateClasses();
+                }
 
                 //console.log(`${menu.attached.menu.id} Opening elementPointerEnterCallback`);
             };
@@ -392,14 +538,17 @@
             this.#groupPointerLeaveCallback = (event) => {
                 if (this.id === undefined) return;
 
-                if (menu.attached?.menu?.attachedId !== this.id) {
-                    if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+                if (menu.attached?.menu?.attachedItem !== this) {
+                    if (this.ContainsClass("WolfermusActive")) {
+                        this.RemoveClass("WolfermusActive");
+                        this.UpdateClasses();
+                    }
                     return;
                 }
                 if (menu.attached?.menu === undefined) return;
                 if (menu.attached.menu.element === undefined) return;
 
-                if (menu.attached.menu.attached?.menu?.attachedId !== undefined) return;
+                if (menu.attached.menu.attached?.menu?.attachedItem !== undefined) return;
 
                 if (menu.attached?.menu?.cooldownTimeoutID !== undefined) {
                     clearTimeout(menu.attached.menu.cooldownTimeoutID);
@@ -407,25 +556,30 @@
                 }
 
                 menu.attached.menu.cooldownTimeoutID = setTimeout(() => {
-                    if (menu.attached?.menu?.attachedId !== this.id) {
-                        if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+                    if (menu.attached?.menu?.attachedItem !== this) {
+                        if (this.ContainsClass("WolfermusActive")) {
+                            this.RemoveClass("WolfermusActive");
+                            this.UpdateClasses();
+                        }
                         return;
                     }
                     if (menu.attached?.menu === undefined) return;
                     if (menu.attached.menu.element === undefined) return;
 
-                    if (menu.attached.menu.attached?.menu?.attachedId !== undefined) return;
+                    if (menu.attached.menu.attached?.menu?.attachedItem !== undefined) return;
 
-                    if (this.element !== undefined && this.element !== null) {
-                        if (this.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
+                    if (gottenGroup !== undefined && gottenGroup !== null) {
+                        if (gottenGroup.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
                     }
                     if (!menu.element.matches(":hover") && menu.element.style["visibility"] !== "hidden") return;
 
                     //console.log(`${menu.attached.menu.id} Closing Via elementPointerLeaveCallback setTimeout 0`);
 
                     menu.attached.menu.Hide();
-                    menu.attached.menu.attachedId = undefined;
-                    if (this.element !== undefined && this.element !== null) this.element.style["background-color"] = "";
+                    if (this.ContainsClass("WolfermusActive")) {
+                        this.RemoveClass("WolfermusActive");
+                        this.UpdateClasses();
+                    }
                     menu.attached.menu.cooldownTimeoutID = undefined;
                 }, 500);
 
@@ -441,8 +595,60 @@
             menu.element.addEventListener("pointerenter", this.#menuPointerEnterCallback);
             menu.element.addEventListener("pointerleave", this.#menuPointerLeaveCallback);
 
-            this.element.addEventListener("pointerenter", this.#groupPointerEnterCallback);
-            this.element.addEventListener("pointerleave", this.#groupPointerLeaveCallback);
+            gottenGroup.addEventListener("pointerenter", this.#groupPointerEnterCallback);
+            gottenGroup.addEventListener("pointerleave", this.#groupPointerLeaveCallback);
+
+
+            /**
+             * @param {InputEvent} event 
+             */
+            this.#collapse = (event) => {
+                if (this.id === undefined) return;
+
+                if (gottenGroup === undefined || gottenGroup === null) return;
+                if (gottenSection === undefined || gottenSection === null) return;
+
+                this.#UnloadItems(menu);
+
+                this.#collapsed = true;
+                gottenGroup.style.display = "";
+                gottenSection.style.display = "none";
+
+                this.#ExecuteCollapsedEvent();
+            };
+
+            /**
+             * @param {InputEvent} event 
+             */
+            this.#expand = async (event) => {
+                if (this.id === undefined) return;
+
+                if (gottenGroup === undefined || gottenGroup === null) return;
+                if (gottenSection === undefined || gottenSection === null) return;
+
+                this.#collapsed = false;
+                gottenGroup.style.display = "none";
+                gottenSection.style.display = "";
+
+                menu.attached?.menu?.Hide?.();
+
+                this.#UnloadItems(menu);
+                await this.#SetupItems(menu);
+
+                this.#ExecuteCollapsedEvent();
+            };
+
+            gottenCollapseButton.addEventListener("click", this.#collapse);
+            gottenGroup.addEventListener("click", this.#expand);
+
+            if (!this.#collapsed) {
+                gottenGroup.style.display = "none";
+                gottenSection.style.display = "";
+                this.#SetupItems(menu);
+            } else {
+                gottenGroup.style.display = "";
+                gottenSection.style.display = "none";
+            }
 
             return true;
         }
@@ -453,12 +659,27 @@
         RemoveEvents(menu) {
             super.RemoveEvents(menu);
 
-            if (this.element !== undefined && this.element !== null) {
-                if (this.#groupPointerEnterCallback !== undefined) this.element.removeEventListener("pointerenter", this.#groupPointerEnterCallback);
-                if (this.#groupPointerLeaveCallback !== undefined) this.element.removeEventListener("pointerleave", this.#groupPointerLeaveCallback);
-                this.#groupPointerEnterCallback = undefined;
-                this.#groupPointerLeaveCallback = undefined;
+            if (!this.#collapsed) {
+                this.#UnloadItems(menu);
             }
+
+            const gottenGroup = document.getElementById(`WolfermusMenu${menu.id}${this.id}Group`);
+            const gottenCollapseButton = document.getElementById(`WolfermusMenu${menu.id}${this.id}GroupCollapseButton`);
+
+            if (gottenGroup !== undefined && gottenGroup !== null) {
+                if (this.#groupPointerEnterCallback !== undefined) gottenGroup.removeEventListener("pointerenter", this.#groupPointerEnterCallback);
+                if (this.#groupPointerLeaveCallback !== undefined) gottenGroup.removeEventListener("pointerleave", this.#groupPointerLeaveCallback);
+                if (this.#expand !== undefined) gottenGroup.removeEventListener("click", this.#expand);
+            }
+
+            if (gottenCollapseButton !== undefined && gottenCollapseButton !== null) {
+                if (this.#collapse !== undefined) gottenCollapseButton.removeEventListener("click", this.#collapse);
+            }
+
+            this.#groupPointerEnterCallback = undefined;
+            this.#groupPointerLeaveCallback = undefined;
+            this.#expand = undefined;
+            this.#collapse = undefined;
 
             if (menu?.element !== undefined) {
                 if (this.#menuPointerEnterCallback !== undefined) menu.element.removeEventListener("pointerenter", this.#menuPointerEnterCallback);
@@ -467,11 +688,29 @@
                 this.#menuPointerLeaveCallback = undefined;
             }
         }
+
+        /**
+         * @param {WolfermusMenu} menu
+         * @returns {Boolean}
+         */
+        async #SetupItems(menu) {
+            for (const menuItem of this.items) {
+                await menuItem.SetupEvents(menu);
+            }
+        }
+
+        /**
+         * @param {WolfermusMenu} menu
+         */
+        #UnloadItems(menu) {
+            for (const menuItem of this.items) {
+                menuItem.RemoveEvents(menu);
+            }
+        }
     }
 
-    if (mainMenuLibrary["Classes"]["Addons"]["Groups"] === undefined || mainMenuLibrary["Classes"]["Addons"]["Groups"] === null) {
-        mainMenuLibrary["Classes"]["Addons"]["Groups"] = {};
-    }
+    mainMenuLibrary["Classes"]["Addons"]["WolfermusGroupMenuItem"] = WolfermusGroupMenuItem;
 
-    mainMenuLibrary["Classes"]["Addons"]["Groups"]["WolfermusGroupMenuItem"] = WolfermusGroupMenuItem;
+    const endTime = performance.now();
+    console.info(`Wolfermus MainMenu: Addons - GroupMenuItem Added - Took ${endTime - startTime}ms`);
 })();

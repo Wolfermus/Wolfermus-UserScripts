@@ -4,7 +4,7 @@
     box-sizing: border-box;
 }
 
-.WolfermusActive {
+.WolfermusVisable {
     visibility: visible !important;
 }
 
@@ -99,6 +99,14 @@
         padding-bottom: 2%;
         overflow: auto;
         border-radius: 15px;
+
+        .WolfermusActive {
+            li {
+                &.WolfermusGroupItem {
+                    background: #3d3d3d;
+                }
+            }
+        }
 
         li {
 
@@ -207,11 +215,17 @@
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                padding: 6px 12px;
-                min-width: 12px;
+                /* padding: 6px 12px; */
+                margin: 6px 12px;
+                /* min-width: 12px; */
                 font-size: 14px;
                 line-height: 20px;
                 text-align: center;
+                flex-shrink: 0;
+                max-width: 200px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
 
                 &.WolfermusGroup {
                     visibility: hidden;
@@ -289,6 +303,8 @@
         line-height: 12px;
         letter-spacing: 0.5px;
         overflow-wrap: break-word;
+        flex-shrink: inherit;
+        white-space: inherit;
     }
 }
 
@@ -395,7 +411,7 @@
             }
         }
 
-        &.WolfermusActive {
+        &.WolfermusVisable {
             .WolfermusActivatedMainMenuWindow {
                 transition: 0.5s;
                 visibility: visible;

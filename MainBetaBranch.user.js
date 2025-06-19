@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu (Beta)
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.0.11-beta
+// @version      2.1.0-beta
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them. (Beta)
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -30,6 +30,8 @@
 // @grant        GM_xmlHttpRequest
 // @icon         https://i.imgur.com/XFeWfV0.png
 // ==/UserScript== 
+
+const wolfermusMainMenuStartTime = performance.now();
 
 if (typeof wolfermusBypassScriptPolicy === "undefined" || typeof wolfermusBypassScriptPolicy === "null") {
     var wolfermusBypassScriptPolicy = trustedTypes.createPolicy("wolfermusBypassScript", {
@@ -83,7 +85,7 @@ function MakeGetRequest(url) {
             url: url,
             onload: (response) => {
                 if (response.status !== 200) {
-                    reject(statusText);
+                    reject(response.statusText);
                     return;
                 }
                 resolve(response.responseText);
@@ -206,14 +208,13 @@ function WolfermusCheckLibraryLoaded(key) {
             return;
         }
         wolfermusAntiStuckLoop1--;
-
     }
 
     if (WolfermusCheckModuleLoaded("MainMenu")) return;
     let mainMenuModule = WolfermusGetModule("MainMenu", true);
 
     while (mainMenuModule["Loading"] === true) {
-        await Sleep(500);
+        await Sleep(100);
     }
 
     if (WolfermusCheckModuleLoaded("MainMenu")) return;
@@ -221,11 +222,11 @@ function WolfermusCheckLibraryLoaded(key) {
     mainMenuModule["Loaded"] = false;
     mainMenuModule["Loading"] = true;
 
-    console.log("Wolfermus Main Menu Loading...");
+    console.info("Wolfermus Main Menu Loading...");
 
     let wolfermusLoadLoopCounter = 0;
     while (!WolfermusCheckLibraryLoaded("MainMenu")) {
-        await Sleep(500);
+        await Sleep(50);
 
         if (wolfermusLoadLoopCounter >= 100) {
             alert("ERROR: antiStuckLoop engaged");
@@ -263,28 +264,40 @@ function WolfermusCheckLibraryLoaded(key) {
 
     const websiteName = window.location.hostname;
     const branch = "beta";
-    const baseScriptURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Scripts/${websiteName}`;
+    const baseURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/`;
+    const baseScriptURL = `${baseURL}Scripts/`;
+    const baseWebsiteScriptURL = `${baseScriptURL}${websiteName}/`;
     async function GetScripts() {
-        let gottenBody = JSON.parse(await MakeGetRequest(`https://api.github.com/repos/Wolfermus/Wolfermus-UserScripts/git/trees/${branch}`));
-        let scriptsFolderItem = gottenBody.tree.find(item => item.path === "Scripts");
+        //const wholeFunctionStartTime = performance.now();
 
-        let gottenScriptsFolder = JSON.parse(await MakeGetRequest(scriptsFolderItem.url));
-
-        let websiteFolderItem = gottenScriptsFolder.tree.filter(item => item.type === "tree").find(item => item.path === websiteName);
-
+        let startsWithString = "Scripts/";
+        let websiteNameStartsWithString = `${websiteName}/`;
         let scriptsURLS = [];
 
-        if (websiteFolderItem === undefined || websiteFolderItem === null) return scriptsURLS;
+        let gottenBody = JSON.parse(await MakeGetRequest(`https://api.github.com/repos/Wolfermus/Wolfermus-UserScripts/git/trees/${branch}?recursive=true`));
 
+        let scriptsItems = gottenBody.tree.filter(item => item.path.startsWith(startsWithString));
+        scriptsItems.forEach(item => item.path = item.path.slice(startsWithString.length));
 
-        let gottenWebsiteScriptsFolder = JSON.parse(await MakeGetRequest(websiteFolderItem.url));
-        for (let scriptItem of gottenWebsiteScriptsFolder.tree) {
-            if (scriptItem.type === "blob") {
-                scriptsURLS.push(`${baseScriptURL}/${scriptItem.path}`);
-            } else if (scriptItem.type === "tree") {
-                scriptsURLS.push(`${baseScriptURL}/${scriptItem.path}/Main.js`);
-            }
+        {
+            let everyWhereScripts = scriptsItems.filter(item => (!item.path.includes("/") && item.type === "blob"));
+            scriptsURLS.push(...everyWhereScripts.map(item => baseScriptURL + item.path));
         }
+
+        let websiteFolderItems = scriptsItems.filter(item => item.path.startsWith(websiteNameStartsWithString));
+        websiteFolderItems.forEach(item => item.path = item.path.slice(websiteNameStartsWithString.length));
+
+        {
+            let youtubeSingleScripts = websiteFolderItems.filter(item => (!item.path.includes("/") && item.type === "blob"));
+            scriptsURLS.push(...youtubeSingleScripts.map(item => baseWebsiteScriptURL + item.path));
+        }
+
+        {
+            let youtubeModuleScripts = websiteFolderItems.filter(item => (item.path.endsWith("/Main.js") && item.type === "blob"));
+            scriptsURLS.push(...youtubeModuleScripts.map(item => baseWebsiteScriptURL + item.path));
+        }
+
+        //console.info(`Wolfermus Main Menu Loaded - GetScripts - wholeFunction - Took ${performance.now() - wholeFunctionStartTime}ms`);
 
         return scriptsURLS;
     }
@@ -296,49 +309,38 @@ function WolfermusCheckLibraryLoaded(key) {
 
     let wolfermusPreventLoopLock1 = 10;
     async function LoadScript(path) {
-        //console.log("Scripts/Main.js - 3");
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path));
-            await eval(script)(baseScriptURL, branch);
+            await eval(script)(baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
         } catch (error) {
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
-            await Sleep(100);
+            await Sleep(50);
             await LoadScript(path);
         }
     }
 
-    //await Sleep(1000);
-
-
-
     async function AttemptLoadScript() {
         const fetchedScripts = await GetScripts();
+
+        // {
+        //     const endTime = performance.now();
+        //     console.info(`Wolfermus Main Menu Loaded - 1 - Took ${endTime - wolfermusMainMenuStartTime}ms`);
+        // }
+
         for (let scriptURL of fetchedScripts) {
-            //console.log("Scripts/Main.js - 2");
             await LoadScript(scriptURL).catch(async (error) => {
                 debugger;
                 console.error(`Wolfermus ERROR: Main - Failed To Load Scripts\n${error}`);
             });
         }
+
+        // {
+        //     const endTime = performance.now();
+        //     console.info(`Wolfermus Main Menu Loaded - 2 - Took ${endTime - wolfermusMainMenuStartTime}ms`);
+        // }
     }
-    //console.log("Scripts/Main.js - 1");
     await AttemptLoadScript();
-
-    // {
-    //     let wolfermusAntiStuckLoop1 = 100;
-    //     while (document.readyState !== "complete") {
-    //         await Sleep(100);
-
-    //         if (wolfermusAntiStuckLoop1 < 0) {
-    //             alert("ERROR: antiStuckLoop engaged");
-    //             return;
-    //         }
-    //         wolfermusAntiStuckLoop1--;
-    //     }
-    // }
-
-    //await Sleep(500);
 
     await UpdateWolfermusMainMenuStyle();
     await UpdateMenuItems();
@@ -348,9 +350,9 @@ function WolfermusCheckLibraryLoaded(key) {
         return;
     }
 
-    //console.log("Scripts/Main.js - 5");
+    const endTime = performance.now();
 
-    console.log("Wolfermus Loaded Scripts/Main.js");
+    console.info(`Wolfermus Main Menu Loaded - Took ${endTime - wolfermusMainMenuStartTime}ms`);
 
     mainMenuModule["Loaded"] = true;
     mainMenuModule["Loading"] = false;

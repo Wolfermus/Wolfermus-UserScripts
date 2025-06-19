@@ -1,6 +1,8 @@
-async (path, branch) => {
+async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     //debugger;
     //if (window.location.href !== "https://www.youtube.com/") return;
+
+    const startTime = performance.now();
 
     //#region Setting Up ChosenXmlHttpRequest
     let IsGMXmlHttpRequest1 = false;
@@ -44,7 +46,7 @@ async (path, branch) => {
                 url: url,
                 onload: (response) => {
                     if (response.status !== 200) {
-                        reject(statusText);
+                        reject(response.statusText);
                         return;
                     }
                     resolve(response.responseText);
@@ -53,8 +55,6 @@ async (path, branch) => {
             });
         });
     }
-
-    console.log("Wolfermus: Youtube - CSSToggles Running");
 
     /**
      * @param {number | undefined} ms
@@ -213,7 +213,7 @@ async (path, branch) => {
         }
     }
 
-    console.log("Wolfermus - Adding CSSToggles");
+    console.info(`Wolfermus Scripts: Youtube - CSSToggles Loading`);
 
     const storageManagerLibrary = WolfermusGetLibrary("StorageManager");
 
@@ -267,7 +267,7 @@ async (path, branch) => {
             createScriptURL: (string) => string
         });
 
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${path}/CSSToggles/ChangeFrostedGlassStyle.js`));
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}CSSToggles/ChangeFrostedGlassStyle.js`));
         ChangeFrostedGlassStyle = eval(script);
     }
 
@@ -279,7 +279,7 @@ async (path, branch) => {
             createScriptURL: (string) => string
         });
 
-        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${path}/CSSToggles/RestoreFrostedGlassBackgroundColor.js`));
+        const script = bypassScriptPolicy.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}CSSToggles/RestoreFrostedGlassBackgroundColor.js`));
         RestoreFrostedGlassBackgroundColor = eval(script);
     }
 
@@ -317,7 +317,7 @@ async (path, branch) => {
         });
     }
 
-    let ToggleFrostedGlassMenuItem = new WolfermusToggleButtonMenuItem("MainPageScrollFrostedGlass", `Toggle Scroll Frosted Glass`, "This script toggles the top bar from a frosted transparent\nlook into solid color");
+    let ToggleFrostedGlassMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Scroll Frosted Glass`, "This script toggles the top bar from a frosted transparent\nlook into solid color");
     ToggleFrostedGlassMenuItem.toggled = WolfermusCSSTogglesSettings["FrostedGlass"];
     ToggleFrostedGlassMenuItem.ToggledEventAddCallback(async (toggled) => {
         const GUIGotten = await GetValue("CSSToggles", "{}");
@@ -345,4 +345,7 @@ async (path, branch) => {
     const mainMenu = GetMainMenu();
 
     mainMenu.items.push(ToggleFrostedGlassMenuItem);
+
+    const endTime = performance.now();
+    console.info(`Wolfermus Scripts: Youtube - CSSToggles Loaded - Took ${endTime - startTime}ms`);
 };
