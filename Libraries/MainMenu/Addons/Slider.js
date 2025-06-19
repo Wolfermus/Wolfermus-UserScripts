@@ -268,9 +268,11 @@
         Generate(menu) {
             if (this.id === undefined) return "";
 
+            const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
+
             return `
                 <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
-                    <a class="WolfermusTitle">${this.title}</a>
+                    <a class="WolfermusTitle Wolfermus${this.id}Title Wolfermus${this.id}TitleItem" style="${validTitle ? "" : "display: none;"}">${this.title}</a>
                     <div>
                         <input class="WolfermusSlider" type="range" value="${this.#value}" min="${this.#min}" max="${this.max}" step="${this.step}">
                         <span class="WolfermusSliderToolTip">${this.#value}</span>
@@ -321,7 +323,7 @@
 
     if (sliderMenuItemStyle === undefined || sliderMenuItemStyle === null) {
         sliderMenuItemStyle = document.createElement("style");
-        sliderMenuItemStyle.id = "WolfermusMainMenuStyle";
+        sliderMenuItemStyle.id = "WolfermusSliderMenuItemStyle";
         document.head.append(sliderMenuItemStyle);
     }
 
