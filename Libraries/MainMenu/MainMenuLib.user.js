@@ -1213,11 +1213,86 @@ class WolfermusMenuItem {
     }
 
     /**
+     * @returns {Array<string>}
+     */
+    GetCssURL() {
+        return [];
+    }
+
+    UnloadCSS() {
+        const gottenCssURL = this.GetCssURL();
+        if (gottenCssURL === undefined || gottenCssURL === null || gottenCssURL.length <= 0) return;
+
+        for (const urlIndex in gottenCssURL) {
+            let menuItemStyle = document.getElementById(`${this.constructor.name}${urlIndex}Style`);
+
+            if (menuItemStyle === undefined || menuItemStyle === null) continue;
+
+            menuItemStyle.remove();
+        }
+    }
+
+    /**
+     * @async
+     */
+    async ValidateCSS() {
+        const gottenCssURL = this.GetCssURL();
+        if (gottenCssURL === undefined || gottenCssURL === null || gottenCssURL.length <= 0) return;
+
+        let branch = "main";
+        if (IsBeta()) {
+            branch = "beta";
+        }
+
+        async function GetCSS(url) {
+            if (url.startsWith("/")) {
+                const baseResourcesURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Resources`;
+                const css = await MakeGetRequest(`${baseResourcesURL}${url}`);
+                return css;
+            } else {
+                const css = await MakeGetRequest(url);
+                return css;
+            }
+        }
+
+        let wolfermusPreventLoopLock1 = 10;
+        async function AttemptLoadCSS(url) {
+            return await GetCSS(url).then(async (response) => {
+                return response;
+            }).catch(async (error) => {
+                if (wolfermusPreventLoopLock1 <= 0) return;
+                wolfermusPreventLoopLock1--;
+                await Sleep(50);
+                return await AttemptLoadCSS(url);
+            });
+        }
+
+        for (const urlIndex in gottenCssURL) {
+            let menuItemStyle = document.getElementById(`${this.constructor.name}${urlIndex}Style`);
+
+            if (menuItemStyle !== undefined && menuItemStyle !== null) continue;
+
+            menuItemStyle = document.createElement("style");
+            menuItemStyle.id = `${this.constructor.name}${urlIndex}Style`;
+            document.head.append(menuItemStyle);
+
+            const url = gottenCssURL[urlIndex];
+
+            wolfermusPreventLoopLock1 = 10;
+            const editedInnerHTML = wolfermusBypassScriptPolicy.createHTML(await AttemptLoadCSS(url));
+
+            menuItemStyle.innerHTML = editedInnerHTML;
+        }
+    }
+
+    /**
      * @param {WolfermusMenu} menu
      * @returns {string}
      */
     Generate(menu) {
         if (this.id === undefined) return "";
+
+        this.ValidateCSS();
 
         const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
 
@@ -1384,6 +1459,8 @@ class WolfermusImageMenuItem extends WolfermusMenuItem {
      */
     Generate(menu) {
         if (this.id === undefined) return "";
+
+        this.ValidateCSS();
 
         return `
             <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
