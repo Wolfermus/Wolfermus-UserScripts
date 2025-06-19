@@ -70,4 +70,5 @@
     box-sizing: border-box;
     transform-origin: center center;
     text-shadow: 0px 0px 5px black;
+    font-size: 16px;
 }
