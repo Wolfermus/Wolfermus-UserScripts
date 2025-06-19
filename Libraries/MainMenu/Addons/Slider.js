@@ -327,11 +327,10 @@
         document.head.append(sliderMenuItemStyle);
     }
 
-    let branch = "Slider-Menu-Item";
-    // let branch = "main";
-    // if (IsBeta()) {
-    //     branch = "beta";
-    // }
+    let branch = "main";
+    if (IsBeta()) {
+        branch = "beta";
+    }
 
     async function GetCSS() {
         const baseResourcesURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Resources/`;
