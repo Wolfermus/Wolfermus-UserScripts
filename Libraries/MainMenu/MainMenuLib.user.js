@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.0.6
+// @version      4.0.7
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -952,9 +952,19 @@ class WolfermusMenuItem {
     set title(newTitle) {
         this.#title = newTitle;
         if (this.element !== undefined && this.element !== null) {
-            const gottenTitleElementGroup = this.element.getElementsByClassName("WolfermusTitle");
+            const gottenTitleElementGroup = this.element.getElementsByClassName(`Wolfermus${this.id}Title`);
+            const gottenTitleItemElementGroup = this.element.getElementsByClassName(`Wolfermus${this.id}TitleItem`);
+            const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
+
             for (let titleElement of gottenTitleElementGroup) {
                 titleElement.innerText = this.#title;
+            }
+            for (let titleItemElement of gottenTitleItemElementGroup) {
+                if (validTitle) {
+                    titleItemElement.style.display = "";
+                } else {
+                    titleItemElement.style.display = "none";
+                }
             }
         }
     }
@@ -1209,9 +1219,11 @@ class WolfermusMenuItem {
     Generate(menu) {
         if (this.id === undefined) return "";
 
+        const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
+
         return `
             <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
-                <a class="WolfermusTitle">${this.title}</a>
+                <a class="WolfermusTitle Wolfermus${this.id}Title Wolfermus${this.id}TitleItem" style="${validTitle ? "" : "display: none;"}">${this.title}</a>
             </li>
         `;
     }
