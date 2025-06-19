@@ -221,11 +221,14 @@
                 font-size: 14px;
                 line-height: 20px;
                 text-align: center;
-                flex-shrink: 0;
                 max-width: 200px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+
+                &.WolfermusInputItem {
+                    flex-shrink: 0;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
 
                 &.WolfermusGroup {
                     visibility: hidden;
@@ -302,9 +305,11 @@
         font-size: 10px;
         line-height: 12px;
         letter-spacing: 0.5px;
-        overflow-wrap: break-word;
+        overflow: inherit;
         flex-shrink: inherit;
         white-space: inherit;
+        text-overflow: inherit;
+        overflow-wrap: break-word;
     }
 }
 
