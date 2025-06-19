@@ -76,6 +76,7 @@ if (typeof ChosenXmlHttpRequest === "undefined" || typeof ChosenXmlHttpRequest =
     //#endregion -Setting Up ChosenXmlHttpRequest
 }
 
+// TODO: Move MakeGetRequest to Utilities Lib
 function MakeGetRequest(url) {
     return new Promise((resolve, reject) => {
         ChosenXmlHttpRequest({
@@ -2052,6 +2053,17 @@ async function UpdateMenuItems() {
     console.info("Wolfermus MainMenu Library - Loading...");
 
     let MainMenuLibrary = WolfermusGetLibrary("MainMenu", true);
+
+    if (!WolfermusCheckLibraryLoaded("Utilities")) {
+        let UtilitiesLibrary = WolfermusGetLibrary("Utilities", true);
+
+        UtilitiesLibrary["Loaded"] = false;
+
+        UtilitiesLibrary["MakeGetRequest"] = MakeGetRequest;
+        UtilitiesLibrary["IsBeta"] = IsBeta;
+
+        UtilitiesLibrary["Loaded"] = true;
+    }
 
     MainMenuLibrary["Loaded"] = false;
 
