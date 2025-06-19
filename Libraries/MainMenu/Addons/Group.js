@@ -221,7 +221,7 @@
                 <div id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
                     <li id="WolfermusMenu${menu.id}${this.id}Group" class="WolfermusGroupItem" style="${this.#collapsed ? "" : "display: none;"}">
                         <a class="WolfermusGroup WolfermusGroupRightPosition"><</a>
-                        <a class="WolfermusTitle">${this.title}</a>
+                        <a class="WolfermusTitle Wolfermus${this.id}Title">${this.title}</a>
                         <a class="WolfermusGroup WolfermusGroupLeftPosition">></a>
                     </li>
                     <li id="WolfermusMenu${menu.id}${this.id}Section" style="background: transparent;
@@ -232,11 +232,9 @@
                     ${!this.#collapsed ? "" : "display: none;"}">
                         <a id="WolfermusMenu${menu.id}${this.id}GroupCollapseButton" style="position: absolute;top: 0; right: 0;pointer-events: all !important;cursor: pointer;z-index: 9600;">x</a>
                         <ul class="WolfermusDefaultCSS">
-                            ${validTitle ? `
-                            <li class="WolfermusDefaultCSS WolfermusTextItem">
-                                <a class="WolfermusTitle" style="font-size: 18px;">${this.title}</a>
+                            <li class="WolfermusDefaultCSS WolfermusTextItem Wolfermus${this.id}TitleItem" style="${validTitle ? "" : "display: none;"}">
+                                <a class="WolfermusTitle Wolfermus${this.id}Title" style="font-size: 18px;">${this.title}</a>
                             </li>
-                            ` : ""}
                             ${this.#GenerateItems(menu)}
                         </ul>
                     </li>
