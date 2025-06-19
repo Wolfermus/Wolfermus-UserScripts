@@ -302,7 +302,8 @@ async function GetWolfermusRoot(forceRequest = false) {
     }
 
     async function GetHTML() {
-        const script = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Resources/MainMenuLibHTML.js`));
+        const baseResourcesURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Resources/`;
+        const script = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`${baseResourcesURL}Libraries/MainMenu/MainMenuLibHTML.js`));
         return script;
     }
 
@@ -620,7 +621,8 @@ async function UpdateWolfermusMainMenuStyle() {
     }
 
     async function GetCSS() {
-        const css = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Resources/MainMenuLib.css`));
+        const baseResourcesURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Resources/`;
+        const css = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`${baseResourcesURL}Libraries/MainMenu/MainMenuLib.css`));
         return css;
     }
 
