@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.0.7
+// @version      4.1.1
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -1651,6 +1651,301 @@ class WolfermusBaseGroupMenuItem extends WolfermusMenuItem {
     items = [];
 }
 
+class WolfermusSpacerMenuItem extends WolfermusMenuItem {
+    /**
+     * @param {any} height
+     */
+    constructor(height = "30px") {
+        super("", "");
+
+        this.#height = height;
+    }
+
+    #height = "30px";
+
+    set height(newValue) {
+        if (newValue === this.#height) return;
+        this.#height = newValue;
+
+        if (this.element === undefined || this.element === null || !this.element) return;
+        this.element.style.height = this.#height;
+    }
+    get height() { return this.#height; }
+
+    /**
+     * @param {WolfermusMenu} menu
+     * @returns {string}
+     */
+    Generate(menu) {
+        if (this.id === undefined) return "";
+
+        this.ValidateCSS();
+
+        return `
+            <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}" style="height: ${this.#height};"></li>
+        `;
+    }
+}
+
+class WolfermusInputMenuItem extends WolfermusMenuItem {
+    /**
+     * @param {string} type
+     * @param {any} id
+     * @param {string} title
+     * @param {string} [tooltip=""]
+     * @param {any} [value=0]
+     * @param {any} [min=0]
+     * @param {any} [max=100]
+     * @param {any} [step=1]
+     */
+    constructor(type, title, tooltip = "", value = 0, min = undefined, max = undefined, step = 1) {
+        super(title, tooltip);
+        this.AddClass("WolfermusInputItem");
+
+        this.#min = min;
+        this.#max = max;
+        this.#step = step;
+        this.value = value;
+        this.type = type
+    }
+
+    /**
+     * @type {any}
+     */
+    #value = 0;
+    /**
+     * @type {any}
+     */
+    #min = undefined;
+    /**
+     * @type {any}
+     */
+    #max = undefined;
+    /**
+     * @type {any}
+     */
+    #step = 1;
+
+    /**
+     * @type {string}
+     */
+    #type = "text";
+
+    /**
+     * @returns {Array<string>}
+     */
+    GetCssURL() {
+        let gottenCssURL = super.GetCssURL();
+        gottenCssURL.push("/Libraries/MainMenu/Input.css");
+        return gottenCssURL;
+    }
+
+    /**
+     * @type {Array<(currentValue, previousValue) => void>}
+     */
+    #valueChangeEvent = [];
+
+    /**
+     * @param {InputEvent} event 
+     * @type {(event: InputEvent) => voud}
+     */
+    #inputCallback = (event) => {
+        this.value = event.target.value;
+    };
+
+    get inputCallback() { return this.#inputCallback; }
+
+    /**
+     * @param {(currentValue, previousValue) => void} callback 
+     */
+    ValueChangeAddCallback(callback) {
+        if (callback === undefined || callback === null) return;
+        if (this.#valueChangeEvent.includes(callback)) return;
+
+        this.#valueChangeEvent.push(callback);
+    }
+
+    /**
+     * @param {(currentValue, previousValue) => void} callback 
+     */
+    ValueChangeRemoveCallback(callback) {
+        if (callback === undefined || callback === null) return;
+        const foundIndex = this.#valueChangeEvent.findIndex((callbackItem) => callbackItem === callback);
+        if (foundIndex <= -1) return;
+
+        this.#valueChangeEvent.splice(foundIndex, 1);
+    }
+
+    /**
+     * @type {(void) => void}
+     */
+    #ValidateValue = () => {
+        if (this.#min !== undefined && this.#min !== null && this.#value < this.#min) this.value = this.#min;
+        else if (this.#max !== undefined && this.#max !== null && this.#value > this.#max) this.value = this.#max;
+    };
+
+    /**
+     * @type {(void) => void}
+     */
+    #UpdateInput = () => {
+        if (this.element === undefined || this.element === null) return;
+
+        const gottonWolfermusInputElements = this.element.getElementsByClassName("WolfermusInput");
+        if (gottonWolfermusInputElements.length <= 0) return;
+
+        const wolfermusInputElement = gottonWolfermusInputElements[0];
+
+        if (wolfermusInputElement.type !== "range" && this.#type === "range") {
+            wolfermusInputElement.removeEventListener("input", this.#inputCallback);
+            wolfermusInputElement.removeEventListener("change", this.#inputCallback);
+
+            wolfermusInputElement.addEventListener("input", this.#inputCallback);
+        } else if (wolfermusInputElement.type === "range" && this.#type !== "range") {
+            wolfermusInputElement.removeEventListener("input", this.#inputCallback);
+            wolfermusInputElement.removeEventListener("change", this.#inputCallback);
+
+            wolfermusInputElement.addEventListener("change", this.#inputCallback);
+        }
+
+        wolfermusInputElement.value = this.#value;
+        wolfermusInputElement.min = this.#min;
+        wolfermusInputElement.max = this.#max;
+        wolfermusInputElement.step = this.#step;
+        wolfermusInputElement.type = this.#type;
+    };
+
+    get UpdateInput() { return this.#UpdateInput; }
+
+    /**
+     * @param {string} newValue
+     */
+    set type(newValue) {
+        if (newValue === this.#value) return;
+
+        this.#type = newValue;
+
+        this.#UpdateInput();
+    }
+    get type() { return this.#type; }
+
+    /**
+     * @param {any} newValue
+     */
+    set value(newValue) {
+        if (newValue === this.#value) return;
+
+        const oldValue = this.#value;
+
+        if (newValue < this.#min) this.#value = this.#min;
+        else if (newValue > this.#max) this.#value = this.#max;
+        else this.#value = newValue;
+
+        this.#UpdateInput();
+
+        for (let callback of this.#valueChangeEvent) {
+            callback?.(this.#value, oldValue);
+        }
+    }
+    get value() { return this.#value; }
+
+    /**
+     * @param {any} newValue
+     */
+    set min(newValue) {
+        if (newValue === this.#min) return;
+
+        this.#min = newValue;
+        this.#ValidateValue();
+
+        this.#UpdateInput();
+    }
+    get min() { return this.#min; }
+
+    /**
+     * @param {any} newValue
+     */
+    set max(newValue) {
+        if (newValue === this.#max) return;
+
+        this.#max = newValue;
+        this.#ValidateValue();
+
+        this.#UpdateInput();
+    }
+    get max() { return this.#max; }
+
+    /**
+     * @param {any} newValue
+     */
+    set step(newValue) {
+        if (newValue === this.#step) return;
+
+        this.#step = newValue;
+
+        this.#UpdateInput();
+    }
+    get step() { return this.#step; }
+
+    /**
+     * @param {WolfermusMenu} menu
+     * @returns {string}
+     */
+    Generate(menu) {
+        if (this.id === undefined) return "";
+
+        this.ValidateCSS();
+
+        const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
+
+        return `
+            <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
+                <a class="WolfermusTitle Wolfermus${this.id}Title Wolfermus${this.id}TitleItem" style="${validTitle ? "" : "display: none;"}">${this.title}</a>
+                <div>
+                    <input class="WolfermusInput WolfermusText" type="${this.#type}" value="${this.#value}" min="${this.#min}" max="${this.max}" step="${this.step}">
+                </div>
+            </li>
+        `;
+    }
+
+    /**
+     * @param {WolfermusMenu} menu
+     * @returns {Boolean}
+     */
+    async SetupEvents(menu) {
+        if (!super.SetupEvents(menu)) return false;
+
+        if (this.element === undefined || this.element === null) return false;
+
+        const gottonWolfermusInputElements = this.element.getElementsByClassName("WolfermusInput");
+        if (gottonWolfermusInputElements.length <= 0) return false;
+
+        const wolfermusInputElement = gottonWolfermusInputElements[0];
+
+        if (this.#type === "range") {
+            wolfermusInputElement.addEventListener("input", this.#inputCallback);
+        } else wolfermusInputElement.addEventListener("change", this.#inputCallback);
+
+        return true;
+    }
+
+    /**
+     * @param {WolfermusMenu} menu
+     */
+    RemoveEvents(menu) {
+        super.RemoveEvents(menu);
+
+        if (this.element !== undefined && this.element !== null) {
+            const gottonWolfermusInputElements = this.element.getElementsByClassName("WolfermusInput");
+            if (gottonWolfermusInputElements.length > 0) {
+                const wolfermusInputElement = gottonWolfermusInputElements[0];
+
+                wolfermusInputElement.removeEventListener("input", this.#inputCallback);
+                wolfermusInputElement.removeEventListener("change", this.#inputCallback);
+            }
+        }
+    }
+}
+
 class WolfermusMenu {
     constructor() {
         WolfermusMenu.id++;
@@ -2159,6 +2454,8 @@ async function UpdateMenuItems() {
     MainMenuLibrary["Classes"] = {};
     MainMenuLibrary["Classes"]["WolfermusMenu"] = WolfermusMenu;
     MainMenuLibrary["Classes"]["WolfermusMenuItem"] = WolfermusMenuItem;
+    MainMenuLibrary["Classes"]["WolfermusInputMenuItem"] = WolfermusInputMenuItem;
+    MainMenuLibrary["Classes"]["WolfermusSpacerMenuItem"] = WolfermusSpacerMenuItem;
 
     MainMenuLibrary["Classes"]["Bases"] = {}
     MainMenuLibrary["Classes"]["Bases"]["WolfermusBaseGroupMenuItem"] = WolfermusBaseGroupMenuItem;
