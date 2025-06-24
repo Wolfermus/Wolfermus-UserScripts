@@ -254,6 +254,8 @@ async (path) => {
     function CheckNode(node, searchSelector) {
         if (node.matches(searchSelector)) {
             HideNode(node);
+        } else {
+            UnHideNode(node);
         }
     }
 
@@ -314,12 +316,13 @@ async (path) => {
             }
             return;
         }
-        UnDoAllNodes(oldValue);
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", async () => {
+                UnDoAllNodes(oldValue);
                 CheckAllNodes(newValue);
             }, { once: true });
         } else {
+            UnDoAllNodes(oldValue);
             CheckAllNodes(newValue);
         }
     });
@@ -347,11 +350,14 @@ async (path) => {
                     } else {
                         removeVideoTypesModule.disabledDone1 = true;
                         if (document.readyState === "loading") {
+                            UnDoAllNodes(YoutubeGotten, true);
                             document.addEventListener("DOMContentLoaded", async () => {
                                 const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
+                                UnDoAllNodes(YoutubeGotten, true);
                                 CheckAllNodes(YoutubeGotten);
                             }, { once: true });
                         } else {
+                            UnDoAllNodes(YoutubeGotten, true);
                             CheckAllNodes(YoutubeGotten);
                         }
                     }
@@ -391,11 +397,14 @@ async (path) => {
                 } else {
                     removeVideoTypesModule.disabledDone2 = true;
                     if (document.readyState === "loading") {
+                        UnDoAllNodes(YoutubeGotten, true);
                         document.addEventListener("DOMContentLoaded", async () => {
                             const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
+                            UnDoAllNodes(YoutubeGotten, true);
                             CheckAllNodes(YoutubeGotten);
                         }, { once: true });
                     } else {
+                        UnDoAllNodes(YoutubeGotten, true);
                         CheckAllNodes(YoutubeGotten);
                     }
                 }
