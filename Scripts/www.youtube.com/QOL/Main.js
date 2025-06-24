@@ -353,20 +353,30 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
     QOLTimeRemainingMenuItem.CheckUrls();
 
-    if (!localStorage["WolfermusYoutubeQOL"]) localStorage["WolfermusYoutubeQOL"] = {};
-    if (!localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"]) localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"] = {};
+    if (typeof localStorage["WolfermusYoutubeQOL"] !== "string") localStorage["WolfermusYoutubeQOL"] = "{}";
+    let localYoutubeQOLSettings = JSON.parse(localStorage["WolfermusYoutubeQOL"]);
 
-    localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled = QOLTimeRemainingMenuItem.disabled;
-    localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone = false;
+    if (!localYoutubeQOLSettings["RemoveVideoTypes"]) localYoutubeQOLSettings["RemoveVideoTypes"] = {};
+    let localRemoveVideoTypesSettings = localYoutubeQOLSettings["RemoveVideoTypes"];
+
+    localRemoveVideoTypesSettings.disabled = QOLTimeRemainingMenuItem.disabled;
+    localRemoveVideoTypesSettings.disabledDone = false;
+
+    localStorage["WolfermusYoutubeQOL"] = JSON.stringify(localYoutubeQOLSettings);
 
     if (RemoveVideoTypesSettings.Active && !QOLTimeRemainingMenuItem.disabled) LoadScriptOnce("RemoveVideoTypes");
 
     QOLTimeRemainingMenuItem.DisabledEventAddCallback((disabled) => {
-        if (!localStorage["WolfermusYoutubeQOL"]) localStorage["WolfermusYoutubeQOL"] = {};
-        if (!localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"]) localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"] = {};
+        if (typeof localStorage["WolfermusYoutubeQOL"] !== "string") localStorage["WolfermusYoutubeQOL"] = "{}";
+        let localYoutubeQOLSettings = JSON.parse(localStorage["WolfermusYoutubeQOL"]);
 
-        localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled = disabled;
-        localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone = false;
+        if (!localYoutubeQOLSettings["RemoveVideoTypes"]) localYoutubeQOLSettings["RemoveVideoTypes"] = {};
+        let localRemoveVideoTypesSettings = localYoutubeQOLSettings["RemoveVideoTypes"];
+
+        localRemoveVideoTypesSettings.disabled = disabled;
+        localRemoveVideoTypesSettings.disabledDone = false;
+
+        localStorage["WolfermusYoutubeQOL"] = JSON.stringify(localYoutubeQOLSettings);
     });
 
 
