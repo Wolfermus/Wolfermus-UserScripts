@@ -169,6 +169,33 @@ async (path) => {
     await SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
 
     /**
+     * @returns {Object}
+     */
+    function GetLocalRemoveVideoTypesSettings() {
+        const gottenWindow = GetWindow();
+
+        if (typeof gottenWindow.localStorage["WolfermusYoutubeQOL"] !== "string") gottenWindow.localStorage["WolfermusYoutubeQOL"] = "{}";
+        let localYoutubeQOLSettings = JSON.parse(gottenWindow.localStorage["WolfermusYoutubeQOL"]);
+
+        if (!localYoutubeQOLSettings["RemoveVideoTypes"]) localYoutubeQOLSettings["RemoveVideoTypes"] = {};
+        let localRemoveVideoTypesSettings = localYoutubeQOLSettings["RemoveVideoTypes"];
+
+        localRemoveVideoTypesSettings.disabled ??= false;
+        localRemoveVideoTypesSettings.disabledDone ??= false;
+
+        return localRemoveVideoTypesSettings;
+    }
+
+    /**
+     * @param {Object} settings
+     */
+    function SaveLocalRemoveVideoTypesSettings(settings) {
+        const gottenWindow = GetWindow();
+
+        gottenWindow.localStorage["WolfermusYoutubeQOL"] = JSON.stringify(settings);
+    }
+
+    /**
      * @param {any | undefined | null} YoutubeGotten
      * @returns {Boolean}
      */
@@ -300,19 +327,13 @@ async (path) => {
     await AddValueChangeListener("YoutubeQOL", (key, oldValue, newValue, remote) => {
         debugger;
 
-        if (typeof localStorage["WolfermusYoutubeQOL"] !== "string") localStorage["WolfermusYoutubeQOL"] = "{}";
-        let localYoutubeQOLSettings = JSON.parse(localStorage["WolfermusYoutubeQOL"]);
-
-        if (!localYoutubeQOLSettings["RemoveVideoTypes"]) localYoutubeQOLSettings["RemoveVideoTypes"] = {};
-        let localRemoveVideoTypesSettings = localYoutubeQOLSettings["RemoveVideoTypes"];
-
-        localRemoveVideoTypesSettings.disabled ??= false;
-        localRemoveVideoTypesSettings.disabledDone ??= false;
+        const localRemoveVideoTypesSettings = GetLocalRemoveVideoTypesSettings();
 
         if (!IsActive(newValue) || localRemoveVideoTypesSettings.disabled) {
             if (localRemoveVideoTypesSettings.disabled) {
                 if (localRemoveVideoTypesSettings.disabledDone) return;
                 localRemoveVideoTypesSettings.disabledDone = true;
+                SaveLocalRemoveVideoTypesSettings(localRemoveVideoTypesSettings);
             }
             UnDoAllNodes(oldValue, true);
             return;
@@ -327,18 +348,12 @@ async (path) => {
                 const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
                 if (!IsActive(YoutubeGotten)) return;
 
-                if (typeof localStorage["WolfermusYoutubeQOL"] !== "string") localStorage["WolfermusYoutubeQOL"] = "{}";
-                let localYoutubeQOLSettings = JSON.parse(localStorage["WolfermusYoutubeQOL"]);
-
-                if (!localYoutubeQOLSettings["RemoveVideoTypes"]) localYoutubeQOLSettings["RemoveVideoTypes"] = {};
-                let localRemoveVideoTypesSettings = localYoutubeQOLSettings["RemoveVideoTypes"];
-
-                localRemoveVideoTypesSettings.disabled ??= false;
-                localRemoveVideoTypesSettings.disabledDone ??= false;
+                const localRemoveVideoTypesSettings = GetLocalRemoveVideoTypesSettings();
 
                 if (localRemoveVideoTypesSettings.disabled) {
                     if (localRemoveVideoTypesSettings.disabledDone) return;
                     localRemoveVideoTypesSettings.disabledDone = true;
+                    SaveLocalRemoveVideoTypesSettings(localRemoveVideoTypesSettings);
                     UnDoAllNodes(YoutubeGotten, true);
                     return;
                 }
@@ -359,18 +374,12 @@ async (path) => {
             const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
             if (!IsActive(YoutubeGotten)) return;
 
-            if (typeof localStorage["WolfermusYoutubeQOL"] !== "string") localStorage["WolfermusYoutubeQOL"] = "{}";
-            let localYoutubeQOLSettings = JSON.parse(localStorage["WolfermusYoutubeQOL"]);
-
-            if (!localYoutubeQOLSettings["RemoveVideoTypes"]) localYoutubeQOLSettings["RemoveVideoTypes"] = {};
-            let localRemoveVideoTypesSettings = localYoutubeQOLSettings["RemoveVideoTypes"];
-
-            localRemoveVideoTypesSettings.disabled ??= false;
-            localRemoveVideoTypesSettings.disabledDone ??= false;
+            const localRemoveVideoTypesSettings = GetLocalRemoveVideoTypesSettings();
 
             if (localRemoveVideoTypesSettings.disabled) {
                 if (localRemoveVideoTypesSettings.disabledDone) return;
                 localRemoveVideoTypesSettings.disabledDone = true;
+                SaveLocalRemoveVideoTypesSettings(localRemoveVideoTypesSettings);
                 UnDoAllNodes(YoutubeGotten, true);
                 return;
             }
@@ -383,14 +392,7 @@ async (path) => {
     });
     observeElements.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
 
-    if (typeof localStorage["WolfermusYoutubeQOL"] !== "string") localStorage["WolfermusYoutubeQOL"] = "{}";
-    let localYoutubeQOLSettings = JSON.parse(localStorage["WolfermusYoutubeQOL"]);
-
-    if (!localYoutubeQOLSettings["RemoveVideoTypes"]) localYoutubeQOLSettings["RemoveVideoTypes"] = {};
-    let localRemoveVideoTypesSettings = localYoutubeQOLSettings["RemoveVideoTypes"];
-
-    localRemoveVideoTypesSettings.disabled ??= false;
-    localRemoveVideoTypesSettings.disabledDone ??= false;
+    const localRemoveVideoTypesSettings = GetLocalRemoveVideoTypesSettings();
 
     if (RemoveVideoTypesSettings.Active && !localRemoveVideoTypesSettings.disabled) {
         if (document.readyState === "loading") {
