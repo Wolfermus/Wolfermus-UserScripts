@@ -321,10 +321,14 @@ async (path) => {
                 removeVideoTypesModule.disabled ??= false;
                 removeVideoTypesModule.disabledDone ??= false;
 
-                if (removeVideoTypesModule.disabled) {
-                    if (removeVideoTypesModule.disabledDone) return;
-                    removeVideoTypesModule.disabledDone = true;
-                    UnDoAllNodes(YoutubeGotten, true);
+                if (!removeVideoTypesModule.disabledDone) {
+                    if (removeVideoTypesModule.disabled) {
+                        removeVideoTypesModule.disabledDone = true;
+                        UnDoAllNodes(YoutubeGotten, true);
+                    } else {
+                        removeVideoTypesModule.disabledDone = true;
+                        CheckAllNodes(YoutubeGotten);
+                    }
                     return;
                 }
 
@@ -347,10 +351,14 @@ async (path) => {
             removeVideoTypesModule.disabled ??= false;
             removeVideoTypesModule.disabledDone ??= false;
 
-            if (removeVideoTypesModule.disabled) {
-                if (removeVideoTypesModule.disabledDone) return;
-                removeVideoTypesModule.disabledDone = true;
-                UnDoAllNodes(YoutubeGotten, true);
+            if (!removeVideoTypesModule.disabledDone) {
+                if (removeVideoTypesModule.disabled) {
+                    removeVideoTypesModule.disabledDone = true;
+                    UnDoAllNodes(YoutubeGotten, true);
+                } else {
+                    removeVideoTypesModule.disabledDone = true;
+                    CheckAllNodes(YoutubeGotten);
+                }
                 return;
             }
 
