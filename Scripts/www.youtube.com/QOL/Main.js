@@ -455,11 +455,22 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
     if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) LoadScriptOnce("RemoveVideoTypes");
 
-    QOLRemoveVideoTypesGroupMenuItem.DisabledEventAddCallback((disabled) => {
+    QOLRemoveVideoTypesGroupMenuItem.DisabledEventAddCallback(async (disabled) => {
         removeVideoTypesModule.disabled = disabled;
         removeVideoTypesModule.disabledDone0 = false;
         removeVideoTypesModule.disabledDone1 = false;
         removeVideoTypesModule.disabledDone2 = false;
+
+        if (!disabled) {
+            const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+            let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+            if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+
+            if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+            let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
+
+            if (RemoveVideoTypesSettingsInner.Active) LoadScriptOnce("RemoveVideoTypes");
+        }
     });
 
 
