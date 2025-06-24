@@ -325,7 +325,15 @@ async (path) => {
         }
     });
 
+    let oldHref = undefined;
+
     const observeElements = new MutationObserver(async (mutations) => {
+        if (oldHref !== document.location.href) {
+            oldHref = document.location.href;
+            const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
+            UnDoAllNodes(YoutubeGotten, true);
+        }
+
         for (const record of mutations) {
             if (record.addedNodes.length > 0) {
                 const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
