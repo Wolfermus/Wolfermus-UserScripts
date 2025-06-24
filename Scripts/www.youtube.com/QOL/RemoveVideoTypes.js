@@ -254,8 +254,6 @@ async (path) => {
     function CheckNode(node, searchSelector) {
         if (node.matches(searchSelector)) {
             HideNode(node);
-        } else {
-            UnHideNode(node);
         }
     }
 
