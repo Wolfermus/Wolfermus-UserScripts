@@ -448,14 +448,18 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     QOLRemoveVideoTypesGroupMenuItem.CheckUrls();
 
     removeVideoTypesModule.disabled = QOLRemoveVideoTypesGroupMenuItem.disabled;
-    removeVideoTypesModule.disabledDone = false;
+    removeVideoTypesModule.disabledDone0 = false;
+    removeVideoTypesModule.disabledDone1 = false;
+    removeVideoTypesModule.disabledDone2 = false;
 
 
     if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) LoadScriptOnce("RemoveVideoTypes");
 
     QOLRemoveVideoTypesGroupMenuItem.DisabledEventAddCallback((disabled) => {
         removeVideoTypesModule.disabled = disabled;
-        removeVideoTypesModule.disabledDone = false;
+        removeVideoTypesModule.disabledDone0 = false;
+        removeVideoTypesModule.disabledDone1 = false;
+        removeVideoTypesModule.disabledDone2 = false;
     });
 
 

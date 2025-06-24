@@ -298,12 +298,12 @@ async (path) => {
         debugger;
 
         removeVideoTypesModule.disabled ??= false;
-        removeVideoTypesModule.disabledDone ??= false;
+        removeVideoTypesModule.disabledDone0 ??= false;
 
         if (!IsActive(newValue) || removeVideoTypesModule.disabled) {
             if (removeVideoTypesModule.disabled) {
-                if (removeVideoTypesModule.disabledDone) return;
-                removeVideoTypesModule.disabledDone = true;
+                if (removeVideoTypesModule.disabledDone0) return;
+                removeVideoTypesModule.disabledDone0 = true;
             }
             UnDoAllNodes(oldValue, true);
             return;
@@ -319,14 +319,14 @@ async (path) => {
                 if (!IsActive(YoutubeGotten)) return;
 
                 removeVideoTypesModule.disabled ??= false;
-                removeVideoTypesModule.disabledDone ??= false;
+                removeVideoTypesModule.disabledDone1 ??= false;
 
-                if (!removeVideoTypesModule.disabledDone) {
+                if (!removeVideoTypesModule.disabledDone1) {
                     if (removeVideoTypesModule.disabled) {
-                        removeVideoTypesModule.disabledDone = true;
+                        removeVideoTypesModule.disabledDone1 = true;
                         UnDoAllNodes(YoutubeGotten, true);
                     } else {
-                        removeVideoTypesModule.disabledDone = true;
+                        removeVideoTypesModule.disabledDone1 = true;
                         CheckAllNodes(YoutubeGotten);
                     }
                     return;
@@ -349,14 +349,14 @@ async (path) => {
             if (!IsActive(YoutubeGotten)) return;
 
             removeVideoTypesModule.disabled ??= false;
-            removeVideoTypesModule.disabledDone ??= false;
+            removeVideoTypesModule.disabledDone2 ??= false;
 
-            if (!removeVideoTypesModule.disabledDone) {
+            if (!removeVideoTypesModule.disabledDone2) {
                 if (removeVideoTypesModule.disabled) {
-                    removeVideoTypesModule.disabledDone = true;
+                    removeVideoTypesModule.disabledDone2 = true;
                     UnDoAllNodes(YoutubeGotten, true);
                 } else {
-                    removeVideoTypesModule.disabledDone = true;
+                    removeVideoTypesModule.disabledDone2 = true;
                     CheckAllNodes(YoutubeGotten);
                 }
                 return;
