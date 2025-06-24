@@ -305,11 +305,23 @@ async (path) => {
                 if (removeVideoTypesModule.disabledDone0) return;
                 removeVideoTypesModule.disabledDone0 = true;
             }
-            UnDoAllNodes(oldValue, true);
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", async () => {
+                    UnDoAllNodes(oldValue, true);
+                }, { once: true });
+            } else {
+                UnDoAllNodes(oldValue, true);
+            }
             return;
         }
         UnDoAllNodes(oldValue);
-        CheckAllNodes(newValue);
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", async () => {
+                CheckAllNodes(newValue);
+            }, { once: true });
+        } else {
+            CheckAllNodes(newValue);
+        }
     });
 
     const observeElements = new MutationObserver(async (mutations) => {
@@ -324,10 +336,24 @@ async (path) => {
                 if (!removeVideoTypesModule.disabledDone1) {
                     if (removeVideoTypesModule.disabled) {
                         removeVideoTypesModule.disabledDone1 = true;
-                        UnDoAllNodes(YoutubeGotten, true);
+                        if (document.readyState === "loading") {
+                            document.addEventListener("DOMContentLoaded", async () => {
+                                const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
+                                UnDoAllNodes(YoutubeGotten, true);
+                            }, { once: true });
+                        } else {
+                            UnDoAllNodes(YoutubeGotten, true);
+                        }
                     } else {
                         removeVideoTypesModule.disabledDone1 = true;
-                        CheckAllNodes(YoutubeGotten);
+                        if (document.readyState === "loading") {
+                            document.addEventListener("DOMContentLoaded", async () => {
+                                const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
+                                CheckAllNodes(YoutubeGotten);
+                            }, { once: true });
+                        } else {
+                            CheckAllNodes(YoutubeGotten);
+                        }
                     }
                     return;
                 }
@@ -354,10 +380,24 @@ async (path) => {
             if (!removeVideoTypesModule.disabledDone2) {
                 if (removeVideoTypesModule.disabled) {
                     removeVideoTypesModule.disabledDone2 = true;
-                    UnDoAllNodes(YoutubeGotten, true);
+                    if (document.readyState === "loading") {
+                        document.addEventListener("DOMContentLoaded", async () => {
+                            const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
+                            UnDoAllNodes(YoutubeGotten, true);
+                        }, { once: true });
+                    } else {
+                        UnDoAllNodes(YoutubeGotten, true);
+                    }
                 } else {
                     removeVideoTypesModule.disabledDone2 = true;
-                    CheckAllNodes(YoutubeGotten);
+                    if (document.readyState === "loading") {
+                        document.addEventListener("DOMContentLoaded", async () => {
+                            const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
+                            CheckAllNodes(YoutubeGotten);
+                        }, { once: true });
+                    } else {
+                        CheckAllNodes(YoutubeGotten);
+                    }
                 }
                 return;
             }
@@ -379,7 +419,7 @@ async (path) => {
             document.addEventListener("DOMContentLoaded", async () => {
                 const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
                 CheckAllNodes(YoutubeGotten);
-            });
+            }, { once: true });
         } else {
             CheckAllNodes(YoutubeGotten);
         }
