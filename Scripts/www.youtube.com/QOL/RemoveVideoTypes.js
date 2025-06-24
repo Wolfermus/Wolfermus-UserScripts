@@ -188,9 +188,10 @@ async (path) => {
 
     /**
      * @param {any | undefined | null} YoutubeGotten
+     * @param {Boolean} [GetFullSearch=false]
      * @returns {String}
      */
-    function GetSearchSelector(YoutubeGotten) {
+    function GetSearchSelector(YoutubeGotten, GetFullSearch = false) {
         let QOLSettings = JSON.parse(YoutubeGotten);
         if (!QOLSettings || typeof QOLSettings !== "object") QOLSettings = {};
 
@@ -204,9 +205,9 @@ async (path) => {
         RemoveVideoTypesSettings.Hide.Live ??= false;
 
         let searchSelectorArray = [];
-        if (RemoveVideoTypesSettings.Hide.YouWatch) searchSelectorArray.push(".youwatch-mark");
-        if (RemoveVideoTypesSettings.Hide.Members) searchSelectorArray.push(".badge-style-type-members-only");
-        if (RemoveVideoTypesSettings.Hide.Live) searchSelectorArray.push(".badge-style-type-live-now-alternate");
+        if (RemoveVideoTypesSettings.Hide.YouWatch || GetFullSearch) searchSelectorArray.push(".youwatch-mark");
+        if (RemoveVideoTypesSettings.Hide.Members || GetFullSearch) searchSelectorArray.push(".badge-style-type-members-only");
+        if (RemoveVideoTypesSettings.Hide.Live || GetFullSearch) searchSelectorArray.push(".badge-style-type-live-now-alternate");
 
         return searchSelectorArray.join(", ");
     }
@@ -226,6 +227,23 @@ async (path) => {
 
         foundItem.style["background"] = "green";
         //foundItem.style["display"] = "none";
+    }
+
+    /**
+     * @param {HTMLElement} node
+     */
+    function UnHideNode(node) {
+        let foundItem = node.closest("ytd-rich-item-renderer");
+        if (foundItem === undefined || foundItem === null) {
+            foundItem = node.closest("ytd-video-renderer");
+            if (foundItem === undefined || foundItem === null) {
+                foundItem = node.closest("yt-lockup-view-model");
+                if (foundItem === undefined || foundItem === null) return;
+            }
+        }
+
+        foundItem.style["background"] = "";
+        //foundItem.style["display"] = "";
     }
 
     /**
@@ -259,11 +277,37 @@ async (path) => {
         }
     }
 
+    /**
+     * @param {Boolean} [GetFullSearch=false]
+     * @param {any | undefined | null} YoutubeGotten
+     */
+    function UnDoAllNodes(YoutubeGotten, GetFullSearch = false) {
+        let ytContentsSections = document.querySelectorAll("#contents.ytd-item-section-renderer");
+        if (ytContentsSections.length <= 0) {
+            ytContentsSections = document.querySelectorAll("#contents.ytd-rich-grid-renderer");
+        }
+        if (ytContentsSections.length <= 0) return;
+
+        const searchSelector = GetSearchSelector(YoutubeGotten, GetFullSearch);
+        if (!searchSelector) return;
+
+        for (let ytContents of ytContentsSections) {
+            const nodes = ytContents.querySelectorAll(searchSelector);
+            for (let node of nodes) {
+                UnHideNode(node);
+            }
+        }
+    }
+
     debugger;
     await AddValueChangeListener("YoutubeQOL", (key, oldValue, newValue, remote) => {
         debugger;
 
-        if (!IsActive(newValue)) return;
+        if (!IsActive(newValue)) {
+            UnDoAllNodes(oldValue, true);
+            return;
+        }
+        UnDoAllNodes(oldValue);
         CheckAllNodes(newValue);
     });
 
