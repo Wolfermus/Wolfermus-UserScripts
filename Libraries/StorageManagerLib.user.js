@@ -325,6 +325,7 @@
      *      // remote is a boolean indicating whether the change originated from a different userscript instance
      *  }
      * ```
+     * @async
      * @param {string} key
      * @param {(key: string, oldValue: any, newValue: any, remote: boolean) => void} callback
      * @returns {Promise<number>}
