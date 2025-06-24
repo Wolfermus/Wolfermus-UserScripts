@@ -255,12 +255,9 @@ async (path) => {
      * @returns {{Active: boolean}}
      */
     async function GetTimeRemainingSettings() {
-        const YoutubeGotten = await GetValue("Youtube", "{}");
-        let YoutubeSettings = JSON.parse(YoutubeGotten);
-        if (!YoutubeSettings || typeof YoutubeSettings !== "object") YoutubeSettings = {};
-
-        if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
-        let QOLSettings = YoutubeSettings["QOL"];
+        const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
+        let QOLSettings = JSON.parse(YoutubeGotten);
+        if (!QOLSettings || typeof QOLSettings !== "object") QOLSettings = {};
 
         if (!QOLSettings["TimeRemaining"]) QOLSettings["TimeRemaining"] = {};
         let TimeRemainingSettings = QOLSettings["TimeRemaining"];
