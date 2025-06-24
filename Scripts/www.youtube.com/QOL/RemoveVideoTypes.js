@@ -155,6 +155,8 @@ async (path) => {
      */
     const AddValueChangeListener = storageManagerLibrary["AddValueChangeListener"];
 
+
+
     let YoutubeGotten = await GetValue("YoutubeQOL", "{}");
     if (!YoutubeGotten || typeof YoutubeGotten !== "string") YoutubeGotten = "{}";
     let QOLSettings = JSON.parse(YoutubeGotten);
@@ -269,8 +271,8 @@ async (path) => {
 
     function UnDoAllNodes() {
         for (let node of nodesHidden) {
-            node?.style?.background = "";
-            //node?.style?.display = "";
+            node.style.background = "";
+            //node.style.display = "";
         }
         nodesHidden = [];
     }
