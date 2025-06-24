@@ -825,6 +825,10 @@ class WolfermusMenuItem {
      */
     #disabled = false;
     /**
+     * @type {Array<(disabled: boolean) => void>}
+     */
+    #disabledEvent = [];
+    /**
      * @type {Array<String>}
      */
     classes = ["WolfermusDefaultCSS", "WolfermusTextItem"];
@@ -943,6 +947,10 @@ class WolfermusMenuItem {
                 this.element.style.display = "none";
             }
             this.contextMenu.Hide();
+        }
+
+        for (let callback of this.#disabledEvent) {
+            callback?.(this.#disabled);
         }
     }
 
@@ -1435,6 +1443,25 @@ class WolfermusMenuItem {
 
         this.#contextMenuCallback = undefined;
         this.#closeWolfermusContextMenu = undefined;
+    }
+
+    /**
+     * Duplicate callbacks will be ignored.
+     * 
+     * @param {(disabled: boolean) => void} callback 
+     */
+    DisabledEventAddCallback(callback) {
+        if (this.#disabledEvent.includes(callback)) return;
+        this.#disabledEvent.push(callback);
+    }
+    /**
+     * @param {(disabled: boolean) => void} callback 
+     */
+    DisabledEventRemoveCallback(callback) {
+        const foundIndex = this.#disabledEvent.findIndex(callbackItem => callbackItem === callback);
+        if (foundIndex <= -1) return;
+
+        this.#disabledEvent.splice(foundIndex, 1);
     }
 }
 
