@@ -331,7 +331,7 @@ async (path) => {
                     }
                     return;
                 }
-
+                if (removeVideoTypesModule.disabled) return;
 
                 const searchSelector = GetSearchSelector(YoutubeGotten);
                 if (!searchSelector) return;
@@ -361,6 +361,7 @@ async (path) => {
                 }
                 return;
             }
+            if (removeVideoTypesModule.disabled) return;
 
             const searchSelector = GetSearchSelector(YoutubeGotten);
             if (!searchSelector) return;
