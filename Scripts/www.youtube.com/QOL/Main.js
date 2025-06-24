@@ -368,23 +368,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
         if (toggled) LoadScriptOnce("RemoveVideoTypes");
     });
-    QOLRemoveVideoTypesMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/",
-        "*www.youtube.com/feed/subscriptions", "*www.youtube.com/feed/subscriptions/",
-        "*www.youtube.com/shorts/*"
-    ];
-
-    QOLRemoveVideoTypesMenuItem.CheckUrls();
-
-    removeVideoTypesModule.disabled = QOLRemoveVideoTypesMenuItem.disabled;
-    removeVideoTypesModule.disabledDone = false;
-
-
-    if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesMenuItem.disabled) LoadScriptOnce("RemoveVideoTypes");
-
-    QOLRemoveVideoTypesMenuItem.DisabledEventAddCallback((disabled) => {
-        removeVideoTypesModule.disabled = disabled;
-        removeVideoTypesModule.disabledDone = false;
-    });
 
     const QOLRemoveVideoTypesHideYouWatchMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide YouWatch`);
     QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = RemoveVideoTypesSettings.Hide.YouWatch;
@@ -456,6 +439,24 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideYouWatchMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideMembersMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideLiveMenuItem);
+
+    QOLRemoveVideoTypesGroupMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/",
+        "*www.youtube.com/feed/subscriptions", "*www.youtube.com/feed/subscriptions/",
+        "*www.youtube.com/shorts/*"
+    ];
+
+    QOLRemoveVideoTypesGroupMenuItem.CheckUrls();
+
+    removeVideoTypesModule.disabled = QOLRemoveVideoTypesGroupMenuItem.disabled;
+    removeVideoTypesModule.disabledDone = false;
+
+
+    if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) LoadScriptOnce("RemoveVideoTypes");
+
+    QOLRemoveVideoTypesGroupMenuItem.DisabledEventAddCallback((disabled) => {
+        removeVideoTypesModule.disabled = disabled;
+        removeVideoTypesModule.disabledDone = false;
+    });
 
 
     let QOLMenuItem = new WolfermusGroupMenuItem("Quality Of Life");
