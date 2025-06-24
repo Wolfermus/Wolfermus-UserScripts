@@ -334,7 +334,10 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         }
 
     });
-    ToggleFrostedGlassMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/"];
+    ToggleFrostedGlassMenuItem.includesUrls = [
+        "*www.youtube.com", "*www.youtube.com/",
+        "*www.youtube.com/feed/subscriptions", "*www.youtube.com/feed/subscriptions/"
+    ];
 
     ToggleFrostedGlassMenuItem.CheckUrls();
 
