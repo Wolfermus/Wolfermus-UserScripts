@@ -348,23 +348,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
         if (toggled) LoadScriptOnce("TimeRemaining");
     });
-    QOLTimeRemainingMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/",
-        "*www.youtube.com/feed/subscriptions", "*www.youtube.com/feed/subscriptions/",
-        "*www.youtube.com/shorts/*"
-    ];
-
-    QOLTimeRemainingMenuItem.CheckUrls();
-
-    removeVideoTypesModule.disabled = QOLTimeRemainingMenuItem.disabled;
-    removeVideoTypesModule.disabledDone = false;
-
-
-    if (RemoveVideoTypesSettings.Active && !QOLTimeRemainingMenuItem.disabled) LoadScriptOnce("RemoveVideoTypes");
-
-    QOLTimeRemainingMenuItem.DisabledEventAddCallback((disabled) => {
-        removeVideoTypesModule.disabled = disabled;
-        removeVideoTypesModule.disabledDone = false;
-    });
 
 
     const QOLRemoveVideoTypesMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Remove Video Type`);
@@ -384,6 +367,23 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
 
         if (toggled) LoadScriptOnce("RemoveVideoTypes");
+    });
+    QOLRemoveVideoTypesMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/",
+        "*www.youtube.com/feed/subscriptions", "*www.youtube.com/feed/subscriptions/",
+        "*www.youtube.com/shorts/*"
+    ];
+
+    QOLRemoveVideoTypesMenuItem.CheckUrls();
+
+    removeVideoTypesModule.disabled = QOLRemoveVideoTypesMenuItem.disabled;
+    removeVideoTypesModule.disabledDone = false;
+
+
+    if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesMenuItem.disabled) LoadScriptOnce("RemoveVideoTypes");
+
+    QOLRemoveVideoTypesMenuItem.DisabledEventAddCallback((disabled) => {
+        removeVideoTypesModule.disabled = disabled;
+        removeVideoTypesModule.disabledDone = false;
     });
 
     const QOLRemoveVideoTypesHideYouWatchMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide YouWatch`);
