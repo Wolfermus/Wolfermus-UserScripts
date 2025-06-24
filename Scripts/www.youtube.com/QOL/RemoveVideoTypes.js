@@ -300,7 +300,17 @@ async (path) => {
     await AddValueChangeListener("YoutubeQOL", (key, oldValue, newValue, remote) => {
         debugger;
 
-        if (!IsActive(newValue)) {
+        if (!localStorage["WolfermusYoutubeQOL"]) localStorage["WolfermusYoutubeQOL"] = {};
+        if (!localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"]) localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"] = {};
+
+        localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled ??= false;
+        localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone ??= false;
+
+        if (!IsActive(newValue) || localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled) {
+            if (localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled) {
+                if (localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone) return;
+                localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone = true;
+            }
             UnDoAllNodes(oldValue, true);
             return;
         }
@@ -313,6 +323,18 @@ async (path) => {
             if (record.addedNodes.length > 0) {
                 const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
                 if (!IsActive(YoutubeGotten)) return;
+
+                if (!localStorage["WolfermusYoutubeQOL"]) localStorage["WolfermusYoutubeQOL"] = {};
+                if (!localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"]) localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"] = {};
+
+                localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled ??= false;
+                if (localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled) {
+                    if (localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone) return;
+                    localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone = true;
+                    UnDoAllNodes(YoutubeGotten, true);
+                    return;
+                }
+
 
                 const searchSelector = GetSearchSelector(YoutubeGotten);
                 if (!searchSelector) return;
@@ -329,6 +351,17 @@ async (path) => {
             const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
             if (!IsActive(YoutubeGotten)) return;
 
+            if (!localStorage["WolfermusYoutubeQOL"]) localStorage["WolfermusYoutubeQOL"] = {};
+            if (!localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"]) localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"] = {};
+
+            localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled ??= false;
+            if (localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled) {
+                if (localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone) return;
+                localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone = true;
+                UnDoAllNodes(YoutubeGotten, true);
+                return;
+            }
+
             const searchSelector = GetSearchSelector(YoutubeGotten);
             if (!searchSelector) return;
 
@@ -337,7 +370,10 @@ async (path) => {
     });
     observeElements.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
 
-    if (RemoveVideoTypesSettings.Active) {
+    if (!localStorage["WolfermusYoutubeQOL"]) localStorage["WolfermusYoutubeQOL"] = {};
+    if (!localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"]) localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"] = {};
+
+    if (RemoveVideoTypesSettings.Active && !localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled) {
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", async () => {
                 const YoutubeGotten = await GetValue("YoutubeQOL", "{}");

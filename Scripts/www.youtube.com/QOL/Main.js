@@ -325,11 +325,12 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
 
     if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
-    if (RemoveVideoTypesSettings.Active) LoadScriptOnce("RemoveVideoTypes");
 
     const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Time Remaining`);
     QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
     QOLTimeRemainingMenuItem.ToggledEventAddCallback(async (toggled) => {
+        if (QOLTimeRemainingMenuItem.disabled) return;
+
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
         if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
@@ -344,6 +345,28 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
 
         if (toggled) LoadScriptOnce("TimeRemaining");
+    });
+    QOLTimeRemainingMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/",
+        "*www.youtube.com/feed/subscriptions", "*www.youtube.com/feed/subscriptions/",
+        "*www.youtube.com/shorts/*"
+    ];
+
+    QOLTimeRemainingMenuItem.CheckUrls();
+
+    if (!localStorage["WolfermusYoutubeQOL"]) localStorage["WolfermusYoutubeQOL"] = {};
+    if (!localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"]) localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"] = {};
+
+    localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled = QOLTimeRemainingMenuItem.disabled;
+    localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone = false;
+
+    if (RemoveVideoTypesSettings.Active && !QOLTimeRemainingMenuItem.disabled) LoadScriptOnce("RemoveVideoTypes");
+
+    QOLTimeRemainingMenuItem.DisabledEventAddCallback((disabled) => {
+        if (!localStorage["WolfermusYoutubeQOL"]) localStorage["WolfermusYoutubeQOL"] = {};
+        if (!localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"]) localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"] = {};
+
+        localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabled = disabled;
+        localStorage["WolfermusYoutubeQOL"]["RemoveVideoTypes"].disabledDone = false;
     });
 
 
