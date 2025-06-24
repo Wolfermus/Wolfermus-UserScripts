@@ -1297,7 +1297,7 @@ class WolfermusMenuItem {
         const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
 
         return `
-            <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
+            <li id="WolfermusMenu${menu.id}Item${this.id}" class="${this.classes.join(" ")}">
                 <a class="WolfermusTitle Wolfermus${this.id}Title Wolfermus${this.id}TitleItem" style="${validTitle ? "" : "display: none;"}">${this.title}</a>
             </li>
         `;
@@ -1312,7 +1312,7 @@ class WolfermusMenuItem {
         if (menu.id === undefined || menu.id === null) return false;
 
         {
-            const gottenElement = document.getElementById(`WolfermusMenu${menu.id}${this.id}`);
+            const gottenElement = document.getElementById(`WolfermusMenu${menu.id}Item${this.id}`);
             if (gottenElement === undefined || gottenElement === null) return false;
             this.element = gottenElement;
         }
@@ -1463,7 +1463,7 @@ class WolfermusImageMenuItem extends WolfermusMenuItem {
         this.ValidateCSS();
 
         return `
-            <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
+            <li id="WolfermusMenu${menu.id}Item${this.id}" class="${this.classes.join(" ")}">
                 <img src="${this.imageSource}" class="WolfermusDefaultCSS"></img>
             </li>
         `;
@@ -1682,7 +1682,7 @@ class WolfermusSpacerMenuItem extends WolfermusMenuItem {
         this.ValidateCSS();
 
         return `
-            <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}" style="height: ${this.#height};"></li>
+            <li id="WolfermusMenu${menu.id}Item${this.id}" class="${this.classes.join(" ")}" style="height: ${this.#height};"></li>
         `;
     }
 }
@@ -1898,7 +1898,7 @@ class WolfermusInputMenuItem extends WolfermusMenuItem {
         const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
 
         return `
-            <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
+            <li id="WolfermusMenu${menu.id}Item${this.id}" class="${this.classes.join(" ")}">
                 <a class="WolfermusTitle Wolfermus${this.id}Title Wolfermus${this.id}TitleItem" style="${validTitle ? "" : "display: none;"}">${this.title}</a>
                 <div>
                     <input class="WolfermusInput WolfermusText" type="${this.#type}" value="${this.#value}" min="${this.#min}" max="${this.max}" step="${this.step}">

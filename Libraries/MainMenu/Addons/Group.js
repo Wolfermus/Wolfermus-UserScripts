@@ -218,19 +218,19 @@
             const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
 
             return `
-                <div id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
-                    <li id="WolfermusMenu${menu.id}${this.id}Group" class="WolfermusGroupItem" style="${this.#collapsed ? "" : "display: none;"}">
+                <div id="WolfermusMenu${menu.id}Item${this.id}" class="${this.classes.join(" ")}">
+                    <li id="WolfermusMenu${menu.id}Item${this.id}Group" class="WolfermusGroupItem" style="${this.#collapsed ? "" : "display: none;"}">
                         <a class="WolfermusGroup WolfermusGroupRightPosition"><</a>
                         <a class="WolfermusTitle Wolfermus${this.id}Title">${this.title}</a>
                         <a class="WolfermusGroup WolfermusGroupLeftPosition">></a>
                     </li>
-                    <li id="WolfermusMenu${menu.id}${this.id}Section" style="background: transparent;
+                    <li id="WolfermusMenu${menu.id}Item${this.id}Section" style="background: transparent;
                     border-radius: 20px;
                     border-color: #272727;
                     border-width: 4px;
                     border-style: solid;
                     ${!this.#collapsed ? "" : "display: none;"}">
-                        <a id="WolfermusMenu${menu.id}${this.id}GroupCollapseButton" style="position: absolute;top: 0; right: 0;pointer-events: all !important;cursor: pointer;z-index: 9600;">x</a>
+                        <a id="WolfermusMenu${menu.id}Item${this.id}GroupCollapseButton" style="position: absolute;top: 0; right: 0;pointer-events: all !important;cursor: pointer;z-index: 9600;">x</a>
                         <ul class="WolfermusDefaultCSS">
                             <li class="WolfermusDefaultCSS WolfermusTextItem Wolfermus${this.id}TitleItem" style="${validTitle ? "" : "display: none;"}">
                                 <a class="WolfermusTitle Wolfermus${this.id}Title" style="font-size: 18px;">${this.title}</a>
@@ -260,12 +260,12 @@
             const wolfermusRoot = await GetWolfermusRoot();
             if (wolfermusRoot === undefined || wolfermusRoot === null) return false;
 
-            const gottenGroup = document.getElementById(`WolfermusMenu${menu.id}${this.id}Group`);
-            const gottenSection = document.getElementById(`WolfermusMenu${menu.id}${this.id}Section`);
+            const gottenGroup = document.getElementById(`WolfermusMenu${menu.id}Item${this.id}Group`);
+            const gottenSection = document.getElementById(`WolfermusMenu${menu.id}Item${this.id}Section`);
             if (gottenGroup === undefined || gottenGroup === null) return false;
             if (gottenSection === undefined || gottenSection === null) return false;
 
-            const gottenCollapseButton = document.getElementById(`WolfermusMenu${menu.id}${this.id}GroupCollapseButton`);
+            const gottenCollapseButton = document.getElementById(`WolfermusMenu${menu.id}Item${this.id}GroupCollapseButton`);
             if (gottenCollapseButton === undefined || gottenCollapseButton === null) return false;
 
             /**
@@ -663,8 +663,8 @@
                 this.#UnloadItems(menu);
             }
 
-            const gottenGroup = document.getElementById(`WolfermusMenu${menu.id}${this.id}Group`);
-            const gottenCollapseButton = document.getElementById(`WolfermusMenu${menu.id}${this.id}GroupCollapseButton`);
+            const gottenGroup = document.getElementById(`WolfermusMenu${menu.id}Item${this.id}Group`);
+            const gottenCollapseButton = document.getElementById(`WolfermusMenu${menu.id}Item${this.id}GroupCollapseButton`);
 
             if (gottenGroup !== undefined && gottenGroup !== null) {
                 if (this.#groupPointerEnterCallback !== undefined) gottenGroup.removeEventListener("pointerenter", this.#groupPointerEnterCallback);

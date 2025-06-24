@@ -211,7 +211,7 @@
             const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
 
             return `
-                <li id="WolfermusMenu${menu.id}${this.id}" class="${this.classes.join(" ")}">
+                <li id="WolfermusMenu${menu.id}Item${this.id}" class="${this.classes.join(" ")}">
                     <a class="WolfermusTitle Wolfermus${this.id}Title Wolfermus${this.id}TitleItem" style="${validTitle ? "" : "display: none;"}">${this.title}</a>
                     <div>
                         <input class="WolfermusInput WolfermusSlider WolfermusText" type="range" value="${this.value}" min="${this.min}" max="${this.max}" step="${this.step}">
