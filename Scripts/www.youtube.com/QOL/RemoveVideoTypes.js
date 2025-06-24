@@ -261,10 +261,7 @@ async (path) => {
      * @param {any | undefined | null} YoutubeGotten
      */
     function CheckAllNodes(YoutubeGotten) {
-        let ytContentsSections = document.querySelectorAll("#contents.ytd-item-section-renderer");
-        if (ytContentsSections.length <= 0) {
-            ytContentsSections = document.querySelectorAll("#contents.ytd-rich-grid-renderer");
-        }
+        let ytContentsSections = document.querySelectorAll("#contents.ytd-item-section-renderer, #contents.ytd-rich-grid-renderer");
         if (ytContentsSections.length <= 0) return;
 
         const searchSelector = GetSearchSelector(YoutubeGotten);
@@ -283,10 +280,7 @@ async (path) => {
      * @param {any | undefined | null} YoutubeGotten
      */
     function UnDoAllNodes(YoutubeGotten, GetFullSearch = false) {
-        let ytContentsSections = document.querySelectorAll("#contents.ytd-item-section-renderer");
-        if (ytContentsSections.length <= 0) {
-            ytContentsSections = document.querySelectorAll("#contents.ytd-rich-grid-renderer");
-        }
+        let ytContentsSections = document.querySelectorAll("#contents.ytd-item-section-renderer, #contents.ytd-rich-grid-renderer");
         if (ytContentsSections.length <= 0) return;
 
         const searchSelector = GetSearchSelector(YoutubeGotten, GetFullSearch);
