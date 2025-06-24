@@ -152,8 +152,6 @@ async (path) => {
      */
     const AddValueChangeListener = storageManagerLibrary["AddValueChangeListener"];
 
-    debugger;
-
     let YoutubeGotten = await GetValue("YoutubeQOL", "{}");
     if (!YoutubeGotten || typeof YoutubeGotten !== "string") YoutubeGotten = "{}";
     let QOLSettings = JSON.parse(YoutubeGotten);
@@ -299,7 +297,6 @@ async (path) => {
         }
     }
 
-    debugger;
     await AddValueChangeListener("YoutubeQOL", (key, oldValue, newValue, remote) => {
         debugger;
 
@@ -310,8 +307,6 @@ async (path) => {
         UnDoAllNodes(oldValue);
         CheckAllNodes(newValue);
     });
-
-    debugger;
 
     const observeElements = new MutationObserver(async (mutations) => {
         for (const record of mutations) {
