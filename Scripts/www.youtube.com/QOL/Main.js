@@ -212,6 +212,29 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     */
     const GetValue = storageManagerLibrary["GetValue"];
 
+    /**
+     * Allows a userscript to add a listener for changes to the value of a specific key in the userscript's storage.
+     * 
+     * The function takes two parameters:
+     *  
+     * - A string specifying the key for which changes should be monitored.
+     * - A callback function that will be called when the value of the key changes. The callback function should have the following signature:
+     * ```js
+     *  function(key, oldValue, newValue, remote) {
+     *      // key is the key whose value has changed
+     *      // oldValue is the previous value of the key
+     *      // newValue is the new value of the key
+     *      // remote is a boolean indicating whether the change originated from a different userscript instance
+     *  }
+     * ```
+     * @async
+     * @param {string} key
+     * @param {(key: string, oldValue: any, newValue: any, remote: boolean) => void} callback
+     * @type {(key: string, callback: ((key: string, oldValue: any, newValue: any, remote: boolean) => void)) => Promise<number>}
+     * @returns {Promise<number>}
+     */
+    const AddValueChangeListener = storageManagerLibrary["AddValueChangeListener"];
+
 
     const mainMenuLibrary = WolfermusGetLibrary("MainMenu");
 
@@ -278,59 +301,183 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         }
     }
 
-    const YoutubeGotten = await GetValue("Youtube", "{}");
-    let YoutubeSettings = JSON.parse(YoutubeGotten);
-    if (!YoutubeSettings || typeof YoutubeSettings !== "object") YoutubeSettings = {};
-
-    if (!YoutubeSettings["QOL"]) YoutubeSettings["QOL"] = {};
-    let QOLSettings = YoutubeSettings["QOL"];
+    const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
+    let QOLSettings = JSON.parse(YoutubeGotten);
+    if (!QOLSettings || typeof QOLSettings !== "object") QOLSettings = {};
 
     if (!QOLSettings["TimeRemaining"]) QOLSettings["TimeRemaining"] = {};
     let TimeRemainingSettings = QOLSettings["TimeRemaining"];
 
+    if (!QOLSettings["RemoveVideoTypes"]) QOLSettings["RemoveVideoTypes"] = {};
+    let RemoveVideoTypesSettings = QOLSettings["RemoveVideoTypes"];
+
     TimeRemainingSettings.Active ??= false;
+
+    RemoveVideoTypesSettings.Active ??= false;
+    RemoveVideoTypesSettings.Hide ??= {};
+    RemoveVideoTypesSettings.Hide.YouWatch ??= false;
+    RemoveVideoTypesSettings.Hide.Members ??= false;
+    RemoveVideoTypesSettings.Hide.Live ??= false;
+    RemoveVideoTypesSettings.Collapsed ??= false;
 
     QOLSettings.Collapsed ??= true;
 
-    SetValue("Youtube", JSON.stringify(YoutubeSettings));
+    SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
 
     if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
+    if (RemoveVideoTypesSettings.Active) LoadScriptOnce("RemoveVideoTypes");
 
     const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Time Remaining`);
     QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
     QOLTimeRemainingMenuItem.ToggledEventAddCallback(async (toggled) => {
-        const YoutubeGottenInner = await GetValue("Youtube", "{}");
-        let YoutubeSettingsInner = JSON.parse(YoutubeGottenInner);
-        if (!YoutubeSettingsInner || typeof YoutubeSettingsInner !== "object") YoutubeSettingsInner = {};
-
-        if (!YoutubeSettingsInner["QOL"]) YoutubeSettingsInner["QOL"] = {};
-        let QOLSettingsInner = YoutubeSettingsInner["QOL"];
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
 
         if (!QOLSettingsInner["TimeRemaining"]) QOLSettingsInner["TimeRemaining"] = {};
         let TimeRemainingSettingsInner = QOLSettingsInner["TimeRemaining"];
 
+        if (TimeRemainingSettingsInner.Active === toggled) return;
+
         TimeRemainingSettingsInner.Active = toggled;
 
-        SetValue("Youtube", JSON.stringify(YoutubeSettingsInner));
+        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
 
         if (toggled) LoadScriptOnce("TimeRemaining");
     });
 
+
+    const QOLRemoveVideoTypesMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Remove Video Type`);
+    QOLRemoveVideoTypesMenuItem.toggled = RemoveVideoTypesSettings.Active;
+    QOLRemoveVideoTypesMenuItem.ToggledEventAddCallback(async (toggled) => {
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+
+        if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
+
+        if (RemoveVideoTypesSettingsInner.Active === toggled) return;
+
+        RemoveVideoTypesSettingsInner.Active = toggled;
+
+        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+
+        if (toggled) LoadScriptOnce("RemoveVideoTypes");
+    });
+
+    const QOLRemoveVideoTypesHideYouWatchMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide YouWatch`);
+    QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = RemoveVideoTypesSettings.Hide.YouWatch;
+    QOLRemoveVideoTypesHideYouWatchMenuItem.ToggledEventAddCallback(async (toggled) => {
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+
+        if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
+
+        if (RemoveVideoTypesSettingsInner.Hide.YouWatch === toggled) return;
+
+        RemoveVideoTypesSettingsInner.Hide.YouWatch = toggled;
+
+        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+    });
+
+    const QOLRemoveVideoTypesHideMembersMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide Members`);
+    QOLRemoveVideoTypesHideMembersMenuItem.toggled = RemoveVideoTypesSettings.Hide.Members;
+    QOLRemoveVideoTypesHideMembersMenuItem.ToggledEventAddCallback(async (toggled) => {
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+
+        if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
+
+        if (RemoveVideoTypesSettingsInner.Hide.Members === toggled) return;
+
+        RemoveVideoTypesSettingsInner.Hide.Members = toggled;
+
+        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+    });
+
+    const QOLRemoveVideoTypesHideLiveMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide Live`);
+    QOLRemoveVideoTypesHideLiveMenuItem.toggled = RemoveVideoTypesSettings.Hide.Live;
+    QOLRemoveVideoTypesHideLiveMenuItem.ToggledEventAddCallback(async (toggled) => {
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+
+        if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
+
+        if (RemoveVideoTypesSettingsInner.Hide.Live === toggled) return;
+
+        RemoveVideoTypesSettingsInner.Hide.Live = toggled;
+
+        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+    });
+
+
+    const QOLRemoveVideoTypesGroupMenuItem = new WolfermusGroupMenuItem(`Remove Video Type`);
+    QOLRemoveVideoTypesGroupMenuItem.collapsed = RemoveVideoTypesSettings.Collapsed;
+    QOLRemoveVideoTypesGroupMenuItem.CollapsedAddCallback(async (newCollapsed) => {
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+
+        if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
+
+        RemoveVideoTypesSettingsInner.Collapsed = newCollapsed;
+
+        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+    });
+    QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesMenuItem);
+    QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideYouWatchMenuItem);
+    QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideMembersMenuItem);
+    QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideLiveMenuItem);
+
+
     let QOLMenuItem = new WolfermusGroupMenuItem("Quality Of Life");
     QOLMenuItem.collapsed = QOLSettings.Collapsed;
     QOLMenuItem.CollapsedAddCallback(async (newCollapsed) => {
-        const YoutubeGottenInner = await GetValue("Youtube", "{}");
-        let YoutubeSettingsInner = JSON.parse(YoutubeGottenInner);
-        if (!YoutubeSettingsInner || typeof YoutubeSettingsInner !== "object") YoutubeSettingsInner = {};
-
-        if (!YoutubeSettingsInner["QOL"]) YoutubeSettingsInner["QOL"] = {};
-        let QOLSettingsInner = YoutubeSettingsInner["QOL"];
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
 
         QOLSettingsInner.Collapsed = newCollapsed;
 
-        SetValue("Youtube", JSON.stringify(YoutubeSettingsInner));
+        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
     QOLMenuItem.items.push(QOLTimeRemainingMenuItem);
+    QOLMenuItem.items.push(QOLRemoveVideoTypesGroupMenuItem);
+
+
+    await AddValueChangeListener("YoutubeQOL", (key, oldValue, newValue, remote) => {
+        let QOLSettings = JSON.parse(newValue);
+        if (!QOLSettings || typeof QOLSettings !== "object") QOLSettings = {};
+
+        if (!QOLSettings["TimeRemaining"]) QOLSettings["TimeRemaining"] = {};
+        let TimeRemainingSettings = QOLSettings["TimeRemaining"];
+
+        if (!QOLSettings["RemoveVideoTypes"]) QOLSettings["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettings = QOLSettings["RemoveVideoTypes"];
+
+        TimeRemainingSettings.Active ??= false;
+
+        RemoveVideoTypesSettings.Active ??= false;
+        RemoveVideoTypesSettings.Collapsed ??= false;
+
+        QOLSettings.Collapsed ??= true;
+
+        QOLMenuItem.collapsed = QOLSettings.Collapsed;
+
+        QOLRemoveVideoTypesGroupMenuItem.collapsed = RemoveVideoTypesSettings.Collapsed;
+        QOLRemoveVideoTypesMenuItem.toggled = RemoveVideoTypesSettings.Active;
+
+        QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
+    });
+
 
     const mainMenu = GetMainMenu();
 
