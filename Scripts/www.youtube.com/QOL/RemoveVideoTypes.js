@@ -1,4 +1,5 @@
 async (path) => {
+    return;
     /**
  * @param {number | undefined} ms
  */
@@ -238,10 +239,38 @@ async (path) => {
 
     /**
      * @param {HTMLElement} node
+     */
+    function UnHideNode(node) {
+        let foundItem = node.closest("ytd-rich-item-renderer");
+        if (foundItem === undefined || foundItem === null) {
+            foundItem = node.closest("ytd-video-renderer");
+            if (foundItem === undefined || foundItem === null) {
+                foundItem = node.closest("yt-lockup-view-model");
+                if (foundItem === undefined || foundItem === null) return;
+            }
+        }
+
+        const foundIndex = nodesHidden.findIndex(item => item === foundItem);
+        if (foundIndex > -1) {
+            nodesHidden.splice(foundIndex, 1);
+        }
+
+
+        foundItem.style["background"] = "";
+        //foundItem.style["display"] = "";
+    }
+
+    /**
+     * @param {HTMLElement} node
      * @param {String} searchSelector
      */
     function CheckNode(node, searchSelector) {
         if (node.matches(searchSelector)) {
+            const ytdBrowse = ytContents.closest("ytd-browse");
+            if (!ytdBrowse && ytdBrowse !== undefined && ytdBrowse !== null) {
+                UnHideNode(node);
+                if (ytdBrowse?.style?.display === "none") return;
+            }
             HideNode(node);
         }
     }
