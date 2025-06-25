@@ -1,5 +1,7 @@
 async (path) => {
-    return;
+    const ValidYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model"];
+
+
     /**
  * @param {number | undefined} ms
  */
@@ -158,6 +160,26 @@ async (path) => {
 
 
 
+    let removeVideoTypesStyle = document.getElementById("WolfermusScriptRemoveVideoTypesStyle");
+
+    if (removeVideoTypesStyle === undefined || removeVideoTypesStyle === null) {
+        removeVideoTypesStyle = document.createElement("style");
+        removeVideoTypesStyle.id = "WolfermusScriptRemoveVideoTypesStyle";
+        document.head.append(removeVideoTypesStyle);
+    }
+
+    // const editedInnerHTML = wolfermusBypassScriptPolicy.createHTML(`
+    const editedInnerHTML = `
+        .WolfermusHideVideo {
+            background: green;
+            //display: none;
+        }
+        `;
+
+    removeVideoTypesStyle.innerHTML = editedInnerHTML;
+
+
+
     let YoutubeGotten = await GetValue("YoutubeQOL", "{}");
     if (!YoutubeGotten || typeof YoutubeGotten !== "string") YoutubeGotten = "{}";
     let QOLSettings = JSON.parse(YoutubeGotten);
@@ -216,82 +238,131 @@ async (path) => {
         return searchSelectorArray.join(", ");
     }
 
-    let nodesHidden = [];
+    let RemoveVideoTypesIsActive = RemoveVideoTypesSettings.Active;
+    let RemoveVideoTypesSearchSelector = GetSearchSelector(YoutubeGotten);
 
     /**
      * @param {HTMLElement} node
+     * @returns {Element | undefined}
      */
-    function HideNode(node) {
-        let foundItem = node.closest("ytd-rich-item-renderer");
-        if (foundItem === undefined || foundItem === null) {
-            foundItem = node.closest("ytd-video-renderer");
-            if (foundItem === undefined || foundItem === null) {
-                foundItem = node.closest("yt-lockup-view-model");
-                if (foundItem === undefined || foundItem === null) return;
-            }
+    function FindVideo(node) {
+        let foundItem = undefined;
+
+        for (const validItem of ValidYTDItems) {
+            foundItem = node.closest(validItem);
+            if (foundItem && foundItem !== undefined && foundItem !== null) break;
         }
+        if (!foundItem || foundItem === undefined || foundItem === null) return undefined;
 
-        if (!nodesHidden.includes(foundItem)) nodesHidden.push(foundItem);
+        return foundItem;
+    }
 
-        foundItem.style["background"] = "green";
-        //foundItem.style["display"] = "none";
+    const observeVideosConfig = { childList: true, subtree: true, attributes: false, characterData: false };
+    const observeVideos = new MutationObserver(async (mutations) => {
+        if (removeVideoTypesModule.disabled) return;
+        if (!RemoveVideoTypesIsActive) return;
+        if (!RemoveVideoTypesSearchSelector) return;
+
+        for (const record of mutations) {
+            if (record.addedNodes.length > 0) {
+                for (let node of record.addedNodes) {
+                    if (!(node instanceof HTMLElement)) continue;
+
+                    let foundItem = FindVideo(node);
+                    if (foundItem === undefined) continue;
+
+                    CheckVideo(foundItem, RemoveVideoTypesSearchSelector, false);
+                }
+            }
+            if (!(record.target instanceof HTMLElement)) continue;
+
+            let foundItem = FindVideo(record.target);
+            if (foundItem === undefined) continue;
+
+            CheckVideo(foundItem, RemoveVideoTypesSearchSelector, false);
+        }
+    });
+
+    /**
+     * @param {HTMLElement} videoElement
+     * @param {boolean} [shouldObserveItem=true] 
+     */
+    function HideVideo(videoElement, shouldObserveItem = true) {
+        if (videoElement.classList.contains("WolfermusHideVideo")) return;
+
+        videoElement.classList.add("WolfermusHideVideo");
+
+        if (shouldObserveItem) {
+            observeVideos.observe(videoElement, observeVideosConfig);
+        }
+    }
+
+    /**
+     * @param {HTMLElement} videoElement
+     */
+    function UnHideVideo(videoElement) {
+        videoElement.classList.remove("WolfermusHideVideo");
+    }
+
+    /**
+     * @param {HTMLElement} videoElement
+     * @param {String} searchSelector
+     * @param {boolean} [shouldObserveItem=true]
+     * @param {boolean} [shouldUnHideFalse=false]
+     */
+    function CheckVideo(videoElement, searchSelector, shouldObserveItem = true) {
+        const foundElements = videoElement.querySelectorAll(searchSelector);
+        if (foundElements.length > 0) {
+            HideVideo(videoElement, shouldObserveItem);
+        } else UnHideVideo(videoElement);
+    }
+
+    /**
+     * @param {HTMLElement} node
+     * @param {boolean} [shouldObserveItem=true] 
+     */
+    function HideNode(node, shouldObserveItem = true) {
+        let foundItem = FindVideo(node);
+        if (foundItem === undefined) return;
+
+        HideVideo(foundItem, shouldObserveItem);
     }
 
     /**
      * @param {HTMLElement} node
      */
     function UnHideNode(node) {
-        let foundItem = node.closest("ytd-rich-item-renderer");
-        if (foundItem === undefined || foundItem === null) {
-            foundItem = node.closest("ytd-video-renderer");
-            if (foundItem === undefined || foundItem === null) {
-                foundItem = node.closest("yt-lockup-view-model");
-                if (foundItem === undefined || foundItem === null) return;
-            }
-        }
+        let foundItem = FindVideo(node);
+        if (foundItem === undefined) return;
 
-        const foundIndex = nodesHidden.findIndex(item => item === foundItem);
-        if (foundIndex > -1) {
-            nodesHidden.splice(foundIndex, 1);
-        }
-
-
-        foundItem.style["background"] = "";
-        //foundItem.style["display"] = "";
+        UnHideVideo(foundItem);
     }
 
     /**
      * @param {HTMLElement} node
      * @param {String} searchSelector
+     * @param {boolean} [shouldObserveItem=true]
+     * @param {boolean} [shouldUnHideFalse=false]
      */
-    function CheckNode(node, searchSelector) {
+    function CheckNode(node, searchSelector, shouldObserveItem = true) {
         if (node.matches(searchSelector)) {
-            const ytdBrowse = ytContents.closest("ytd-browse");
-            if (!ytdBrowse && ytdBrowse !== undefined && ytdBrowse !== null) {
-                UnHideNode(node);
-                if (ytdBrowse?.style?.display === "none") return;
-            }
-            HideNode(node);
+            HideNode(node, shouldObserveItem);
         }
     }
 
-    /**
-     * @param {any | undefined | null} YoutubeGotten
-     */
-    function CheckAllNodes(YoutubeGotten) {
-        let ytContentsSections = document.querySelectorAll("#contents.ytd-item-section-renderer, #contents.ytd-rich-grid-renderer");
-        if (ytContentsSections.length <= 0) return;
+    function CheckAllNodes() {
+        if (removeVideoTypesModule.disabled) return;
+        if (!RemoveVideoTypesIsActive) return;
+        if (!RemoveVideoTypesSearchSelector) return;
 
-        const searchSelector = GetSearchSelector(YoutubeGotten);
-        if (!searchSelector) return;
+        const ytdBrowses = document.querySelectorAll("ytd-browse");
+        if (ytdBrowses.length <= 0) return;
 
-        for (let ytContents of ytContentsSections) {
-            const ytdBrowse = ytContents.closest("ytd-browse");
-            if (!ytdBrowse && ytdBrowse !== undefined && ytdBrowse !== null) {
-                if (ytdBrowse?.style?.display === "none") continue;
-            }
+        for (const ytdBrowse of ytdBrowses) {
+            const ytdBrowseStyle = window.getComputedStyle(ytdBrowse);
+            if (ytdBrowseStyle.display === "none") continue;
 
-            const nodes = ytContents.querySelectorAll(searchSelector);
+            const nodes = ytdBrowse.querySelectorAll(RemoveVideoTypesSearchSelector);
             for (let node of nodes) {
                 HideNode(node);
             }
@@ -299,131 +370,104 @@ async (path) => {
     }
 
     function UnDoAllNodes() {
+        observeVideos.disconnect();
+        let nodesHidden = document.querySelectorAll(".WolfermusHideVideo");
         for (let node of nodesHidden) {
-            node.style.background = "";
-            //node.style.display = "";
+            node.classList.remove("WolfermusHideVideo");
         }
-        nodesHidden = [];
     }
 
     await AddValueChangeListener("YoutubeQOL", (key, oldValue, newValue, remote) => {
-        debugger;
+        RemoveVideoTypesIsActive = IsActive(newValue);
+        RemoveVideoTypesSearchSelector = GetSearchSelector(newValue);
 
         removeVideoTypesModule.disabled ??= false;
         removeVideoTypesModule.disabledDone0 ??= false;
 
-        if (!IsActive(newValue) || removeVideoTypesModule.disabled) {
+        UnDoAllNodes();
+        if (!RemoveVideoTypesIsActive || removeVideoTypesModule.disabled) {
             if (removeVideoTypesModule.disabled) {
                 if (removeVideoTypesModule.disabledDone0) return;
                 removeVideoTypesModule.disabledDone0 = true;
             }
-            UnDoAllNodes();
             return;
         }
-        UnDoAllNodes();
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", async () => {
-                CheckAllNodes(newValue);
+                CheckAllNodes();
             }, { once: true });
         } else {
-            CheckAllNodes(newValue);
+            CheckAllNodes();
         }
     });
 
-    let oldHref = undefined;
-
+    const observeConfig = { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] };
     const observeElements = new MutationObserver(async (mutations) => {
-        if (oldHref !== document.location.href) {
-            oldHref = document.location.href;
-            console.log(`Wolfermus UserScripts: Youtube Remove Video Types: href changed, document.readyState: ${document.readyState}`);
-            UnDoAllNodes();
-        }
+        removeVideoTypesModule.disabled ??= false;
+        if (removeVideoTypesModule.disabled) return;
+        if (!RemoveVideoTypesIsActive) return;
+        if (!RemoveVideoTypesSearchSelector) return;
 
         for (const record of mutations) {
             if (record.addedNodes.length > 0) {
-                const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
-                if (!IsActive(YoutubeGotten)) return;
-
-                removeVideoTypesModule.disabled ??= false;
-                removeVideoTypesModule.disabledDone1 ??= false;
-
-                if (!removeVideoTypesModule.disabledDone1) {
-                    if (removeVideoTypesModule.disabled) {
-                        removeVideoTypesModule.disabledDone1 = true;
-                        UnDoAllNodes(YoutubeGotten, true);
-                    } else {
-                        removeVideoTypesModule.disabledDone1 = true;
-                        UnDoAllNodes();
-                        if (document.readyState === "loading") {
-                            document.addEventListener("DOMContentLoaded", async () => {
-                                const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
-                                CheckAllNodes(YoutubeGotten);
-                            }, { once: true });
-                        } else {
-                            CheckAllNodes(YoutubeGotten);
-                        }
-                    }
-                    return;
-                }
-                if (removeVideoTypesModule.disabled) return;
-
-                const searchSelector = GetSearchSelector(YoutubeGotten);
-                if (!searchSelector) return;
-
                 for (let node of record.addedNodes) {
                     if (!(node instanceof HTMLElement)) continue;
 
-                    CheckNode(node, searchSelector);
+                    CheckNode(node, RemoveVideoTypesSearchSelector);
                 }
             }
 
             if (!(record.target instanceof HTMLElement)) continue;
-
-            const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
-            if (!IsActive(YoutubeGotten)) return;
-
-            removeVideoTypesModule.disabled ??= false;
-            removeVideoTypesModule.disabledDone2 ??= false;
-
-            if (!removeVideoTypesModule.disabledDone2) {
-                if (removeVideoTypesModule.disabled) {
-                    removeVideoTypesModule.disabledDone2 = true;
-                    UnDoAllNodes();
-                } else {
-                    removeVideoTypesModule.disabledDone2 = true;
-                    UnDoAllNodes();
-                    if (document.readyState === "loading") {
-                        document.addEventListener("DOMContentLoaded", async () => {
-                            const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
-                            CheckAllNodes(YoutubeGotten);
-                        }, { once: true });
-                    } else {
-                        CheckAllNodes(YoutubeGotten);
-                    }
-                }
-                return;
-            }
-            if (removeVideoTypesModule.disabled) return;
-
-            const searchSelector = GetSearchSelector(YoutubeGotten);
-            if (!searchSelector) return;
-
-            CheckNode(record.target, searchSelector);
+            CheckNode(record.target, RemoveVideoTypesSearchSelector);
         }
     });
-    observeElements.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+
+    let oldHref = undefined;
+    const observeUrlChange = async () => {
+        window.addEventListener("yt-navigate-finish", async (event) => {
+            if (oldHref === document.location.href) return;
+
+            observeElements.disconnect();
+            UnDoAllNodes();
+
+            if (oldHref !== undefined) {
+                console.log(`Wolfermus UserScripts: Youtube Remove Video Types: href changed, document.readyState: ${document.readyState}`);
+            }
+
+            oldHref = document.location.href;
+
+            const ytdBrowses = document.querySelectorAll("ytd-browse");
+            if (ytdBrowses.length <= 0) return;
+
+            for (const ytdBrowse of ytdBrowses) {
+                const ytdBrowseStyle = window.getComputedStyle(ytdBrowse);
+                if (ytdBrowseStyle.display === "none") continue;
+
+                observeElements.observe(ytdBrowse, observeConfig);
+            }
+
+            CheckAllNodes();
+        });
+    };
 
     removeVideoTypesModule.disabled ??= false;
     removeVideoTypesModule.disabledDone ??= false;
 
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", async () => {
+            await observeUrlChange();
+        }, { once: true });
+    } else {
+        await observeUrlChange();
+    }
+
     if (RemoveVideoTypesSettings.Active && !removeVideoTypesModule.disabled) {
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", async () => {
-                const YoutubeGotten = await GetValue("YoutubeQOL", "{}");
-                CheckAllNodes(YoutubeGotten);
+                CheckAllNodes();
             }, { once: true });
         } else {
-            CheckAllNodes(YoutubeGotten);
+            CheckAllNodes();
         }
     }
 
