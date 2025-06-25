@@ -306,6 +306,7 @@ async (path) => {
     const observeElements = new MutationObserver(async (mutations) => {
         if (oldHref !== document.location.href) {
             oldHref = document.location.href;
+            console.log(`Wolfermus UserScripts: Youtube Remove Video Types: href changed, document.readyState: ${document.readyState}`);
             UnDoAllNodes();
         }
 
