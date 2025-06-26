@@ -1,5 +1,4 @@
 async (path) => {
-    return;
     const validYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model", "ytd-compact-video-renderer"];
     const validTagNames = ["A", "DIV", "YTD-BADGE-SUPPORTED-RENDERER"];
 
@@ -254,10 +253,7 @@ async (path) => {
     function FindVideo(node) {
         let foundItem = undefined;
 
-        // if (!validTagNames.includes(node.tagName)) {
-        //     debugger;
-        //     return undefined;
-        // }
+        if (!validTagNames.includes(node.tagName)) return undefined;
 
         for (const validItem of validYTDItems) {
             foundItem = node.closest(validItem);
@@ -268,18 +264,14 @@ async (path) => {
         let videoID = undefined;
         if (foundItem?.data?.content?.videoRenderer?.videoId) videoID = foundItem.data.content.videoRenderer.videoId;
         else if (foundItem?.data?.content?.lockupViewModel?.contentId) videoID = foundItem.data.content.lockupViewModel.contentId;
-        else {
-            debugger;
-            return undefined;
-        }
+        else if (foundItem?.data?.videoId) videoID = foundItem.data.videoId;
+        else return undefined;
 
         if (!findVideoStats[videoID]) findVideoStats[videoID] = {};
         if (!findVideoStats[videoID].amount) findVideoStats[videoID].amount = 0;
         if (!findVideoStats[videoID][node.tagName]) findVideoStats[videoID][node.tagName] = 0;
         findVideoStats[videoID][node.tagName]++;
         findVideoStats[videoID].amount++;
-
-        //return undefined;
 
         return foundItem;
     }
@@ -301,6 +293,7 @@ async (path) => {
                     let videoID = undefined;
                     if (foundItem?.data?.content?.videoRenderer?.videoId) videoID = foundItem.data.content.videoRenderer.videoId;
                     else if (foundItem?.data?.content?.lockupViewModel?.contentId) videoID = foundItem.data.content.lockupViewModel.contentId;
+                    else if (foundItem?.data?.videoId) videoID = foundItem.data.videoId;
                     else {
                         debugger;
                         return undefined;
@@ -328,6 +321,7 @@ async (path) => {
             let videoID = undefined;
             if (foundItem?.data?.content?.videoRenderer?.videoId) videoID = foundItem.data.content.videoRenderer.videoId;
             else if (foundItem?.data?.content?.lockupViewModel?.contentId) videoID = foundItem.data.content.lockupViewModel.contentId;
+            else if (foundItem?.data?.videoId) videoID = foundItem.data.videoId;
             else {
                 debugger;
                 return undefined;
@@ -360,6 +354,7 @@ async (path) => {
         let videoID = undefined;
         if (videoElement?.data?.content?.videoRenderer?.videoId) videoID = videoElement.data.content.videoRenderer.videoId;
         else if (videoElement?.data?.content?.lockupViewModel?.contentId) videoID = videoElement.data.content.lockupViewModel.contentId;
+        else if (videoElement?.data?.videoId) videoID = videoElement.data.videoId;
         else {
             debugger;
             return undefined;
@@ -382,6 +377,7 @@ async (path) => {
         let videoID = undefined;
         if (videoElement?.data?.content?.videoRenderer?.videoId) videoID = videoElement.data.content.videoRenderer.videoId;
         else if (videoElement?.data?.content?.lockupViewModel?.contentId) videoID = videoElement.data.content.lockupViewModel.contentId;
+        else if (videoElement?.data?.videoId) videoID = videoElement.data.videoId;
         else {
             debugger;
             return undefined;
@@ -417,6 +413,7 @@ async (path) => {
         let videoID = undefined;
         if (foundItem?.data?.content?.videoRenderer?.videoId) videoID = foundItem.data.content.videoRenderer.videoId;
         else if (foundItem?.data?.content?.lockupViewModel?.contentId) videoID = foundItem.data.content.lockupViewModel.contentId;
+        else if (foundItem?.data?.videoId) videoID = foundItem.data.videoId;
         else {
             debugger;
             return undefined;
@@ -562,23 +559,28 @@ async (path) => {
         oldHref = document.location.href;
 
         const ytdBrowses = document.querySelectorAll("ytd-browse");
-        if (ytdBrowses.length <= 0) return;
+        if (ytdBrowses.length > 0) {
+            for (const ytdBrowse of ytdBrowses) {
+                const ytdBrowseStyle = window.getComputedStyle(ytdBrowse);
+                if (ytdBrowseStyle.display === "none") continue;
 
-        for (const ytdBrowse of ytdBrowses) {
-            const ytdBrowseStyle = window.getComputedStyle(ytdBrowse);
-            if (ytdBrowseStyle.display === "none") continue;
-
-            observeElements.observe(ytdBrowse, observeConfig);
+                observeElements.observe(ytdBrowse, observeConfig);
+            }
         }
 
         const ytdWatchFlexys = document.querySelectorAll("ytd-watch-flexy");
-        if (ytdWatchFlexys.length <= 0) return;
+        if (ytdWatchFlexys.length > 0) {
+            for (const ytdWatchFlexy of ytdWatchFlexys) {
+                const ytdWatchFlexyStyle = window.getComputedStyle(ytdWatchFlexy);
+                if (ytdWatchFlexyStyle.display === "none") continue;
 
-        for (const ytdWatchFlexy of ytdWatchFlexys) {
-            const ytdWatchFlexyStyle = window.getComputedStyle(ytdWatchFlexy);
-            if (ytdWatchFlexyStyle.display === "none") continue;
+                const contents = ytdWatchFlexy.querySelectorAll("#contents.ytd-item-section-renderer");
+                if (contents.length <= 0) continue;
 
-            observeElements.observe(ytdWatchFlexy, observeConfig);
+                for (const content of contents) {
+                    observeElements.observe(content, observeConfig);
+                }
+            }
         }
 
         CheckAllNodes();
