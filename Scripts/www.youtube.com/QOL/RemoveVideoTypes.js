@@ -317,8 +317,8 @@ async (path) => {
 
             if (!findVideoElementTagStats[videoID]) findVideoElementTagStats[videoID] = {};
             if (!findVideoElementTagStats[videoID][group]) findVideoElementTagStats[videoID][group] = {};
-            if (!findVideoElementTagStats[videoID][group][node.tagName]) findVideoElementTagStats[videoID][group][node.tagName] = 0;
-            findVideoElementTagStats[videoID][group][node.tagName]++;
+            if (!findVideoElementTagStats[videoID][group][record.target.tagName]) findVideoElementTagStats[videoID][group][record.target.tagName] = 0;
+            findVideoElementTagStats[videoID][group][record.target.tagName]++;
 
             CheckVideo(foundItem, RemoveVideoTypesSearchSelector, false);
         }
