@@ -242,7 +242,7 @@ async (path) => {
     let RemoveVideoTypesSearchSelector = GetSearchSelector(YoutubeGotten);
 
     let findVideoElementTagStats = {};
-    let findVideoAmountStats = 0;
+    let findVideoAmountStats = {};
 
     /**
      * @param {HTMLElement} node
@@ -257,8 +257,10 @@ async (path) => {
         }
         if (!foundItem || foundItem === undefined || foundItem === null) return undefined;
 
-        if (!findVideoElementTagStats[node.tagName]) findVideoElementTagStats[node.tagName] = 0;
-        findVideoElementTagStats[node.tagName]++;
+        const videoID = foundItem.data.content.videoRenderer.videoId;
+        if (!findVideoElementTagStats[videoID]) findVideoElementTagStats[videoID] = {};
+        if (!findVideoElementTagStats[videoID][node.tagName]) findVideoElementTagStats[videoID][node.tagName] = 0;
+        findVideoElementTagStats[videoID][node.tagName]++;
 
         return foundItem;
     }
@@ -297,7 +299,11 @@ async (path) => {
         if (videoElement.classList.contains("WolfermusHideVideo")) return;
 
         videoElement.classList.add("WolfermusHideVideo");
-        findVideoAmountStats++;
+
+        const videoID = foundItem.data.content.videoRenderer.videoId;
+        if (!findVideoAmountStats[videoID]) findVideoAmountStats[videoID] = 0;
+        if (!findVideoAmountStats[videoID]["Added"]) findVideoAmountStats[videoID]["Added"] = 0;
+        findVideoAmountStats[videoID]["Added"]++;
 
         if (shouldObserveItem) {
             observeVideos.observe(videoElement, observeVideosConfig);
@@ -310,7 +316,11 @@ async (path) => {
     function UnHideVideo(videoElement) {
         if (!videoElement.classList.contains("WolfermusHideVideo")) return;
 
-        findVideoAmountStats++;
+        const videoID = foundItem.data.content.videoRenderer.videoId;
+        if (!findVideoAmountStats[videoID]) findVideoAmountStats[videoID] = 0;
+        if (!findVideoAmountStats[videoID]["Removed"]) findVideoAmountStats[videoID]["Removed"] = 0;
+        findVideoAmountStats[videoID]["Removed"]++;
+
         videoElement.classList.remove("WolfermusHideVideo");
     }
 
