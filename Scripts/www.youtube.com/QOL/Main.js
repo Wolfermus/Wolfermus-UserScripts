@@ -442,7 +442,8 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
     QOLRemoveVideoTypesGroupMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/",
         "*www.youtube.com/feed/subscriptions", "*www.youtube.com/feed/subscriptions/",
-        "*www.youtube.com/shorts/*"
+        "*www.youtube.com/shorts/*",
+        "*www.youtube.com/watch*"
     ];
 
     QOLRemoveVideoTypesGroupMenuItem.CheckUrls();
