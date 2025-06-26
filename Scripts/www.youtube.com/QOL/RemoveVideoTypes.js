@@ -1,4 +1,5 @@
 async (path) => {
+    return;
     const validYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model", "ytd-compact-video-renderer"];
     const validTagNames = ["A", "DIV", "YTD-BADGE-SUPPORTED-RENDERER"];
 
@@ -253,10 +254,10 @@ async (path) => {
     function FindVideo(node) {
         let foundItem = undefined;
 
-        if (!validTagNames.includes(node.tagName)) {
-            debugger;
-            return undefined;
-        }
+        // if (!validTagNames.includes(node.tagName)) {
+        //     debugger;
+        //     return undefined;
+        // }
 
         for (const validItem of validYTDItems) {
             foundItem = node.closest(validItem);
