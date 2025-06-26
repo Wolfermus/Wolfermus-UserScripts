@@ -457,28 +457,28 @@ async (path) => {
         if (!RemoveVideoTypesSearchSelector) return;
 
         const ytdBrowses = document.querySelectorAll("ytd-browse");
-        if (ytdBrowses.length <= 0) return;
+        if (ytdBrowses.length > 0) {
+            for (const ytdBrowse of ytdBrowses) {
+                const ytdBrowseStyle = window.getComputedStyle(ytdBrowse);
+                if (ytdBrowseStyle.display === "none") continue;
 
-        for (const ytdBrowse of ytdBrowses) {
-            const ytdBrowseStyle = window.getComputedStyle(ytdBrowse);
-            if (ytdBrowseStyle.display === "none") continue;
-
-            const nodes = ytdBrowse.querySelectorAll(RemoveVideoTypesSearchSelector);
-            for (let node of nodes) {
-                HideNode(node);
+                const nodes = ytdBrowse.querySelectorAll(RemoveVideoTypesSearchSelector);
+                for (let node of nodes) {
+                    HideNode(node);
+                }
             }
         }
 
         const ytdWatchFlexys = document.querySelectorAll("ytd-watch-flexy");
-        if (ytdWatchFlexys.length <= 0) return;
+        if (ytdWatchFlexys.length > 0) {
+            for (const ytdWatchFlexy of ytdWatchFlexys) {
+                const ytdWatchFlexyStyle = window.getComputedStyle(ytdWatchFlexy);
+                if (ytdWatchFlexyStyle.display === "none") continue;
 
-        for (const ytdWatchFlexy of ytdWatchFlexys) {
-            const ytdWatchFlexyStyle = window.getComputedStyle(ytdWatchFlexy);
-            if (ytdWatchFlexyStyle.display === "none") continue;
-
-            const nodes = ytdWatchFlexy.querySelectorAll(RemoveVideoTypesSearchSelector);
-            for (let node of nodes) {
-                HideNode(node);
+                const nodes = ytdWatchFlexy.querySelectorAll(RemoveVideoTypesSearchSelector);
+                for (let node of nodes) {
+                    HideNode(node);
+                }
             }
         }
     }
