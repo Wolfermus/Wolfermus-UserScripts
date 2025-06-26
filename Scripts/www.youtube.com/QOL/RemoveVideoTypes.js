@@ -528,55 +528,44 @@ async (path) => {
 
     let oldHref = undefined;
     const observeUrlChange = async () => {
-        window.addEventListener("yt-navigate-finish", async () => {
-            if (oldHref === document.location.href) return;
+        if (oldHref === document.location.href) return;
 
-            observeElements.disconnect();
+        observeElements.disconnect();
 
-            console.log("findVideoElementTagStats:");
-            console.log(findVideoElementTagStats);
-            console.log(findVideoAmountStats);
-            console.log(findVideoStats);
-            findVideoElementTagStats = {};
-            findVideoAmountStats = {};
-            findVideoStats = {};
+        console.log("findVideoElementTagStats:");
+        console.log(findVideoElementTagStats);
+        console.log(findVideoAmountStats);
+        console.log(findVideoStats);
+        findVideoElementTagStats = {};
+        findVideoAmountStats = {};
+        findVideoStats = {};
 
-            UnDoAllNodes();
+        UnDoAllNodes();
 
-            if (oldHref !== undefined) {
-                console.log(`Wolfermus UserScripts: Youtube Remove Video Types: href changed, document.readyState: ${document.readyState}`);
-            }
+        if (oldHref !== undefined) {
+            console.log(`Wolfermus UserScripts: Youtube Remove Video Types: href changed, document.readyState: ${document.readyState}`);
+        }
 
-            oldHref = document.location.href;
+        oldHref = document.location.href;
 
-            const ytdBrowses = document.querySelectorAll("ytd-browse");
-            if (ytdBrowses.length <= 0) return;
+        const ytdBrowses = document.querySelectorAll("ytd-browse");
+        if (ytdBrowses.length <= 0) return;
 
-            for (const ytdBrowse of ytdBrowses) {
-                const ytdBrowseStyle = window.getComputedStyle(ytdBrowse);
-                if (ytdBrowseStyle.display === "none") continue;
+        for (const ytdBrowse of ytdBrowses) {
+            const ytdBrowseStyle = window.getComputedStyle(ytdBrowse);
+            if (ytdBrowseStyle.display === "none") continue;
 
-                observeElements.observe(ytdBrowse, observeConfig);
-            }
+            observeElements.observe(ytdBrowse, observeConfig);
+        }
 
-            CheckAllNodes();
-        });
+        CheckAllNodes();
     };
 
     removeVideoTypesModule.disabled ??= false;
     removeVideoTypesModule.disabledDone ??= false;
 
+    window.addEventListener("yt-navigate-finish", observeUrlChange);
     await observeUrlChange();
-
-    if (RemoveVideoTypesSettings.Active && !removeVideoTypesModule.disabled) {
-        if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", async () => {
-                CheckAllNodes();
-            }, { once: true });
-        } else {
-            CheckAllNodes();
-        }
-    }
 
     removeVideoTypesModule.Loaded = true;
 
