@@ -1,4 +1,5 @@
 async (path) => {
+    return;
     const ValidYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model"];
 
 
