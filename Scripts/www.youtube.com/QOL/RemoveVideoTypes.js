@@ -301,7 +301,7 @@ async (path) => {
         videoElement.classList.add("WolfermusHideVideo");
 
         const videoID = videoElement.data.content.videoRenderer.videoId;
-        if (!findVideoAmountStats[videoID]) findVideoAmountStats[videoID] = 0;
+        if (!findVideoAmountStats[videoID]) findVideoAmountStats[videoID] = {};
         if (!findVideoAmountStats[videoID]["Added"]) findVideoAmountStats[videoID]["Added"] = 0;
         findVideoAmountStats[videoID]["Added"]++;
 
@@ -317,7 +317,7 @@ async (path) => {
         if (!videoElement.classList.contains("WolfermusHideVideo")) return;
 
         const videoID = videoElement.data.content.videoRenderer.videoId;
-        if (!findVideoAmountStats[videoID]) findVideoAmountStats[videoID] = 0;
+        if (!findVideoAmountStats[videoID]) findVideoAmountStats[videoID] = {};
         if (!findVideoAmountStats[videoID]["Removed"]) findVideoAmountStats[videoID]["Removed"] = 0;
         findVideoAmountStats[videoID]["Removed"]++;
 
