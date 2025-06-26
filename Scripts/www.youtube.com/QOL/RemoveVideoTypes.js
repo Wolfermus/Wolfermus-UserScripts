@@ -1,5 +1,4 @@
 async (path) => {
-    return;
     const ValidYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model"];
 
 
@@ -242,10 +241,11 @@ async (path) => {
     let RemoveVideoTypesIsActive = RemoveVideoTypesSettings.Active;
     let RemoveVideoTypesSearchSelector = GetSearchSelector(YoutubeGotten);
 
+    let findVideoStats = {};
     let findVideoElementTagStats = {};
     let findVideoAmountStats = {};
 
-    const validTagNames = ["A", "SPAN", "YTD-BADGE-SUPPORTED-RENDERER"];
+    const validTagNames = ["A", "DIV", "YTD-BADGE-SUPPORTED-RENDERER"];
 
     /**
      * @param {HTMLElement} node
@@ -254,13 +254,32 @@ async (path) => {
     function FindVideo(node) {
         let foundItem = undefined;
 
-        if (!validTagNames.includes(node.tagName)) return undefined;
+        if (!validTagNames.includes(node.tagName)) {
+            debugger;
+            return undefined;
+        }
 
         for (const validItem of ValidYTDItems) {
             foundItem = node.closest(validItem);
             if (foundItem && foundItem !== undefined && foundItem !== null) break;
         }
         if (!foundItem || foundItem === undefined || foundItem === null) return undefined;
+
+        let videoID = undefined;
+        if (foundItem?.data?.content?.videoRenderer?.videoId) videoID = foundItem.data.content.videoRenderer.videoId;
+        else if (foundItem?.data?.content?.lockupViewModel?.contentId) videoID = foundItem.data.content.lockupViewModel.contentId;
+        else {
+            debugger;
+            return undefined;
+        }
+
+        if (!findVideoStats[videoID]) findVideoStats[videoID] = {};
+        if (!findVideoStats[videoID].amount) findVideoStats[videoID].amount = 0;
+        if (!findVideoStats[videoID][node.tagName]) findVideoStats[videoID][node.tagName] = 0;
+        findVideoStats[videoID][node.tagName]++;
+        findVideoStats[videoID].amount++;
+
+        //return undefined;
 
         return foundItem;
     }
@@ -517,8 +536,10 @@ async (path) => {
             console.log("findVideoElementTagStats:");
             console.log(findVideoElementTagStats);
             console.log(findVideoAmountStats);
+            console.log(findVideoStats);
             findVideoElementTagStats = {};
             findVideoAmountStats = {};
+            findVideoStats = {};
 
             UnDoAllNodes();
 
