@@ -242,6 +242,7 @@ async (path) => {
     let RemoveVideoTypesSearchSelector = GetSearchSelector(YoutubeGotten);
 
     let findVideoElementTagStats = {};
+    let findVideoAmountStats = 0;
 
     /**
      * @param {HTMLElement} node
@@ -258,6 +259,7 @@ async (path) => {
 
         if (!findVideoElementTagStats[node.tagName]) findVideoElementTagStats[node.tagName] = 0;
         findVideoElementTagStats[node.tagName]++;
+        findVideoAmountStats++;
 
         return foundItem;
     }
@@ -436,7 +438,9 @@ async (path) => {
 
             console.log("findVideoElementTagStats:");
             console.log(findVideoElementTagStats);
+            console.log(findVideoAmountStats);
             findVideoElementTagStats = {};
+            findVideoAmountStats = 0;
 
             UnDoAllNodes();
 
