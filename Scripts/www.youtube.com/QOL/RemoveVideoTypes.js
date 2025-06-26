@@ -259,7 +259,6 @@ async (path) => {
 
         if (!findVideoElementTagStats[node.tagName]) findVideoElementTagStats[node.tagName] = 0;
         findVideoElementTagStats[node.tagName]++;
-        findVideoAmountStats++;
 
         return foundItem;
     }
@@ -298,6 +297,7 @@ async (path) => {
         if (videoElement.classList.contains("WolfermusHideVideo")) return;
 
         videoElement.classList.add("WolfermusHideVideo");
+        findVideoAmountStats++;
 
         if (shouldObserveItem) {
             observeVideos.observe(videoElement, observeVideosConfig);
@@ -308,6 +308,9 @@ async (path) => {
      * @param {HTMLElement} videoElement
      */
     function UnHideVideo(videoElement) {
+        if (!videoElement.classList.contains("WolfermusHideVideo")) return;
+
+        findVideoAmountStats++;
         videoElement.classList.remove("WolfermusHideVideo");
     }
 
@@ -431,7 +434,7 @@ async (path) => {
 
     let oldHref = undefined;
     const observeUrlChange = async () => {
-        window.addEventListener("yt-navigate-finish", async (event) => {
+        window.addEventListener("yt-navigate-finish", async () => {
             if (oldHref === document.location.href) return;
 
             observeElements.disconnect();
@@ -467,13 +470,7 @@ async (path) => {
     removeVideoTypesModule.disabled ??= false;
     removeVideoTypesModule.disabledDone ??= false;
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", async () => {
-            await observeUrlChange();
-        }, { once: true });
-    } else {
-        await observeUrlChange();
-    }
+    await observeUrlChange();
 
     if (RemoveVideoTypesSettings.Active && !removeVideoTypesModule.disabled) {
         if (document.readyState === "loading") {
