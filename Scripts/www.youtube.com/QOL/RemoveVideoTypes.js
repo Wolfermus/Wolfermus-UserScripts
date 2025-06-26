@@ -257,11 +257,6 @@ async (path) => {
         }
         if (!foundItem || foundItem === undefined || foundItem === null) return undefined;
 
-        const videoID = foundItem.data.content.videoRenderer.videoId;
-        if (!findVideoElementTagStats[videoID]) findVideoElementTagStats[videoID] = {};
-        if (!findVideoElementTagStats[videoID][node.tagName]) findVideoElementTagStats[videoID][node.tagName] = 0;
-        findVideoElementTagStats[videoID][node.tagName]++;
-
         return foundItem;
     }
 
@@ -279,6 +274,25 @@ async (path) => {
                     let foundItem = FindVideo(node);
                     if (foundItem === undefined) continue;
 
+                    let videoID = undefined;
+                    if (foundItem?.data?.content?.videoRenderer?.videoId) videoID = foundItem.data.content.videoRenderer.videoId;
+                    else if (foundItem?.data?.content?.lockupViewModel?.contentId) videoID = foundItem.data.content.lockupViewModel.contentId;
+                    else {
+                        debugger;
+                        return undefined;
+                    }
+
+                    let group = "Removed";
+                    const foundElements = foundItem.querySelectorAll(RemoveVideoTypesSearchSelector);
+                    if (foundElements.length > 0) {
+                        group = "Added";
+                    }
+
+                    if (!findVideoElementTagStats[videoID]) findVideoElementTagStats[videoID] = {};
+                    if (!findVideoElementTagStats[videoID][group]) findVideoElementTagStats[videoID][group] = {};
+                    if (!findVideoElementTagStats[videoID][group][node.tagName]) findVideoElementTagStats[videoID][group][node.tagName] = 0;
+                    findVideoElementTagStats[videoID][group][node.tagName]++;
+
                     CheckVideo(foundItem, RemoveVideoTypesSearchSelector, false);
                 }
             }
@@ -286,6 +300,25 @@ async (path) => {
 
             let foundItem = FindVideo(record.target);
             if (foundItem === undefined) continue;
+
+            let videoID = undefined;
+            if (foundItem?.data?.content?.videoRenderer?.videoId) videoID = foundItem.data.content.videoRenderer.videoId;
+            else if (foundItem?.data?.content?.lockupViewModel?.contentId) videoID = foundItem.data.content.lockupViewModel.contentId;
+            else {
+                debugger;
+                return undefined;
+            }
+
+            let group = "Removed";
+            const foundElements = foundItem.querySelectorAll(RemoveVideoTypesSearchSelector);
+            if (foundElements.length > 0) {
+                group = "Added";
+            }
+
+            if (!findVideoElementTagStats[videoID]) findVideoElementTagStats[videoID] = {};
+            if (!findVideoElementTagStats[videoID][group]) findVideoElementTagStats[videoID][group] = {};
+            if (!findVideoElementTagStats[videoID][group][node.tagName]) findVideoElementTagStats[videoID][group][node.tagName] = 0;
+            findVideoElementTagStats[videoID][group][node.tagName]++;
 
             CheckVideo(foundItem, RemoveVideoTypesSearchSelector, false);
         }
@@ -300,7 +333,7 @@ async (path) => {
 
         videoElement.classList.add("WolfermusHideVideo");
 
-        const videoID = videoElement.data.content.videoRenderer.videoId;
+        let videoID = videoElement.data.content.videoRenderer.videoId;
         if (!findVideoAmountStats[videoID]) findVideoAmountStats[videoID] = {};
         if (!findVideoAmountStats[videoID]["Added"]) findVideoAmountStats[videoID]["Added"] = 0;
         findVideoAmountStats[videoID]["Added"]++;
@@ -316,7 +349,7 @@ async (path) => {
     function UnHideVideo(videoElement) {
         if (!videoElement.classList.contains("WolfermusHideVideo")) return;
 
-        const videoID = videoElement.data.content.videoRenderer.videoId;
+        let videoID = videoElement.data.content.videoRenderer.videoId;
         if (!findVideoAmountStats[videoID]) findVideoAmountStats[videoID] = {};
         if (!findVideoAmountStats[videoID]["Removed"]) findVideoAmountStats[videoID]["Removed"] = 0;
         findVideoAmountStats[videoID]["Removed"]++;
@@ -344,6 +377,21 @@ async (path) => {
     function HideNode(node, shouldObserveItem = true) {
         let foundItem = FindVideo(node);
         if (foundItem === undefined) return;
+
+        let videoID = undefined;
+        if (foundItem?.data?.content?.videoRenderer?.videoId) videoID = foundItem.data.content.videoRenderer.videoId;
+        else if (foundItem?.data?.content?.lockupViewModel?.contentId) videoID = foundItem.data.content.lockupViewModel.contentId;
+        else {
+            debugger;
+            return undefined;
+        }
+
+        let group = "Added";
+
+        if (!findVideoElementTagStats[videoID]) findVideoElementTagStats[videoID] = {};
+        if (!findVideoElementTagStats[videoID][group]) findVideoElementTagStats[videoID][group] = {};
+        if (!findVideoElementTagStats[videoID][group][node.tagName]) findVideoElementTagStats[videoID][group][node.tagName] = 0;
+        findVideoElementTagStats[videoID][group][node.tagName]++;
 
         HideVideo(foundItem, shouldObserveItem);
     }
