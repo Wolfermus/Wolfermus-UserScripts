@@ -241,6 +241,8 @@ async (path) => {
     let RemoveVideoTypesIsActive = RemoveVideoTypesSettings.Active;
     let RemoveVideoTypesSearchSelector = GetSearchSelector(YoutubeGotten);
 
+    let findVideoElementTagStats = {};
+
     /**
      * @param {HTMLElement} node
      * @returns {Element | undefined}
@@ -253,6 +255,9 @@ async (path) => {
             if (foundItem && foundItem !== undefined && foundItem !== null) break;
         }
         if (!foundItem || foundItem === undefined || foundItem === null) return undefined;
+
+        if (!findVideoElementTagStats[node.tagName]) findVideoElementTagStats[node.tagName] = 0;
+        findVideoElementTagStats[node.tagName]++;
 
         return foundItem;
     }
@@ -428,6 +433,11 @@ async (path) => {
             if (oldHref === document.location.href) return;
 
             observeElements.disconnect();
+
+            console.log("findVideoElementTagStats:");
+            console.log(findVideoElementTagStats);
+            findVideoElementTagStats = {};
+
             UnDoAllNodes();
 
             if (oldHref !== undefined) {
