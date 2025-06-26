@@ -1,5 +1,6 @@
 async (path) => {
-    const ValidYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model"];
+    const validYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model", "ytd-compact-video-renderer"];
+    const validTagNames = ["A", "DIV", "YTD-BADGE-SUPPORTED-RENDERER"];
 
 
     /**
@@ -245,8 +246,6 @@ async (path) => {
     let findVideoElementTagStats = {};
     let findVideoAmountStats = {};
 
-    const validTagNames = ["A", "DIV", "YTD-BADGE-SUPPORTED-RENDERER"];
-
     /**
      * @param {HTMLElement} node
      * @returns {Element | undefined}
@@ -259,7 +258,7 @@ async (path) => {
             return undefined;
         }
 
-        for (const validItem of ValidYTDItems) {
+        for (const validItem of validYTDItems) {
             foundItem = node.closest(validItem);
             if (foundItem && foundItem !== undefined && foundItem !== null) break;
         }
@@ -471,6 +470,19 @@ async (path) => {
                 HideNode(node);
             }
         }
+
+        const ytdWatchFlexys = document.querySelectorAll("ytd-watch-flexy");
+        if (ytdWatchFlexys.length <= 0) return;
+
+        for (const ytdWatchFlexy of ytdWatchFlexys) {
+            const ytdWatchFlexyStyle = window.getComputedStyle(ytdWatchFlexy);
+            if (ytdWatchFlexyStyle.display === "none") continue;
+
+            const nodes = ytdWatchFlexy.querySelectorAll(RemoveVideoTypesSearchSelector);
+            for (let node of nodes) {
+                HideNode(node);
+            }
+        }
     }
 
     function UnDoAllNodes() {
@@ -556,6 +568,16 @@ async (path) => {
             if (ytdBrowseStyle.display === "none") continue;
 
             observeElements.observe(ytdBrowse, observeConfig);
+        }
+
+        const ytdWatchFlexys = document.querySelectorAll("ytd-watch-flexy");
+        if (ytdWatchFlexys.length <= 0) return;
+
+        for (const ytdWatchFlexy of ytdWatchFlexys) {
+            const ytdWatchFlexyStyle = window.getComputedStyle(ytdWatchFlexy);
+            if (ytdWatchFlexyStyle.display === "none") continue;
+
+            observeElements.observe(ytdWatchFlexy, observeConfig);
         }
 
         CheckAllNodes();
