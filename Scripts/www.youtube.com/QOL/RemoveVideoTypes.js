@@ -244,12 +244,16 @@ async (path) => {
     let findVideoElementTagStats = {};
     let findVideoAmountStats = {};
 
+    const validTagNames = ["A", "SPAN", "YTD-BADGE-SUPPORTED-RENDERER"];
+
     /**
      * @param {HTMLElement} node
      * @returns {Element | undefined}
      */
     function FindVideo(node) {
         let foundItem = undefined;
+
+        if (!validTagNames.includes(node.tagName)) return undefined;
 
         for (const validItem of ValidYTDItems) {
             foundItem = node.closest(validItem);
@@ -260,7 +264,7 @@ async (path) => {
         return foundItem;
     }
 
-    const observeVideosConfig = { childList: true, subtree: true, attributes: false, characterData: false };
+    const observeVideosConfig = { childList: true, subtree: true, attributes: true, characterData: false };
     const observeVideos = new MutationObserver(async (mutations) => {
         if (removeVideoTypesModule.disabled) return;
         if (!RemoveVideoTypesIsActive) return;
