@@ -1,5 +1,7 @@
 async (path) => {
-    const validYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model", "ytd-compact-video-renderer"];
+    return;
+
+    const validYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model", "ytd-compact-video-renderer", "ytd-grid-video-renderer"];
     const validTagNames = ["A", "DIV", "YTD-BADGE-SUPPORTED-RENDERER"];
 
 
