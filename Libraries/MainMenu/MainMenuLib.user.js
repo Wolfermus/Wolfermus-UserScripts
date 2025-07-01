@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.1.2
+// @version      4.1.3
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -1003,7 +1003,7 @@ class WolfermusMenuItem {
             const validTitle = (this.title !== undefined && this.title !== null & this.title !== "");
 
             for (let titleElement of gottenTitleElementGroup) {
-                titleElement.innerText = this.#title;
+                titleElement.innerHTML = wolfermusBypassScriptPolicy.createHTML(this.#title);
             }
             for (let titleItemElement of gottenTitleItemElementGroup) {
                 if (validTitle) {
