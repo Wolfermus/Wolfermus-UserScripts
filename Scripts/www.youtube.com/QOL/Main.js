@@ -422,8 +422,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
      * @returns {Array<string>}
      */
     function FlattenRemoveVideoTypesUrlsIncludes() {
-        debugger;
-
         let falttenedUrls = [];
         for (const urlKey in RemoveVideoTypesUrlsInclude) {
             if (Array.isArray(RemoveVideoTypesUrlsInclude[urlKey])) {
@@ -440,8 +438,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
      * @returns {Array<string>}
      */
     function FlattenRemoveVideoTypesUrlsExcludes() {
-        debugger;
-
         let falttenedUrls = [];
         for (const urlKey in RemoveVideoTypesUrlsExcludes) {
             if (Array.isArray(RemoveVideoTypesUrlsExcludes[urlKey])) {
@@ -459,8 +455,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
      * @returns {Array<string>}
      */
     function GetCurrentWebsitesEnabled() {
-        debugger;
-
         for (const urlKey in RemoveVideoTypesUrlsInclude) {
             if (Array.isArray(RemoveVideoTypesUrlsInclude[urlKey])) {
                 let includesBool = false;
@@ -609,8 +603,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
 
-        debugger;
-
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
         if (currentWebsitesObject === undefined) return;
 
@@ -629,8 +621,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
         let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
-
-        debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
         if (currentWebsitesObject === undefined) return;
@@ -654,8 +644,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
         let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
-        debugger;
-
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
         if (currentWebsitesObject === undefined) return;
 
@@ -677,8 +665,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
         let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
-
-        debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
         if (currentWebsitesObject === undefined) return;
@@ -734,8 +720,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
         let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
-
-        debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
         if (currentWebsitesObject === undefined) return;
@@ -879,8 +863,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (oldHref === document.location.href) return;
         oldHref = document.location.href;
 
-        debugger;
-
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettings = JSON.parse(YoutubeGottenInner);
         if (!QOLSettings || typeof QOLSettings !== "object") QOLSettings = {};
@@ -889,8 +871,6 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         let RemoveVideoTypesSettings = QOLSettings["RemoveVideoTypes"];
 
         RemoveVideoTypesSettings.Active ??= false;
-
-        debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettings);
 
