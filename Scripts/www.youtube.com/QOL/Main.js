@@ -612,7 +612,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
 
-    const QOLRemoveVideoTypesHideYouWatchMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide YouWatch`);
+    const QOLRemoveVideoTypesHideYouWatchMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide YouWatch`, "For 'Watchmarker for Youtube'<br>(Browser Extension)");
     QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = currentWebsites?.Hide?.YouWatch ? true : false;
     QOLRemoveVideoTypesHideYouWatchMenuItem.ToggledEventAddCallback(async (toggled) => {
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
