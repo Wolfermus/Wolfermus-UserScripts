@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu (Beta)
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      2.1.0-beta
+// @version      2.1.1-beta
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them. (Beta)
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -222,7 +222,7 @@ function WolfermusCheckLibraryLoaded(key) {
     mainMenuModule["Loaded"] = false;
     mainMenuModule["Loading"] = true;
 
-    console.info("Wolfermus Main Menu Loading...");
+    console.info("Wolfermus Main Loading...");
 
     let wolfermusLoadLoopCounter = 0;
     while (!WolfermusCheckLibraryLoaded("MainMenu")) {
@@ -308,18 +308,25 @@ function WolfermusCheckLibraryLoaded(key) {
     });
 
     let wolfermusPreventLoopLock1 = 10;
+    /**
+     * @param {string} path 
+     * @returns {boolean}
+     */
     async function LoadScript(path) {
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(path));
             await eval(script)(baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
+            return true;
         } catch (error) {
             if (wolfermusPreventLoopLock1 <= 0) return;
             wolfermusPreventLoopLock1--;
             await Sleep(50);
             await LoadScript(path);
         }
+        return false;
     }
 
+    let sucessfullyLoadedAtLeastOneScript = false;
     async function AttemptLoadScript() {
         const fetchedScripts = await GetScripts();
 
@@ -329,10 +336,15 @@ function WolfermusCheckLibraryLoaded(key) {
         // }
 
         for (let scriptURL of fetchedScripts) {
-            await LoadScript(scriptURL).catch(async (error) => {
-                debugger;
-                console.error(`Wolfermus ERROR: Main - Failed To Load Scripts\n${error}`);
+            wolfermusPreventLoopLock1 = 10;
+            const result = await LoadScript(scriptURL).catch(async (error) => {
+                console.error(`Wolfermus ERROR: Main - Failed To Load Script\n${scriptURL}\n${error}`);
             });
+            if (result) {
+                sucessfullyLoadedAtLeastOneScript = true;
+            } else {
+                console.error(`Wolfermus ERROR: Main - Failed To Load Script\n${scriptURL}`);
+            }
         }
 
         // {
@@ -340,20 +352,34 @@ function WolfermusCheckLibraryLoaded(key) {
         //     console.info(`Wolfermus Main Menu Loaded - 2 - Took ${endTime - wolfermusMainMenuStartTime}ms`);
         // }
     }
-    await AttemptLoadScript();
 
-    await UpdateWolfermusMainMenuStyle();
-    await UpdateMenuItems();
+    async function LoadMenu() {
+        await AttemptLoadScript();
 
-    if (wolfermusPreventLoopLock1 <= 0) {
+        if (!sucessfullyLoadedAtLeastOneScript) {
+            mainMenuModule["Loading"] = false;
+            console.info(`Wolfermus ERROR: Main - Failed to load`);
+            return;
+        }
+
+        await UpdateWolfermusMainMenuStyle();
+        await UpdateMenuItems();
+
+        const endTime = performance.now();
+
+        console.info(`Wolfermus Main Loaded - Took ${endTime - wolfermusMainMenuStartTime}ms`);
+
+        mainMenuModule["Loaded"] = true;
         mainMenuModule["Loading"] = false;
-        return;
     }
 
-    const endTime = performance.now();
-
-    console.info(`Wolfermus Main Menu Loaded - Took ${endTime - wolfermusMainMenuStartTime}ms`);
-
-    mainMenuModule["Loaded"] = true;
-    mainMenuModule["Loading"] = false;
+    if (navigator.onLine) {
+        await LoadMenu();
+    } else {
+        console.info("Wolfermus Main Waiting - Navigator is currently offline");
+        window.addEventListener("online", async (e) => {
+            console.info("Wolfermus Main Resuming - Navigator is now online");
+            await LoadMenu();
+        }, { once: true });
+    }
 })();
