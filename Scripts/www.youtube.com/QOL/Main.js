@@ -356,7 +356,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     WebsitesEnabledSettings.Playlist.Hide.YouWatch ??= true;
     WebsitesEnabledSettings.Playlist.Hide.Members ??= true;
     WebsitesEnabledSettings.Playlist.Hide.Live ??= true;
-    if (typeof WebsitesEnabledSettings.Playlist.IdsToHide !== "object" || Array.isArray(WebsitesEnabledSettings.Playlist.IdsToHide)) WebsitesEnabledSettings.Playlist.IdsToHide = [];
+    if (typeof WebsitesEnabledSettings.Playlist.IdsToHide !== "object" || !Array.isArray(WebsitesEnabledSettings.Playlist.IdsToHide)) WebsitesEnabledSettings.Playlist.IdsToHide = [];
 
     if (typeof WebsitesEnabledSettings.Channels !== "object") WebsitesEnabledSettings.Channels = {};
 
@@ -654,7 +654,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
-        if (currentWebsites === undefined) return;
+        if (currentWebsitesObject === undefined) return;
 
         if (currentWebsitesObject.Hide.YouWatch === toggled) return;
         currentWebsitesObject.Hide.YouWatch = toggled;
