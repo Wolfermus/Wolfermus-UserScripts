@@ -508,7 +508,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         const keysArray = GetCurrentWebsitesEnabled(json);
 
         if (keysArray.length > 0) {
-            let referenceBool = RemoveVideoTypesSettings;
+            let referenceBool = RemoveVideoTypesSettings.WebsitesEnabled;
             for (const key of keysArray) {
                 referenceBool = referenceBool[key];
             }
@@ -567,7 +567,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         const keysArray = GetCurrentWebsitesEnabled(QOLSettingsInner);
 
         if (keysArray.length > 0) {
-            let referenceBool = RemoveVideoTypesSettingsInner;
+            let referenceBool = RemoveVideoTypesSettingsInner.WebsitesEnabled;
             for (const key of keysArray) {
                 if (typeof referenceBool[key] == "boolean") {
                     referenceBool[key] = toggled;
