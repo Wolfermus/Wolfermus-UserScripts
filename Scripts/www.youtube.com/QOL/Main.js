@@ -811,7 +811,15 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
         RemoveVideoTypesSettings.Active ??= false;
 
-        QOLRemoveVideoTypesTogglePageMenuItem.toggled = IsCurrentWebsitesEnabled(QOLSettings);
+        debugger;
+
+        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+
+        QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsitesObject.Active;
+
+        QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = currentWebsitesObject.Hide.YouWatch.Active;
+        QOLRemoveVideoTypesHideMembersMenuItem.toggled = currentWebsitesObject.Hide.Members.Active;
+        QOLRemoveVideoTypesHideLiveMenuItem.toggled = currentWebsitesObject.Hide.Live.Active;
 
         if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
             ShouldDisable(QOLSettings);
