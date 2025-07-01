@@ -6,16 +6,16 @@
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
 // @supportURL   https://github.com/Wolfermus/Wolfermus-UserScripts/issues
-// @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/MainBetaBranch.user.js
-// @downloadURL  https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/MainBetaBranch.user.js
+// @updateURL    https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/RemoveVideoTypes-Script/MainBetaBranch.user.js
+// @downloadURL  https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/RemoveVideoTypes-Script/MainBetaBranch.user.js
 // @license      GPLv3
 // @noframes
 // @match        *
 // @match        *://*/*
 // @match        http://*/*
 // @match        https://*/*
-// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Libraries/StorageManagerLib.user.js
-// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/beta/Libraries/MainMenu/MainMenuLib.user.js
+// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/RemoveVideoTypes-Script/Libraries/StorageManagerLib.user.js
+// @require      https://github.com/Wolfermus/Wolfermus-UserScripts/raw/refs/heads/RemoveVideoTypes-Script/Libraries/MainMenu/MainMenuLib.user.js
 // @connect      raw.githubusercontent.com
 // @connect      api.github.com
 // @grant        GM_getValue
@@ -263,7 +263,8 @@ function WolfermusCheckLibraryLoaded(key) {
     // }
 
     const websiteName = window.location.hostname;
-    const branch = "beta";
+    //const branch = "beta";
+    const branch = "RemoveVideoTypes-Script"; // TODO: Temp for this branch
     const baseURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/`;
     const baseScriptURL = `${baseURL}Scripts/`;
     const baseWebsiteScriptURL = `${baseScriptURL}${websiteName}/`;
