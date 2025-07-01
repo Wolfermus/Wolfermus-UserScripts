@@ -325,67 +325,46 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
     TimeRemainingSettings.Active ??= false;
 
+    // TODO: extract to function
+
+    /**
+     * @param {object} objectBase 
+     * @param {string} name 
+     * @param {boolean} [defaultActive=true] 
+     */
+    function ValidateWebsiteEnabledSetting(objectBase, name, defaultActive = true) {
+        if (typeof objectBase[name] !== "object") objectBase[name] = {};
+        objectBase[name].Active ??= defaultActive;
+        if (typeof objectBase[name].Hide !== "object") objectBase[name].Hide = {};
+        objectBase[name].Hide.YouWatch ??= true;
+        objectBase[name].Hide.Members ??= true;
+        objectBase[name].Hide.Live ??= true;
+        //objectBase[name].Hide.Shorts ??= true;
+    }
+
     RemoveVideoTypesSettings.Active ??= false;
     if (typeof RemoveVideoTypesSettings.WebsitesEnabled !== "object") RemoveVideoTypesSettings.WebsitesEnabled = {};
     let WebsitesEnabledSettings = RemoveVideoTypesSettings.WebsitesEnabled;
 
-    if (typeof WebsitesEnabledSettings.Main !== "object") WebsitesEnabledSettings.Main = {};
-    WebsitesEnabledSettings.Main.Active ??= true;
-    if (typeof WebsitesEnabledSettings.Main.Hide !== "object") WebsitesEnabledSettings.Main.Hide = {};
-    WebsitesEnabledSettings.Main.Hide.YouWatch ??= true;
-    WebsitesEnabledSettings.Main.Hide.Members ??= true;
-    WebsitesEnabledSettings.Main.Hide.Live ??= true;
-
-    if (typeof WebsitesEnabledSettings.Subscriptions !== "object") WebsitesEnabledSettings.Subscriptions = {};
-    WebsitesEnabledSettings.Subscriptions.Active ??= true;
-    if (typeof WebsitesEnabledSettings.Subscriptions.Hide !== "object") WebsitesEnabledSettings.Subscriptions.Hide = {};
-    WebsitesEnabledSettings.Subscriptions.Hide.YouWatch ??= true;
-    WebsitesEnabledSettings.Subscriptions.Hide.Members ??= true;
-    WebsitesEnabledSettings.Subscriptions.Hide.Live ??= true;
-
-    if (typeof WebsitesEnabledSettings.Watch !== "object") WebsitesEnabledSettings.Watch = {};
-    WebsitesEnabledSettings.Watch.Active ??= true;
-    if (typeof WebsitesEnabledSettings.Watch.Hide !== "object") WebsitesEnabledSettings.Watch.Hide = {};
-    WebsitesEnabledSettings.Watch.Hide.YouWatch ??= true;
-    WebsitesEnabledSettings.Watch.Hide.Members ??= true;
-    WebsitesEnabledSettings.Watch.Hide.Live ??= true;
-
-    if (typeof WebsitesEnabledSettings.Playlist !== "object") WebsitesEnabledSettings.Playlist = {};
-    WebsitesEnabledSettings.Playlist.Active ??= false;
-    if (typeof WebsitesEnabledSettings.Playlist.Hide !== "object") WebsitesEnabledSettings.Playlist.Hide = {};
-    WebsitesEnabledSettings.Playlist.Hide.YouWatch ??= true;
-    WebsitesEnabledSettings.Playlist.Hide.Members ??= true;
-    WebsitesEnabledSettings.Playlist.Hide.Live ??= true;
+    ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Main");
+    ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Subscriptions");
+    ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Watch");
+    ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Playlist", false);
     if (typeof WebsitesEnabledSettings.Playlist.IdsToHide !== "object" || !Array.isArray(WebsitesEnabledSettings.Playlist.IdsToHide)) WebsitesEnabledSettings.Playlist.IdsToHide = [];
+
 
     if (typeof WebsitesEnabledSettings.Channels !== "object") WebsitesEnabledSettings.Channels = {};
 
-    if (typeof WebsitesEnabledSettings.Channels.Home !== "object") WebsitesEnabledSettings.Channels.Home = {};
-    WebsitesEnabledSettings.Channels.Home.Active ??= false;
-    if (typeof WebsitesEnabledSettings.Channels.Home.Hide !== "object") WebsitesEnabledSettings.Channels.Home.Hide = {};
-    WebsitesEnabledSettings.Channels.Home.Hide.YouWatch ??= true;
-    WebsitesEnabledSettings.Channels.Home.Hide.Members ??= true;
-    WebsitesEnabledSettings.Channels.Home.Hide.Live ??= true;
-
-    if (typeof WebsitesEnabledSettings.Channels.Videos !== "object") WebsitesEnabledSettings.Channels.Videos = {};
-    WebsitesEnabledSettings.Channels.Videos.Active ??= false;
-    if (typeof WebsitesEnabledSettings.Channels.Videos.Hide !== "object") WebsitesEnabledSettings.Channels.Videos.Hide = {};
-    WebsitesEnabledSettings.Channels.Videos.Hide.YouWatch ??= true;
-    WebsitesEnabledSettings.Channels.Videos.Hide.Members ??= true;
-    WebsitesEnabledSettings.Channels.Videos.Hide.Live ??= true;
-
-    if (typeof WebsitesEnabledSettings.Channels.Search !== "object") WebsitesEnabledSettings.Channels.Search = {};
-    WebsitesEnabledSettings.Channels.Search.Active ??= false;
-    if (typeof WebsitesEnabledSettings.Channels.Search.Hide !== "object") WebsitesEnabledSettings.Channels.Search.Hide = {};
-    WebsitesEnabledSettings.Channels.Search.Hide.YouWatch ??= true;
-    WebsitesEnabledSettings.Channels.Search.Hide.Members ??= true;
-    WebsitesEnabledSettings.Channels.Search.Hide.Live ??= true;
+    ValidateWebsiteEnabledSetting(WebsitesEnabledSettings.Channels, "Home", false);
+    ValidateWebsiteEnabledSetting(WebsitesEnabledSettings.Channels, "Videos", false);
+    ValidateWebsiteEnabledSetting(WebsitesEnabledSettings.Channels, "Search", false);
 
     // TODO: Remove when moved to RemoveVideoTypes.js
     RemoveVideoTypesSettings.Hide ??= {};
     RemoveVideoTypesSettings.Hide.YouWatch ??= false;
     RemoveVideoTypesSettings.Hide.Members ??= false;
     RemoveVideoTypesSettings.Hide.Live ??= false;
+    //RemoveVideoTypesSettings.Hide.Shorts ??= false;
 
     RemoveVideoTypesSettings.Collapsed ??= false;
 
@@ -713,6 +692,30 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
 
+    // const QOLRemoveVideoTypesHideShortsMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide Shorts`);
+    // QOLRemoveVideoTypesHideShortsMenuItem.toggled = currentWebsites?.Hide?.Shorts ? true : false;
+    // QOLRemoveVideoTypesHideShortsMenuItem.ToggledEventAddCallback(async (toggled) => {
+    //     const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+    //     let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+    //     if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+
+    //     if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+    //     let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
+
+    //     debugger;
+
+    //     const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+    //     if (currentWebsitesObject === undefined) return;
+
+    //     if (currentWebsitesObject.Hide.Shorts === toggled) return;
+    //     currentWebsitesObject.Hide.Shorts = toggled;
+
+    //     // TODO: Remove when moved to RemoveVideoTypes.js
+    //     RemoveVideoTypesSettingsInner.Hide.Shorts = toggled;
+
+    //     SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+    // });
+
 
 
     const QOLRemoveVideoTypesPlaylistMenuItem = new WolfermusToggleButtonMenuItem(`Toggle This Playlist`);
@@ -786,6 +789,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideYouWatchMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideMembersMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideLiveMenuItem);
+    //QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideShortsMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesPlaylistMenuItem);
 
     QOLRemoveVideoTypesGroupMenuItem.includesUrls = FlattenRemoveVideoTypesUrlsIncludes();
@@ -912,6 +916,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = currentWebsitesObject.Hide.YouWatch;
         QOLRemoveVideoTypesHideMembersMenuItem.toggled = currentWebsitesObject.Hide.Members;
         QOLRemoveVideoTypesHideLiveMenuItem.toggled = currentWebsitesObject.Hide.Live;
+        //QOLRemoveVideoTypesHideShortsMenuItem.toggled = currentWebsitesObject.Hide.Shorts;
 
         //#region Remove when moved to RemoveVideoTypes.js
         // TODO: Remove when moved to RemoveVideoTypes.js
@@ -928,6 +933,10 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
             RemoveVideoTypesSettings.Hide.Live = currentWebsitesObject.Hide.Live;
             shouldSave = true;
         }
+        // if (RemoveVideoTypesSettings.Hide.Shorts !== currentWebsitesObject.Hide.Shorts) {
+        //     RemoveVideoTypesSettings.Hide.Shorts = currentWebsitesObject.Hide.Shorts;
+        //     shouldSave = true;
+        // }
         //#region -Remove when moved to RemoveVideoTypes.js
 
         if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
