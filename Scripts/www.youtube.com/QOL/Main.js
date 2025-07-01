@@ -440,10 +440,10 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideMembersMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideLiveMenuItem);
 
-    QOLRemoveVideoTypesGroupMenuItem.includesUrls = ["*www.youtube.com", "*www.youtube.com/",
-        "*www.youtube.com/feed/subscriptions", "*www.youtube.com/feed/subscriptions/",
-        "*www.youtube.com/shorts/*",
-        "*www.youtube.com/watch*"
+    QOLRemoveVideoTypesGroupMenuItem.includesUrls = ["*www.youtube.*", "*www.youtube.*/",
+        "*www.youtube.*/feed/subscriptions", "*www.youtube.*/feed/subscriptions/",
+        "*www.youtube.*/shorts/*",
+        "*www.youtube.*/watch*"
     ];
 
     QOLRemoveVideoTypesGroupMenuItem.CheckUrls();
