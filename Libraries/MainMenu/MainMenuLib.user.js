@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.1.1
+// @version      4.1.2
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -835,6 +835,10 @@ class WolfermusMenuItem {
      */
     #disabled = false;
     /**
+     * @type {boolean}
+     */
+    #userDisabled = false;
+    /**
      * @type {Array<(disabled: boolean) => void>}
      */
     #disabledEvent = [];
@@ -843,6 +847,17 @@ class WolfermusMenuItem {
      */
     classes = ["WolfermusDefaultCSS", "WolfermusTextItem"];
 
+    /**
+     * @param {boolean} newValue 
+     */
+    set disabled(newValue) {
+        if (typeof newValue !== "boolean") return;
+        if (this.#userDisabled === newValue) return;
+
+        this.#userDisabled = newValue;
+
+        this.CheckUrls();
+    }
     get disabled() { return this.#disabled; }
 
     #ProxyDeletePropertyCallback = (target, property) => {
@@ -929,27 +944,38 @@ class WolfermusMenuItem {
     get excludesUrls() { return this.#excludesArrayProxy; }
     //#endregion -excludesUrls
 
+    // TODO: Rename to CheckDisabled
     CheckUrls = () => {
         let includesBool = false;
         let excludesBool = false;
 
-        for (const urlRule of this.#includesArray) {
-            if (MatchRuleExpl(window.location.href, urlRule)) {
-                includesBool = true;
-                break;
-            }
-        }
-        for (const urlRule of this.#excludesArray) {
-            if (MatchRuleExpl(window.location.href, urlRule)) {
-                excludesBool = true;
-                break;
-            }
-        }
+        const prevDisabled = this.#disabled;
 
-        if (includesBool && !excludesBool) {
-            this.#disabled = false;
-            if (this.element !== undefined && this.element !== null) {
-                this.element.style.display = "";
+        if (!this.#userDisabled) {
+            for (const urlRule of this.#includesArray) {
+                if (MatchRuleExpl(window.location.href, urlRule)) {
+                    includesBool = true;
+                    break;
+                }
+            }
+            for (const urlRule of this.#excludesArray) {
+                if (MatchRuleExpl(window.location.href, urlRule)) {
+                    excludesBool = true;
+                    break;
+                }
+            }
+
+            if (includesBool && !excludesBool) {
+                this.#disabled = false;
+                if (this.element !== undefined && this.element !== null) {
+                    this.element.style.display = "";
+                }
+            } else {
+                this.#disabled = true;
+                if (this.element !== undefined && this.element !== null) {
+                    this.element.style.display = "none";
+                }
+                this.contextMenu.Hide();
             }
         } else {
             this.#disabled = true;
@@ -959,8 +985,10 @@ class WolfermusMenuItem {
             this.contextMenu.Hide();
         }
 
-        for (let callback of this.#disabledEvent) {
-            callback?.(this.#disabled);
+        if (prevDisabled !== this.#disabled) {
+            for (let callback of this.#disabledEvent) {
+                callback?.(this.#disabled);
+            }
         }
     }
 
