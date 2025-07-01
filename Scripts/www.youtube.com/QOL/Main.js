@@ -327,17 +327,64 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
     RemoveVideoTypesSettings.Active ??= false;
     RemoveVideoTypesSettings.WebsitesEnabled ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Main ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Watch ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Playlist ??= false;
+
+    RemoveVideoTypesSettings.WebsitesEnabled.Main ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Main.Active ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Main.Hide ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Main.Hide.YouWatch ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Main.Hide.Members ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Main.Hide.Live ??= true;
+
+    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions.Active ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions.Hide ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions.Hide.YouWatch ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions.Hide.Members ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions.Hide.Live ??= true;
+
+    RemoveVideoTypesSettings.WebsitesEnabled.Watch ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Watch.Active ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Watch.Hide ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Watch.Hide.YouWatch ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Watch.Hide.Members ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Watch.Hide.Live ??= true;
+
+    RemoveVideoTypesSettings.WebsitesEnabled.Playlist ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Playlist.Active ??= false;
+    RemoveVideoTypesSettings.WebsitesEnabled.Playlist.Hide ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Playlist.Hide.YouWatch ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Playlist.Hide.Members ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Playlist.Hide.Live ??= true;
+
     RemoveVideoTypesSettings.WebsitesEnabled.Channels ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home ??= false;
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos ??= false;
+
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home.Active ??= false;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home.Hide ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home.Hide.YouWatch ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home.Hide.Members ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home.Hide.Live ??= true;
+
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos.Active ??= false;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos.Hide ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos.Hide.YouWatch ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos.Hide.Members ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos.Hide.Live ??= true;
+
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search.Active ??= false;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search.Hide ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search.Hide.YouWatch ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search.Hide.Members ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search.Hide.Live ??= true;
+
+    // TODO: Remove when moved to RemoveVideoTypes.js
     RemoveVideoTypesSettings.Hide ??= {};
     RemoveVideoTypesSettings.Hide.YouWatch ??= false;
     RemoveVideoTypesSettings.Hide.Members ??= false;
     RemoveVideoTypesSettings.Hide.Live ??= false;
+
     RemoveVideoTypesSettings.Collapsed ??= false;
 
     QOLSettings.Collapsed ??= true;
@@ -374,7 +421,8 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         Playlist: ["*www.youtube.com/playlist*"],
         Channels: {
             Home: ["*www.youtube.com/@*", "*www.youtube.com/@*/featured"],
-            Videos: ["*www.youtube.com/@*/videos"]
+            Videos: ["*www.youtube.com/@*/videos"],
+            Search: ["*www.youtube.com/@*/search*"]
         }
     };
     const RemoveVideoTypesUrlsExcludes = {
@@ -384,7 +432,8 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         Playlist: [],
         Channels: {
             Home: ["*www.youtube.com/@*/shorts", "*www.youtube.com/@*/streams", "*www.youtube.com/@*/playlists", "*www.youtube.com/@*/posts"],
-            Videos: []
+            Videos: [],
+            Search: []
         }
     };
 
@@ -426,23 +475,10 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     }
 
     /**
-     * @param {Object} json
      * @returns {Array<string>}
      */
-    function GetCurrentWebsitesEnabled(json) {
+    function GetCurrentWebsitesEnabled() {
         debugger;
-
-        if (!json["RemoveVideoTypes"]) json["RemoveVideoTypes"] = {};
-        let RemoveVideoTypesSettings = json["RemoveVideoTypes"];
-
-        RemoveVideoTypesSettings.WebsitesEnabled ??= {};
-        RemoveVideoTypesSettings.WebsitesEnabled.Main ??= true; // "*www.youtube.*"
-        RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions ??= true; // "*www.youtube.*/feed/subscriptions", "*www.youtube.*/feed/subscriptions/"
-        RemoveVideoTypesSettings.WebsitesEnabled.Watch ??= true; // "*www.youtube.*/watch*"
-        RemoveVideoTypesSettings.WebsitesEnabled.Playlist ??= false; // "*www.youtube.com/playlist*"
-        RemoveVideoTypesSettings.WebsitesEnabled.Channels ??= {};
-        RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home ??= false; // "*www.youtube.com/@*", "*www.youtube.com/@*/featured"
-        RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos ??= false; // "*www.youtube.com/@*/videos"
 
         for (const urlKey in RemoveVideoTypesUrlsInclude) {
             if (Array.isArray(RemoveVideoTypesUrlsInclude[urlKey])) {
@@ -498,29 +534,44 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
     /**
      * @param {Object} json
-     * @returns {boolean}
+     * @returns {Array<string>}
      */
-    function IsCurrentWebsitesEnabled(json) {
+    function GetCurrentWebsitesObject(json) {
+        const keysArray = GetCurrentWebsitesEnabled();
+
+        if (keysArray.length <= 0) {
+            const message = "Wolfermus ERROR: Youtube QOL - Failed to GetCurrentWebsitesEnabled";
+            console.error(message);
+            throw new Error(message);
+            return {};
+        }
+
         if (!json["RemoveVideoTypes"]) json["RemoveVideoTypes"] = {};
         let RemoveVideoTypesSettings = json["RemoveVideoTypes"];
 
-        debugger;
-        const keysArray = GetCurrentWebsitesEnabled(json);
-
-        if (keysArray.length > 0) {
-            let referenceBool = RemoveVideoTypesSettings.WebsitesEnabled;
-            for (const key of keysArray) {
-                referenceBool = referenceBool[key];
+        let referenceObject = RemoveVideoTypesSettings.WebsitesEnabled;
+        for (const key of keysArray) {
+            if (typeof referenceObject[key] !== "object") {
+                referenceObject[key] = {};
             }
-
-            if (referenceBool) {
-                return true;
-            } else {
-                return false;
-            }
+            referenceObject = referenceObject[key];
         }
 
-        return false;
+        return referenceObject;
+    }
+
+    /**
+     * @param {Object} json
+     * @returns {boolean}
+     */
+    function IsCurrentWebsitesEnabled(json) {
+        const currentWebsitesObject = GetCurrentWebsitesObject(json);
+
+        if (currentWebsitesObject.Active) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -553,80 +604,89 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (toggled) LoadScriptOnce("RemoveVideoTypes");
     });
 
+    const currentWebsites = GetCurrentWebsitesObject(QOLSettings);
+
     const QOLRemoveVideoTypesTogglePageMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Page`);
-    QOLRemoveVideoTypesTogglePageMenuItem.toggled = IsCurrentWebsitesEnabled(QOLSettings);
+    QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsites.Active;
     QOLRemoveVideoTypesTogglePageMenuItem.ToggledEventAddCallback(async (toggled) => {
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
         if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
-        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
         debugger;
-        const keysArray = GetCurrentWebsitesEnabled(QOLSettingsInner);
 
-        if (keysArray.length > 0) {
-            let referenceBool = RemoveVideoTypesSettingsInner.WebsitesEnabled;
-            for (const key of keysArray) {
-                if (typeof referenceBool[key] == "boolean") {
-                    referenceBool[key] = toggled;
-                } else referenceBool = referenceBool[key];
-            }
+        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
 
-            SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
-        } else {
-            debugger;
-        }
+        if (currentWebsitesObject.Active === toggled) return;
+        currentWebsitesObject.Active = toggled;
+
+        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
 
     const QOLRemoveVideoTypesHideYouWatchMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide YouWatch`);
-    QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = RemoveVideoTypesSettings.Hide.YouWatch;
+    QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = currentWebsites.Hide.YouWatch;
     QOLRemoveVideoTypesHideYouWatchMenuItem.ToggledEventAddCallback(async (toggled) => {
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
         if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
-        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
-        if (RemoveVideoTypesSettingsInner.Hide.YouWatch === toggled) return;
+        debugger;
 
-        RemoveVideoTypesSettingsInner.Hide.YouWatch = toggled;
+        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+
+        if (currentWebsitesObject.Hide.YouWatch === toggled) return;
+        currentWebsitesObject.Hide.YouWatch = toggled;
+
+        // TODO: Remove when moved to RemoveVideoTypes.js
+        RemoveVideoTypesSettings.Hide.YouWatch = toggled;
 
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
 
     const QOLRemoveVideoTypesHideMembersMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide Members`);
-    QOLRemoveVideoTypesHideMembersMenuItem.toggled = RemoveVideoTypesSettings.Hide.Members;
+    QOLRemoveVideoTypesHideMembersMenuItem.toggled = currentWebsites.Hide.Members;
     QOLRemoveVideoTypesHideMembersMenuItem.ToggledEventAddCallback(async (toggled) => {
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
         if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
-        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
-        if (RemoveVideoTypesSettingsInner.Hide.Members === toggled) return;
+        debugger;
 
-        RemoveVideoTypesSettingsInner.Hide.Members = toggled;
+        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+
+        if (currentWebsitesObject.Hide.Members === toggled) return;
+        currentWebsitesObject.Hide.Members = toggled;
+
+        // TODO: Remove when moved to RemoveVideoTypes.js
+        RemoveVideoTypesSettings.Hide.Members = toggled;
 
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
 
     const QOLRemoveVideoTypesHideLiveMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide Live`);
-    QOLRemoveVideoTypesHideLiveMenuItem.toggled = RemoveVideoTypesSettings.Hide.Live;
+    QOLRemoveVideoTypesHideLiveMenuItem.toggled = currentWebsites.Hide.Live;
     QOLRemoveVideoTypesHideLiveMenuItem.ToggledEventAddCallback(async (toggled) => {
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
         if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
-        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
-        if (RemoveVideoTypesSettingsInner.Hide.Live === toggled) return;
+        debugger;
 
-        RemoveVideoTypesSettingsInner.Hide.Live = toggled;
+        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+
+        if (currentWebsitesObject.Hide.Live === toggled) return;
+        currentWebsitesObject.Hide.Live = toggled;
+
+        // TODO: Remove when moved to RemoveVideoTypes.js
+        RemoveVideoTypesSettings.Hide.Live = toggled;
 
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
@@ -651,6 +711,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideYouWatchMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideMembersMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideLiveMenuItem);
+    // TODO: Add toggle playlist menu item. [default=true] and if within array then disable otherwise enable.
 
     QOLRemoveVideoTypesGroupMenuItem.includesUrls = FlattenRemoveVideoTypesUrlsIncludes();
     QOLRemoveVideoTypesGroupMenuItem.excludesUrls = FlattenRemoveVideoTypesUrlsExcludes();
