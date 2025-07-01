@@ -145,9 +145,14 @@ function Sleep(ms) {
     });
 }
 
-function MatchRuleExpl(str, rule) {
+/**
+ * @param {string} string
+ * @param {string} rule
+ * @returns {boolean}
+ */
+function MatchRuleExpl(string, rule) {
     // for this solution to work on any string, no matter what characters it has
-    var escapeRegex = (str) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+    var escapeRegex = (string) => string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 
     // "."  => Find a single character, except newline or line terminator
     // ".*" => Matches any string that contains zero or more characters
@@ -161,7 +166,7 @@ function MatchRuleExpl(str, rule) {
     var regex = new RegExp(rule);
 
     //Returns true if it finds a match, otherwise it returns false
-    return regex.test(str);
+    return regex.test(string);
 }
 
 /**
@@ -765,8 +770,13 @@ const observeUrlChange = () => {
     observer.observe(body, { childList: true, subtree: true });
 };
 
-window.addEventListener("load", observeUrlChange);
-observeUrlChange();
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", async () => {
+        observeUrlChange();
+    }, { once: true });
+} else {
+    observeUrlChange();
+}
 
 class WolfermusMenuItem {
     /**
@@ -2472,6 +2482,7 @@ async function UpdateMenuItems() {
 
         UtilitiesLibrary["MakeGetRequest"] = MakeGetRequest;
         UtilitiesLibrary["IsBeta"] = IsBeta;
+        UtilitiesLibrary["MatchRuleExpl"] = MatchRuleExpl;
 
         UtilitiesLibrary["Loaded"] = true;
     }
