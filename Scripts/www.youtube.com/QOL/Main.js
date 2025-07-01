@@ -535,16 +535,13 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
     /**
      * @param {Object} json
-     * @returns {Array<string>}
+     * @returns {Object | undefined}
      */
     function GetCurrentWebsitesObject(json) {
         const keysArray = GetCurrentWebsitesEnabled();
 
         if (keysArray.length <= 0) {
-            const message = "Wolfermus ERROR: Youtube QOL - Failed to GetCurrentWebsitesEnabled";
-            console.error(message);
-            throw new Error(message);
-            return {};
+            return undefined;
         }
 
         if (!json["RemoveVideoTypes"]) json["RemoveVideoTypes"] = {};
@@ -567,6 +564,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
      */
     function IsCurrentWebsitesEnabled(json) {
         const currentWebsitesObject = GetCurrentWebsitesObject(json);
+        if (currentWebsitesObject === undefined) return false;
 
         if (currentWebsitesObject.Active) {
             return true;
@@ -606,9 +604,10 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     });
 
     const currentWebsites = GetCurrentWebsitesObject(QOLSettings);
+    if (currentWebsites === undefined) currentWebsites = {};
 
     const QOLRemoveVideoTypesTogglePageMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Page`);
-    QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsites.Active;
+    QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsites?.Active ? true : false;
     QOLRemoveVideoTypesTogglePageMenuItem.ToggledEventAddCallback(async (toggled) => {
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
@@ -619,6 +618,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+        if (currentWebsites === undefined) return;
 
         if (currentWebsitesObject.Active === toggled) return;
         currentWebsitesObject.Active = toggled;
@@ -627,7 +627,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     });
 
     const QOLRemoveVideoTypesHideYouWatchMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide YouWatch`);
-    QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = currentWebsites.Hide.YouWatch;
+    QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = currentWebsites?.Hide?.YouWatch ? true : false;
     QOLRemoveVideoTypesHideYouWatchMenuItem.ToggledEventAddCallback(async (toggled) => {
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
@@ -639,6 +639,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+        if (currentWebsites === undefined) return;
 
         if (currentWebsitesObject.Hide.YouWatch === toggled) return;
         currentWebsitesObject.Hide.YouWatch = toggled;
@@ -650,7 +651,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     });
 
     const QOLRemoveVideoTypesHideMembersMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide Members`);
-    QOLRemoveVideoTypesHideMembersMenuItem.toggled = currentWebsites.Hide.Members;
+    QOLRemoveVideoTypesHideMembersMenuItem.toggled = currentWebsites?.Hide?.Members ? true : false;
     QOLRemoveVideoTypesHideMembersMenuItem.ToggledEventAddCallback(async (toggled) => {
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
@@ -662,6 +663,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+        if (currentWebsites === undefined) return;
 
         if (currentWebsitesObject.Hide.Members === toggled) return;
         currentWebsitesObject.Hide.Members = toggled;
@@ -673,7 +675,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     });
 
     const QOLRemoveVideoTypesHideLiveMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide Live`);
-    QOLRemoveVideoTypesHideLiveMenuItem.toggled = currentWebsites.Hide.Live;
+    QOLRemoveVideoTypesHideLiveMenuItem.toggled = currentWebsites?.Hide?.Live ? true : false;
     QOLRemoveVideoTypesHideLiveMenuItem.ToggledEventAddCallback(async (toggled) => {
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
@@ -685,6 +687,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+        if (currentWebsites === undefined) return;
 
         if (currentWebsitesObject.Hide.Live === toggled) return;
         currentWebsitesObject.Hide.Live = toggled;
@@ -818,6 +821,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettings);
+        if (currentWebsitesObject === undefined) return;
 
         QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsitesObject.Active;
 
