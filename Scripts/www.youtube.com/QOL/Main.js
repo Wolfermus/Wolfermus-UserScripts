@@ -356,6 +356,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     WebsitesEnabledSettings.Playlist.Hide.YouWatch ??= true;
     WebsitesEnabledSettings.Playlist.Hide.Members ??= true;
     WebsitesEnabledSettings.Playlist.Hide.Live ??= true;
+    if (typeof WebsitesEnabledSettings.Playlist.IdsToHide !== "object" || Array.isArray(WebsitesEnabledSettings.Playlist.IdsToHide)) WebsitesEnabledSettings.Playlist.IdsToHide = [];
 
     if (typeof WebsitesEnabledSettings.Channels !== "object") WebsitesEnabledSettings.Channels = {};
 
@@ -578,7 +579,19 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
      */
     function ShouldDisable(json) {
         if (IsCurrentWebsitesEnabled(json)) {
-            removeVideoTypesModule.disabled = false;
+            let shouldEnable = false;
+            const keysArray = GetCurrentWebsitesEnabled();
+            if (keysArray.length === 1) {
+                if (keysArray[0] === "Playlist") {
+                    if (currentWebsites?.IdsToHide) {
+                        let params = new URL(document.location.toString()).searchParams;
+                        if (params.has("list")) {
+                            shouldEnable = currentWebsites.IdsToHide.includes(params.get("list"));
+                        }
+                    }
+                }
+            }
+            removeVideoTypesModule.disabled = shouldEnable;
         } else {
             removeVideoTypesModule.disabled = true;
         }
@@ -699,6 +712,59 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     });
 
 
+
+    const QOLRemoveVideoTypesPlaylistMenuItem = new WolfermusToggleButtonMenuItem(`Toggle This Playlist`);
+    QOLRemoveVideoTypesPlaylistMenuItem.disabled = true;
+    QOLRemoveVideoTypesPlaylistMenuItem.toggled = true;
+    if (currentWebsites?.IdsToHide) {
+        let params = new URL(document.location.toString()).searchParams;
+        if (params.has("list")) {
+            QOLRemoveVideoTypesPlaylistMenuItem.toggled = !currentWebsites.IdsToHide.includes(params.get("list"));
+        }
+    }
+    QOLRemoveVideoTypesPlaylistMenuItem.ToggledEventAddCallback(async (toggled) => {
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+
+        if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
+
+        debugger;
+
+        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+        if (currentWebsites === undefined) return;
+
+        const keysArray = GetCurrentWebsitesEnabled();
+        if (keysArray.length !== 1) return;
+        if (keysArray[0] !== "Playlist") return;
+        if (!(currentWebsitesObject?.IdsToHide)) currentWebsitesObject.IdsToHide = [];
+
+        let params = new URL(document.location.toString()).searchParams;
+        if (!params.has("list")) return;
+
+        const indexOfIdsToHide = currentWebsitesObject.IdsToHide.indexOf(params.get("list"));
+
+        let shouldSave = false;
+
+        if (toggled) {
+            if (indexOfIdsToHide > -1) {
+                currentWebsitesObject.IdsToHide.splice(indexOfIdsToHide, 1);
+                shouldSave = true;
+            }
+        } else if (indexOfIdsToHide <= -1) {
+            currentWebsitesObject.IdsToHide.push(params.get("list"));
+            shouldSave = true;
+        }
+
+        if (shouldSave) SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+    });
+    const keysArray = GetCurrentWebsitesEnabled();
+    if (keysArray.length === 1) {
+        if (keysArray[0] === "Playlist") QOLRemoveVideoTypesPlaylistMenuItem.disabled = false;
+    }
+
+
     const QOLRemoveVideoTypesGroupMenuItem = new WolfermusGroupMenuItem(`Remove Video Type`);
     QOLRemoveVideoTypesGroupMenuItem.collapsed = RemoveVideoTypesSettings.Collapsed;
     QOLRemoveVideoTypesGroupMenuItem.CollapsedAddCallback(async (newCollapsed) => {
@@ -718,7 +784,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideYouWatchMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideMembersMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideLiveMenuItem);
-    // TODO: Add toggle playlist menu item. [default=true] and if within array then disable otherwise enable.
+    QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesPlaylistMenuItem);
 
     QOLRemoveVideoTypesGroupMenuItem.includesUrls = FlattenRemoveVideoTypesUrlsIncludes();
     QOLRemoveVideoTypesGroupMenuItem.excludesUrls = FlattenRemoveVideoTypesUrlsExcludes();
@@ -821,6 +887,22 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettings);
+
+        const keysArray = GetCurrentWebsitesEnabled();
+        if (keysArray.length === 1) {
+            if (keysArray[0] === "Playlist") {
+                QOLRemoveVideoTypesPlaylistMenuItem.disabled = false;
+                if (currentWebsitesObject === undefined) return;
+                if (currentWebsitesObject?.IdsToHide) {
+                    let params = new URL(document.location.toString()).searchParams;
+                    if (params.has("list")) {
+                        QOLRemoveVideoTypesPlaylistMenuItem.toggled = !currentWebsitesObject.IdsToHide.includes(params.get("list"));
+                    }
+                }
+            }
+            else QOLRemoveVideoTypesPlaylistMenuItem.disabled = true;
+        } else QOLRemoveVideoTypesPlaylistMenuItem.disabled = true;
+
         if (currentWebsitesObject === undefined) return;
 
         QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsitesObject.Active;
@@ -829,6 +911,8 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         QOLRemoveVideoTypesHideMembersMenuItem.toggled = currentWebsitesObject.Hide.Members;
         QOLRemoveVideoTypesHideLiveMenuItem.toggled = currentWebsitesObject.Hide.Live;
 
+        //#region Remove when moved to RemoveVideoTypes.js
+        // TODO: Remove when moved to RemoveVideoTypes.js
         let shouldSave = false;
         if (RemoveVideoTypesSettings.Hide.YouWatch !== currentWebsitesObject.Hide.YouWatch) {
             RemoveVideoTypesSettings.Hide.YouWatch = currentWebsitesObject.Hide.YouWatch;
@@ -843,6 +927,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
             shouldSave = true;
         }
         if (shouldSave) SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
+        //#region -Remove when moved to RemoveVideoTypes.js
 
         if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
             ShouldDisable(QOLSettings);
