@@ -1,7 +1,13 @@
 async (path) => {
-    return;
+    if (typeof wolfermusBypassScriptPolicy === "undefined" || typeof wolfermusBypassScriptPolicy === "null") {
+        var wolfermusBypassScriptPolicy = trustedTypes.createPolicy("wolfermusBypassScript", {
+            createHTML: (string) => string,
+            createScript: (string) => string,
+            createScriptURL: (string) => string
+        });
+    }
 
-    const validYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model", "ytd-compact-video-renderer", "ytd-grid-video-renderer"];
+    const validYTDItems = ["ytd-rich-item-renderer", "ytd-video-renderer", "yt-lockup-view-model", "ytd-compact-video-renderer", "ytd-grid-video-renderer", "ytd-playlist-video-renderer"];
     const validTagNames = ["A", "DIV", "YTD-BADGE-SUPPORTED-RENDERER"];
 
 
@@ -179,7 +185,7 @@ async (path) => {
         }
         `;
 
-    removeVideoTypesStyle.innerHTML = editedInnerHTML;
+    removeVideoTypesStyle.innerHTML = wolfermusBypassScriptPolicy.createHTML(editedInnerHTML);
 
 
 
@@ -196,6 +202,11 @@ async (path) => {
     RemoveVideoTypesSettings.Hide.YouWatch ??= false;
     RemoveVideoTypesSettings.Hide.Members ??= false;
     RemoveVideoTypesSettings.Hide.Live ??= false;
+    //RemoveVideoTypesSettings.Hide.Shorts ??= false;
+
+    // TODO: Add shorts support.
+
+    let oldDisabled = undefined;
 
     await SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
 
@@ -232,11 +243,13 @@ async (path) => {
         RemoveVideoTypesSettings.Hide.YouWatch ??= false;
         RemoveVideoTypesSettings.Hide.Members ??= false;
         RemoveVideoTypesSettings.Hide.Live ??= false;
+        //RemoveVideoTypesSettings.Hide.Shorts ??= false;
 
         let searchSelectorArray = [];
         if (RemoveVideoTypesSettings.Hide.YouWatch || GetFullSearch) searchSelectorArray.push(".youwatch-mark");
         if (RemoveVideoTypesSettings.Hide.Members || GetFullSearch) searchSelectorArray.push(".badge-style-type-members-only");
         if (RemoveVideoTypesSettings.Hide.Live || GetFullSearch) searchSelectorArray.push(".badge-style-type-live-now-alternate");
+        //if (RemoveVideoTypesSettings.Hide.Shorts || GetFullSearch) searchSelectorArray.push(".badge-style-type-live-now-alternate");
 
         return searchSelectorArray.join(", ");
     }
@@ -280,6 +293,12 @@ async (path) => {
 
     const observeVideosConfig = { childList: true, subtree: true, attributes: true, characterData: false };
     const observeVideos = new MutationObserver(async (mutations) => {
+        if (oldDisabled !== removeVideoTypesModule.disabled) {
+            oldDisabled = removeVideoTypesModule.disabled;
+            oldHref = undefined;
+            observeUrlChange();
+            return;
+        }
         if (removeVideoTypesModule.disabled) return;
         if (!RemoveVideoTypesIsActive) return;
         if (!RemoveVideoTypesSearchSelector) return;
@@ -454,6 +473,12 @@ async (path) => {
     }
 
     function CheckAllNodes() {
+        if (oldDisabled !== removeVideoTypesModule.disabled) {
+            oldDisabled = removeVideoTypesModule.disabled;
+            oldHref = undefined;
+            observeUrlChange();
+            return;
+        }
         if (removeVideoTypesModule.disabled) return;
         if (!RemoveVideoTypesIsActive) return;
         if (!RemoveVideoTypesSearchSelector) return;
@@ -500,6 +525,8 @@ async (path) => {
         removeVideoTypesModule.disabled ??= false;
         removeVideoTypesModule.disabledDone0 ??= false;
 
+        oldDisabled = removeVideoTypesModule.disabled;
+
         UnDoAllNodes();
         if (!RemoveVideoTypesIsActive || removeVideoTypesModule.disabled) {
             if (removeVideoTypesModule.disabled) {
@@ -520,6 +547,12 @@ async (path) => {
     const observeConfig = { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] };
     const observeElements = new MutationObserver(async (mutations) => {
         removeVideoTypesModule.disabled ??= false;
+        if (oldDisabled !== removeVideoTypesModule.disabled) {
+            oldDisabled = removeVideoTypesModule.disabled;
+            oldHref = undefined;
+            observeUrlChange();
+            return;
+        }
         if (removeVideoTypesModule.disabled) return;
         if (!RemoveVideoTypesIsActive) return;
         if (!RemoveVideoTypesSearchSelector) return;
@@ -591,8 +624,17 @@ async (path) => {
     removeVideoTypesModule.disabled ??= false;
     removeVideoTypesModule.disabledDone ??= false;
 
+    oldDisabled = removeVideoTypesModule.disabled;
+
     window.addEventListener("yt-navigate-finish", observeUrlChange);
     await observeUrlChange();
+
+    setInterval(() => {
+        if (oldDisabled === removeVideoTypesModule.disabled) return;
+        oldDisabled = removeVideoTypesModule.disabled;
+        oldHref = undefined;
+        observeUrlChange();
+    }, 1000);
 
     removeVideoTypesModule.Loaded = true;
 
