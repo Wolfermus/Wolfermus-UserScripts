@@ -326,58 +326,59 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     TimeRemainingSettings.Active ??= false;
 
     RemoveVideoTypesSettings.Active ??= false;
-    RemoveVideoTypesSettings.WebsitesEnabled ??= {};
+    if (typeof RemoveVideoTypesSettings.WebsitesEnabled !== "object") RemoveVideoTypesSettings.WebsitesEnabled = {};
+    let WebsitesEnabledSettings = RemoveVideoTypesSettings.WebsitesEnabled;
 
-    RemoveVideoTypesSettings.WebsitesEnabled.Main ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Main.Active ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Main.Hide ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Main.Hide.YouWatch ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Main.Hide.Members ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Main.Hide.Live ??= true;
+    if (typeof WebsitesEnabledSettings.Main !== "object") WebsitesEnabledSettings.Main = {};
+    WebsitesEnabledSettings.Main.Active ??= true;
+    if (typeof WebsitesEnabledSettings.Main.Hide !== "object") WebsitesEnabledSettings.Main.Hide = {};
+    WebsitesEnabledSettings.Main.Hide.YouWatch ??= true;
+    WebsitesEnabledSettings.Main.Hide.Members ??= true;
+    WebsitesEnabledSettings.Main.Hide.Live ??= true;
 
-    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions.Active ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions.Hide ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions.Hide.YouWatch ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions.Hide.Members ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions.Hide.Live ??= true;
+    if (typeof WebsitesEnabledSettings.Subscriptions !== "object") WebsitesEnabledSettings.Subscriptions = {};
+    WebsitesEnabledSettings.Subscriptions.Active ??= true;
+    if (typeof WebsitesEnabledSettings.Subscriptions.Hide !== "object") WebsitesEnabledSettings.Subscriptions.Hide = {};
+    WebsitesEnabledSettings.Subscriptions.Hide.YouWatch ??= true;
+    WebsitesEnabledSettings.Subscriptions.Hide.Members ??= true;
+    WebsitesEnabledSettings.Subscriptions.Hide.Live ??= true;
 
-    RemoveVideoTypesSettings.WebsitesEnabled.Watch ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Watch.Active ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Watch.Hide ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Watch.Hide.YouWatch ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Watch.Hide.Members ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Watch.Hide.Live ??= true;
+    if (typeof WebsitesEnabledSettings.Watch !== "object") WebsitesEnabledSettings.Watch = {};
+    WebsitesEnabledSettings.Watch.Active ??= true;
+    if (typeof WebsitesEnabledSettings.Watch.Hide !== "object") WebsitesEnabledSettings.Watch.Hide = {};
+    WebsitesEnabledSettings.Watch.Hide.YouWatch ??= true;
+    WebsitesEnabledSettings.Watch.Hide.Members ??= true;
+    WebsitesEnabledSettings.Watch.Hide.Live ??= true;
 
-    RemoveVideoTypesSettings.WebsitesEnabled.Playlist ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Playlist.Active ??= false;
-    RemoveVideoTypesSettings.WebsitesEnabled.Playlist.Hide ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Playlist.Hide.YouWatch ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Playlist.Hide.Members ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Playlist.Hide.Live ??= true;
+    if (typeof WebsitesEnabledSettings.Playlist !== "object") WebsitesEnabledSettings.Playlist = {};
+    WebsitesEnabledSettings.Playlist.Active ??= false;
+    if (typeof WebsitesEnabledSettings.Playlist.Hide !== "object") WebsitesEnabledSettings.Playlist.Hide = {};
+    WebsitesEnabledSettings.Playlist.Hide.YouWatch ??= true;
+    WebsitesEnabledSettings.Playlist.Hide.Members ??= true;
+    WebsitesEnabledSettings.Playlist.Hide.Live ??= true;
 
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels ??= {};
+    if (typeof WebsitesEnabledSettings.Channels !== "object") WebsitesEnabledSettings.Channels = {};
 
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home.Active ??= false;
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home.Hide ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home.Hide.YouWatch ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home.Hide.Members ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home.Hide.Live ??= true;
+    if (typeof WebsitesEnabledSettings.Channels.Home !== "object") WebsitesEnabledSettings.Channels.Home = {};
+    WebsitesEnabledSettings.Channels.Home.Active ??= false;
+    if (typeof WebsitesEnabledSettings.Channels.Home.Hide !== "object") WebsitesEnabledSettings.Channels.Home.Hide = {};
+    WebsitesEnabledSettings.Channels.Home.Hide.YouWatch ??= true;
+    WebsitesEnabledSettings.Channels.Home.Hide.Members ??= true;
+    WebsitesEnabledSettings.Channels.Home.Hide.Live ??= true;
 
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos.Active ??= false;
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos.Hide ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos.Hide.YouWatch ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos.Hide.Members ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos.Hide.Live ??= true;
+    if (typeof WebsitesEnabledSettings.Channels.Videos !== "object") WebsitesEnabledSettings.Channels.Videos = {};
+    WebsitesEnabledSettings.Channels.Videos.Active ??= false;
+    if (typeof WebsitesEnabledSettings.Channels.Videos.Hide !== "object") WebsitesEnabledSettings.Channels.Videos.Hide = {};
+    WebsitesEnabledSettings.Channels.Videos.Hide.YouWatch ??= true;
+    WebsitesEnabledSettings.Channels.Videos.Hide.Members ??= true;
+    WebsitesEnabledSettings.Channels.Videos.Hide.Live ??= true;
 
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search.Active ??= false;
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search.Hide ??= {};
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search.Hide.YouWatch ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search.Hide.Members ??= true;
-    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Search.Hide.Live ??= true;
+    if (typeof WebsitesEnabledSettings.Channels.Search !== "object") WebsitesEnabledSettings.Channels.Search = {};
+    WebsitesEnabledSettings.Channels.Search.Active ??= false;
+    if (typeof WebsitesEnabledSettings.Channels.Search.Hide !== "object") WebsitesEnabledSettings.Channels.Search.Hide = {};
+    WebsitesEnabledSettings.Channels.Search.Hide.YouWatch ??= true;
+    WebsitesEnabledSettings.Channels.Search.Hide.Members ??= true;
+    WebsitesEnabledSettings.Channels.Search.Hide.Live ??= true;
 
     // TODO: Remove when moved to RemoveVideoTypes.js
     RemoveVideoTypesSettings.Hide ??= {};
