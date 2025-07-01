@@ -634,6 +634,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
         debugger;
 
@@ -643,7 +644,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         currentWebsitesObject.Hide.YouWatch = toggled;
 
         // TODO: Remove when moved to RemoveVideoTypes.js
-        RemoveVideoTypesSettings.Hide.YouWatch = toggled;
+        RemoveVideoTypesSettingsInner.Hide.YouWatch = toggled;
 
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
@@ -656,6 +657,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
         debugger;
 
@@ -665,7 +667,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         currentWebsitesObject.Hide.Members = toggled;
 
         // TODO: Remove when moved to RemoveVideoTypes.js
-        RemoveVideoTypesSettings.Hide.Members = toggled;
+        RemoveVideoTypesSettingsInner.Hide.Members = toggled;
 
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
@@ -678,6 +680,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
 
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
         debugger;
 
@@ -687,7 +690,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         currentWebsitesObject.Hide.Live = toggled;
 
         // TODO: Remove when moved to RemoveVideoTypes.js
-        RemoveVideoTypesSettings.Hide.Live = toggled;
+        RemoveVideoTypesSettingsInner.Hide.Live = toggled;
 
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
@@ -814,7 +817,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
         debugger;
 
-        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettings);
 
         QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsitesObject.Active;
 
@@ -822,9 +825,20 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         QOLRemoveVideoTypesHideMembersMenuItem.toggled = currentWebsitesObject.Hide.Members.Active;
         QOLRemoveVideoTypesHideLiveMenuItem.toggled = currentWebsitesObject.Hide.Live.Active;
 
-        RemoveVideoTypesSettings.Hide.YouWatch = currentWebsitesObject.Hide.YouWatch.Active;
-        RemoveVideoTypesSettings.Hide.Members = currentWebsitesObject.Hide.Members.Active;
-        RemoveVideoTypesSettings.Hide.Live = currentWebsitesObject.Hide.Live.Active;
+        let shouldSave = false;
+        if (RemoveVideoTypesSettings.Hide.YouWatch !== currentWebsitesObject.Hide.YouWatch.Active) {
+            RemoveVideoTypesSettings.Hide.YouWatch = currentWebsitesObject.Hide.YouWatch.Active;
+            shouldSave = true;
+        }
+        if (RemoveVideoTypesSettings.Hide.Members !== currentWebsitesObject.Hide.Members.Active) {
+            RemoveVideoTypesSettings.Hide.Members = currentWebsitesObject.Hide.Members.Active;
+            shouldSave = true;
+        }
+        if (RemoveVideoTypesSettings.Hide.Live !== currentWebsitesObject.Hide.Live.Active) {
+            RemoveVideoTypesSettings.Hide.Live = currentWebsitesObject.Hide.Live.Active;
+            shouldSave = true;
+        }
+        if (shouldSave) SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
 
         if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
             ShouldDisable(QOLSettings);
