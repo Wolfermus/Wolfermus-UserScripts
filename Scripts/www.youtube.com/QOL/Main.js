@@ -928,12 +928,14 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
             RemoveVideoTypesSettings.Hide.Live = currentWebsitesObject.Hide.Live;
             shouldSave = true;
         }
-        if (shouldSave) SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
         //#region -Remove when moved to RemoveVideoTypes.js
 
         if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
             ShouldDisable(QOLSettings);
         }
+
+        // TODO: Remove when moved to RemoveVideoTypes.js
+        SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
     };
 
     window.addEventListener("yt-navigate-finish", observeUrlChange);
