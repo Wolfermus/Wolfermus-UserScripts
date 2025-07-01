@@ -378,8 +378,13 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         }
     };
     const RemoveVideoTypesUrlsExcludes = {
+        Main: [],
+        Subscriptions: [],
+        Watch: [],
+        Playlist: [],
         Channels: {
-            Home: ["*www.youtube.com/@*/shorts", "*www.youtube.com/@*/streams", "*www.youtube.com/@*/playlists", "*www.youtube.com/@*/posts"]
+            Home: ["*www.youtube.com/@*/shorts", "*www.youtube.com/@*/streams", "*www.youtube.com/@*/playlists", "*www.youtube.com/@*/posts"],
+            Videos: []
         }
     };
 
