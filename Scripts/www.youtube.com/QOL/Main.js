@@ -578,15 +578,17 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
      * @param {Object} json
      */
     function ShouldDisable(json) {
-        if (IsCurrentWebsitesEnabled(json)) {
+        const currentWebsitesObject = GetCurrentWebsitesObject(json);
+
+        if (currentWebsitesObject !== undefined && currentWebsitesObject.Active) {
             let shouldEnable = false;
             const keysArray = GetCurrentWebsitesEnabled();
             if (keysArray.length === 1) {
                 if (keysArray[0] === "Playlist") {
-                    if (currentWebsites?.IdsToHide) {
+                    if (currentWebsitesObject?.IdsToHide) {
                         let params = new URL(document.location.toString()).searchParams;
                         if (params.has("list")) {
-                            shouldEnable = currentWebsites.IdsToHide.includes(params.get("list"));
+                            shouldEnable = currentWebsitesObject.IdsToHide.includes(params.get("list"));
                         }
                     }
                 }
@@ -631,7 +633,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
-        if (currentWebsites === undefined) return;
+        if (currentWebsitesObject === undefined) return;
 
         if (currentWebsitesObject.Active === toggled) return;
         currentWebsitesObject.Active = toggled;
@@ -676,7 +678,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
-        if (currentWebsites === undefined) return;
+        if (currentWebsitesObject === undefined) return;
 
         if (currentWebsitesObject.Hide.Members === toggled) return;
         currentWebsitesObject.Hide.Members = toggled;
@@ -700,7 +702,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
-        if (currentWebsites === undefined) return;
+        if (currentWebsitesObject === undefined) return;
 
         if (currentWebsitesObject.Hide.Live === toggled) return;
         currentWebsitesObject.Hide.Live = toggled;
@@ -733,7 +735,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         debugger;
 
         const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
-        if (currentWebsites === undefined) return;
+        if (currentWebsitesObject === undefined) return;
 
         const keysArray = GetCurrentWebsitesEnabled();
         if (keysArray.length !== 1) return;
