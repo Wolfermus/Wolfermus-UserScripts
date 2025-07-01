@@ -499,6 +499,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (!json["RemoveVideoTypes"]) json["RemoveVideoTypes"] = {};
         let RemoveVideoTypesSettings = json["RemoveVideoTypes"];
 
+        debugger;
         const keysArray = GetCurrentWebsitesEnabled(json);
 
         if (keysArray.length > 0) {
@@ -557,6 +558,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
         let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
+        debugger;
         const keysArray = GetCurrentWebsitesEnabled(QOLSettingsInner);
 
         if (keysArray.length > 0) {
@@ -731,6 +733,8 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     const observeUrlChange = async () => {
         if (oldHref === document.location.href) return;
         oldHref = document.location.href;
+
+        debugger;
 
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
         let QOLSettings = JSON.parse(YoutubeGottenInner);
