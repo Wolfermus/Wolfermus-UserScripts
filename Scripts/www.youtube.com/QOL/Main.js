@@ -821,21 +821,21 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
         QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsitesObject.Active;
 
-        QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = currentWebsitesObject.Hide.YouWatch.Active;
-        QOLRemoveVideoTypesHideMembersMenuItem.toggled = currentWebsitesObject.Hide.Members.Active;
-        QOLRemoveVideoTypesHideLiveMenuItem.toggled = currentWebsitesObject.Hide.Live.Active;
+        QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = currentWebsitesObject.Hide.YouWatch;
+        QOLRemoveVideoTypesHideMembersMenuItem.toggled = currentWebsitesObject.Hide.Members;
+        QOLRemoveVideoTypesHideLiveMenuItem.toggled = currentWebsitesObject.Hide.Live;
 
         let shouldSave = false;
-        if (RemoveVideoTypesSettings.Hide.YouWatch !== currentWebsitesObject.Hide.YouWatch.Active) {
-            RemoveVideoTypesSettings.Hide.YouWatch = currentWebsitesObject.Hide.YouWatch.Active;
+        if (RemoveVideoTypesSettings.Hide.YouWatch !== currentWebsitesObject.Hide.YouWatch) {
+            RemoveVideoTypesSettings.Hide.YouWatch = currentWebsitesObject.Hide.YouWatch;
             shouldSave = true;
         }
-        if (RemoveVideoTypesSettings.Hide.Members !== currentWebsitesObject.Hide.Members.Active) {
-            RemoveVideoTypesSettings.Hide.Members = currentWebsitesObject.Hide.Members.Active;
+        if (RemoveVideoTypesSettings.Hide.Members !== currentWebsitesObject.Hide.Members) {
+            RemoveVideoTypesSettings.Hide.Members = currentWebsitesObject.Hide.Members;
             shouldSave = true;
         }
-        if (RemoveVideoTypesSettings.Hide.Live !== currentWebsitesObject.Hide.Live.Active) {
-            RemoveVideoTypesSettings.Hide.Live = currentWebsitesObject.Hide.Live.Active;
+        if (RemoveVideoTypesSettings.Hide.Live !== currentWebsitesObject.Hide.Live) {
+            RemoveVideoTypesSettings.Hide.Live = currentWebsitesObject.Hide.Live;
             shouldSave = true;
         }
         if (shouldSave) SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
