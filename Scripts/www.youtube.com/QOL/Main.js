@@ -279,6 +279,16 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
      */
     const GetMainMenu = mainMenuLibrary["Menus"]["GetMainMenu"];
 
+    const UtilitiesLibrary = WolfermusGetLibrary("Utilities");
+
+    /**
+     * @type {(string: string, rule: string) => boolean}
+     * @param {string} string
+     * @param {string} rule
+     * @returns {boolean}
+     */
+    const MatchRuleExpl = UtilitiesLibrary["MatchRuleExpl"];
+
     let wolfermusPreventLoopLock1 = {};
     async function LoadScriptOnce(scriptName) {
         if (!wolfermusPreventLoopLock1[scriptName]) {
@@ -316,6 +326,14 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     TimeRemainingSettings.Active ??= false;
 
     RemoveVideoTypesSettings.Active ??= false;
+    RemoveVideoTypesSettings.WebsitesEnabled ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Main ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Watch ??= true;
+    RemoveVideoTypesSettings.WebsitesEnabled.Playlist ??= false;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels ??= {};
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home ??= false;
+    RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos ??= false;
     RemoveVideoTypesSettings.Hide ??= {};
     RemoveVideoTypesSettings.Hide.YouWatch ??= false;
     RemoveVideoTypesSettings.Hide.Members ??= false;
@@ -349,6 +367,166 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (toggled) LoadScriptOnce("TimeRemaining");
     });
 
+    const RemoveVideoTypesUrlsInclude = {
+        Main: ["*www.youtube.com", "*www.youtube.com/"],
+        Subscriptions: ["*www.youtube.com/feed/subscriptions", "*www.youtube.com/feed/subscriptions/"],
+        Watch: ["*www.youtube.com/watch*"],
+        Playlist: ["*www.youtube.com/playlist*"],
+        Channels: {
+            Home: ["*www.youtube.com/@*", "*www.youtube.com/@*/featured"],
+            Videos: ["*www.youtube.com/@*/videos"]
+        }
+    };
+    const RemoveVideoTypesUrlsExcludes = {
+        Channels: {
+            Home: ["*www.youtube.com/@*/shorts", "*www.youtube.com/@*/streams", "*www.youtube.com/@*/playlists", "*www.youtube.com/@*/posts"]
+        }
+    };
+
+    /**
+     * @returns {Array<string>}
+     */
+    function FlattenRemoveVideoTypesUrlsIncludes() {
+        debugger;
+
+        let falttenedUrls = [];
+        for (const urlKey in RemoveVideoTypesUrlsInclude) {
+            if (Array.isArray(RemoveVideoTypesUrlsInclude[urlKey])) {
+                falttenedUrls.push(...RemoveVideoTypesUrlsInclude[urlKey]);
+            } else {
+                for (const urlKey2 in RemoveVideoTypesUrlsInclude[urlKey]) {
+                    falttenedUrls.push(...RemoveVideoTypesUrlsInclude[urlKey][urlKey2]);
+                }
+            }
+        }
+        return falttenedUrls;
+    }
+    /**
+     * @returns {Array<string>}
+     */
+    function FlattenRemoveVideoTypesUrlsExcludes() {
+        debugger;
+
+        let falttenedUrls = [];
+        for (const urlKey in RemoveVideoTypesUrlsExcludes) {
+            if (Array.isArray(RemoveVideoTypesUrlsExcludes[urlKey])) {
+                falttenedUrls.push(...RemoveVideoTypesUrlsExcludes[urlKey]);
+            } else {
+                for (const urlKey2 in RemoveVideoTypesUrlsExcludes[urlKey]) {
+                    falttenedUrls.push(...RemoveVideoTypesUrlsExcludes[urlKey][urlKey2]);
+                }
+            }
+        }
+        return falttenedUrls;
+    }
+
+    /**
+     * @param {Object} json
+     * @returns {Array<string>}
+     */
+    function GetCurrentWebsitesEnabled(json) {
+        debugger;
+
+        if (!json["RemoveVideoTypes"]) json["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettings = json["RemoveVideoTypes"];
+
+        RemoveVideoTypesSettings.WebsitesEnabled ??= {};
+        RemoveVideoTypesSettings.WebsitesEnabled.Main ??= true; // "*www.youtube.*"
+        RemoveVideoTypesSettings.WebsitesEnabled.Subscriptions ??= true; // "*www.youtube.*/feed/subscriptions", "*www.youtube.*/feed/subscriptions/"
+        RemoveVideoTypesSettings.WebsitesEnabled.Watch ??= true; // "*www.youtube.*/watch*"
+        RemoveVideoTypesSettings.WebsitesEnabled.Playlist ??= false; // "*www.youtube.com/playlist*"
+        RemoveVideoTypesSettings.WebsitesEnabled.Channels ??= {};
+        RemoveVideoTypesSettings.WebsitesEnabled.Channels.Home ??= false; // "*www.youtube.com/@*", "*www.youtube.com/@*/featured"
+        RemoveVideoTypesSettings.WebsitesEnabled.Channels.Videos ??= false; // "*www.youtube.com/@*/videos"
+
+        for (const urlKey in RemoveVideoTypesUrlsInclude) {
+            if (Array.isArray(RemoveVideoTypesUrlsInclude[urlKey])) {
+                let includesBool = false;
+                for (const urlRule of RemoveVideoTypesUrlsInclude[urlKey]) {
+                    if (MatchRuleExpl(window.location.href, urlRule)) {
+                        includesBool = true;
+                        break;
+                    }
+                }
+
+                let excludesBool = false;
+                for (const urlRule of RemoveVideoTypesUrlsExcludes[urlKey]) {
+                    if (MatchRuleExpl(window.location.href, urlRule)) {
+                        excludesBool = true;
+                        break;
+                    }
+                }
+
+                if (includesBool && !excludesBool) {
+                    return [urlKey];
+                }
+            } else {
+                const objKeys = Object.keys(RemoveVideoTypesUrlsInclude[urlKey]);
+                for (let i = objKeys.length - 1; i >= 0; i--) {
+                    const urlKey2 = objKeys[i];
+
+                    let includesBool = false;
+                    for (const urlRule of RemoveVideoTypesUrlsInclude[urlKey][urlKey2]) {
+                        if (MatchRuleExpl(window.location.href, urlRule)) {
+                            includesBool = true;
+                            break;
+                        }
+                    }
+
+                    let excludesBool = false;
+                    for (const urlRule of RemoveVideoTypesUrlsExcludes[urlKey][urlKey2]) {
+                        if (MatchRuleExpl(window.location.href, urlRule)) {
+                            excludesBool = true;
+                            break;
+                        }
+                    }
+
+                    if (includesBool && !excludesBool) {
+                        return [urlKey, urlKey2];
+                    }
+                }
+            }
+        }
+
+        return [];
+    }
+
+    /**
+     * @param {Object} json
+     * @returns {boolean}
+     */
+    function IsCurrentWebsitesEnabled(json) {
+        if (!json["RemoveVideoTypes"]) json["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettings = json["RemoveVideoTypes"];
+
+        const keysArray = GetCurrentWebsitesEnabled(json);
+
+        if (keysArray.length > 0) {
+            let referenceBool = RemoveVideoTypesSettings;
+            for (const key of keysArray) {
+                referenceBool = referenceBool[key];
+            }
+
+            if (referenceBool) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param {Object} json
+     */
+    function ShouldDisable(json) {
+        if (IsCurrentWebsitesEnabled(json)) {
+            removeVideoTypesModule.disabled = false;
+        } else {
+            removeVideoTypesModule.disabled = true;
+        }
+    }
 
     const QOLRemoveVideoTypesMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Remove Video Type`);
     QOLRemoveVideoTypesMenuItem.toggled = RemoveVideoTypesSettings.Active;
@@ -367,6 +545,32 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
 
         if (toggled) LoadScriptOnce("RemoveVideoTypes");
+    });
+
+    const QOLRemoveVideoTypesTogglePageMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Page`);
+    QOLRemoveVideoTypesTogglePageMenuItem.toggled = IsCurrentWebsitesEnabled(QOLSettings);
+    QOLRemoveVideoTypesTogglePageMenuItem.ToggledEventAddCallback(async (toggled) => {
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+
+        if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
+
+        const keysArray = GetCurrentWebsitesEnabled(QOLSettingsInner);
+
+        if (keysArray.length > 0) {
+            let referenceBool = RemoveVideoTypesSettingsInner;
+            for (const key of keysArray) {
+                if (typeof referenceBool[key] == "boolean") {
+                    referenceBool[key] = toggled;
+                } else referenceBool = referenceBool[key];
+            }
+
+            SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+        } else {
+            debugger;
+        }
     });
 
     const QOLRemoveVideoTypesHideYouWatchMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Hide YouWatch`);
@@ -436,15 +640,13 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesMenuItem);
+    QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesTogglePageMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideYouWatchMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideMembersMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesHideLiveMenuItem);
 
-    QOLRemoveVideoTypesGroupMenuItem.includesUrls = ["*www.youtube.*", "*www.youtube.*/",
-        "*www.youtube.*/feed/subscriptions", "*www.youtube.*/feed/subscriptions/",
-        "*www.youtube.*/shorts/*",
-        "*www.youtube.*/watch*"
-    ];
+    QOLRemoveVideoTypesGroupMenuItem.includesUrls = FlattenRemoveVideoTypesUrlsIncludes();
+    QOLRemoveVideoTypesGroupMenuItem.excludesUrls = FlattenRemoveVideoTypesUrlsExcludes();
 
     QOLRemoveVideoTypesGroupMenuItem.CheckUrls();
 
@@ -454,7 +656,10 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     removeVideoTypesModule.disabledDone2 = false;
 
 
-    if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) LoadScriptOnce("RemoveVideoTypes");
+    if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
+        ShouldDisable(QOLSettings);
+        LoadScriptOnce("RemoveVideoTypes");
+    }
 
     QOLRemoveVideoTypesGroupMenuItem.DisabledEventAddCallback(async (disabled) => {
         removeVideoTypesModule.disabled = disabled;
@@ -470,7 +675,10 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
             if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
             let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
-            if (RemoveVideoTypesSettingsInner.Active) LoadScriptOnce("RemoveVideoTypes");
+            if (RemoveVideoTypesSettingsInner.Active) {
+                ShouldDisable(QOLSettingsInner);
+                LoadScriptOnce("RemoveVideoTypes");
+            }
         }
     });
 
@@ -505,6 +713,10 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         RemoveVideoTypesSettings.Active ??= false;
         RemoveVideoTypesSettings.Collapsed ??= false;
 
+        if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
+            ShouldDisable(QOLSettings);
+        }
+
         QOLSettings.Collapsed ??= true;
 
         QOLMenuItem.collapsed = QOLSettings.Collapsed;
@@ -514,6 +726,29 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
         QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
     });
+
+    let oldHref = document.location.href;
+    const observeUrlChange = async () => {
+        if (oldHref === document.location.href) return;
+        oldHref = document.location.href;
+
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettings = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettings || typeof QOLSettings !== "object") QOLSettings = {};
+
+        if (!QOLSettings["RemoveVideoTypes"]) QOLSettings["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettings = QOLSettings["RemoveVideoTypes"];
+
+        RemoveVideoTypesSettings.Active ??= false;
+
+        QOLRemoveVideoTypesTogglePageMenuItem.toggled = IsCurrentWebsitesEnabled(QOLSettings);
+
+        if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
+            ShouldDisable(QOLSettings);
+        }
+    };
+
+    window.addEventListener("yt-navigate-finish", observeUrlChange);
 
 
     const mainMenu = GetMainMenu();
