@@ -1,4 +1,6 @@
 async (path) => {
+    return;
+
     if (typeof wolfermusBypassScriptPolicy === "undefined" || typeof wolfermusBypassScriptPolicy === "null") {
         var wolfermusBypassScriptPolicy = trustedTypes.createPolicy("wolfermusBypassScript", {
             createHTML: (string) => string,
@@ -205,6 +207,10 @@ async (path) => {
     //RemoveVideoTypesSettings.Hide.Shorts ??= false;
 
     // TODO: Add shorts support.
+    // TODO: Add streamed support.
+    // TODO: Add shorts shelf support.
+    // TODO: Add playables shelf support.
+    // TODO: Add featured shelf support.
 
     let oldDisabled = undefined;
 
@@ -472,6 +478,18 @@ async (path) => {
         }
     }
 
+    /**
+     * @param {HTMLElement} baseNode
+     */
+    function HideNodes(baseNode) {
+        if (!RemoveVideoTypesSearchSelector) return;
+
+        const nodes = baseNode.querySelectorAll(RemoveVideoTypesSearchSelector);
+        for (let node of nodes) {
+            HideNode(node);
+        }
+    }
+
     function CheckAllNodes() {
         if (oldDisabled !== removeVideoTypesModule.disabled) {
             oldDisabled = removeVideoTypesModule.disabled;
@@ -489,10 +507,7 @@ async (path) => {
                 const ytdBrowseStyle = window.getComputedStyle(ytdBrowse);
                 if (ytdBrowseStyle.display === "none") continue;
 
-                const nodes = ytdBrowse.querySelectorAll(RemoveVideoTypesSearchSelector);
-                for (let node of nodes) {
-                    HideNode(node);
-                }
+                HideNodes(ytdBrowse);
             }
         }
 
@@ -502,10 +517,7 @@ async (path) => {
                 const ytdWatchFlexyStyle = window.getComputedStyle(ytdWatchFlexy);
                 if (ytdWatchFlexyStyle.display === "none") continue;
 
-                const nodes = ytdWatchFlexy.querySelectorAll(RemoveVideoTypesSearchSelector);
-                for (let node of nodes) {
-                    HideNode(node);
-                }
+                HideNodes(ytdWatchFlexy);
             }
         }
     }
