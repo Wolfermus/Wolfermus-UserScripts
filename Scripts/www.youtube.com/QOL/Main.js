@@ -349,6 +349,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Watch");
     ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Playlist", false);
     if (typeof WebsitesEnabledSettings.Playlist.IdsToHide !== "object" || !Array.isArray(WebsitesEnabledSettings.Playlist.IdsToHide)) WebsitesEnabledSettings.Playlist.IdsToHide = [];
+    ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Results", false);
 
 
     if (typeof WebsitesEnabledSettings.Channels !== "object") WebsitesEnabledSettings.Channels = {};
@@ -398,6 +399,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         Subscriptions: ["*www.youtube.com/feed/subscriptions", "*www.youtube.com/feed/subscriptions/"],
         Watch: ["*www.youtube.com/watch*"],
         Playlist: ["*www.youtube.com/playlist*"],
+        Results: ["*www.youtube.com/results*"],
         Channels: {
             Home: ["*www.youtube.com/@*", "*www.youtube.com/@*/featured"],
             Videos: ["*www.youtube.com/@*/videos"],
@@ -409,6 +411,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         Subscriptions: [],
         Watch: [],
         Playlist: [],
+        Results: [],
         Channels: {
             Home: ["*www.youtube.com/@*/shorts", "*www.youtube.com/@*/streams", "*www.youtube.com/@*/playlists", "*www.youtube.com/@*/posts"],
             Videos: [],
