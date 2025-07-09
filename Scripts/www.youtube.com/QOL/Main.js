@@ -349,7 +349,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Watch");
     ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Playlist", false);
     if (typeof WebsitesEnabledSettings.Playlist.IdsToHide !== "object" || !Array.isArray(WebsitesEnabledSettings.Playlist.IdsToHide)) WebsitesEnabledSettings.Playlist.IdsToHide = [];
-    ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Results", false);
+    ValidateWebsiteEnabledSetting(WebsitesEnabledSettings, "Results");
 
 
     if (typeof WebsitesEnabledSettings.Channels !== "object") WebsitesEnabledSettings.Channels = {};
@@ -861,6 +861,58 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         RemoveVideoTypesSettings.Active ??= false;
         RemoveVideoTypesSettings.Collapsed ??= false;
 
+        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettings);
+
+        const keysArray = GetCurrentWebsitesEnabled();
+        if (keysArray.length === 1) {
+            if (keysArray[0] === "Playlist") {
+                QOLRemoveVideoTypesPlaylistMenuItem.disabled = false;
+                if (currentWebsitesObject === undefined) return;
+                if (currentWebsitesObject?.IdsToHide) {
+                    let params = new URL(document.location.toString()).searchParams;
+                    if (params.has("list")) {
+                        QOLRemoveVideoTypesPlaylistMenuItem.toggled = !currentWebsitesObject.IdsToHide.includes(params.get("list"));
+                    }
+                }
+            }
+            else QOLRemoveVideoTypesPlaylistMenuItem.disabled = true;
+        } else QOLRemoveVideoTypesPlaylistMenuItem.disabled = true;
+
+        if (keysArray.length > 0) {
+            QOLRemoveVideoTypesPageTypeGroupMenuItem.title = keysArray.join(" - ");
+            QOLRemoveVideoTypesPageTypeGroupMenuItem.disabled = false;
+        } else QOLRemoveVideoTypesPageTypeGroupMenuItem.disabled = true;
+
+        if (currentWebsitesObject === undefined) return;
+
+        QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsitesObject.Active;
+
+        QOLRemoveVideoTypesHideYouWatchMenuItem.toggled = currentWebsitesObject.Hide.YouWatch;
+        QOLRemoveVideoTypesHideMembersMenuItem.toggled = currentWebsitesObject.Hide.Members;
+        QOLRemoveVideoTypesHideLiveMenuItem.toggled = currentWebsitesObject.Hide.Live;
+        //QOLRemoveVideoTypesHideShortsMenuItem.toggled = currentWebsitesObject.Hide.Shorts;
+
+        //#region Remove when moved to RemoveVideoTypes.js
+        // TODO: Remove when moved to RemoveVideoTypes.js
+        let shouldSave = false;
+        if (RemoveVideoTypesSettings.Hide.YouWatch !== currentWebsitesObject.Hide.YouWatch) {
+            RemoveVideoTypesSettings.Hide.YouWatch = currentWebsitesObject.Hide.YouWatch;
+            shouldSave = true;
+        }
+        if (RemoveVideoTypesSettings.Hide.Members !== currentWebsitesObject.Hide.Members) {
+            RemoveVideoTypesSettings.Hide.Members = currentWebsitesObject.Hide.Members;
+            shouldSave = true;
+        }
+        if (RemoveVideoTypesSettings.Hide.Live !== currentWebsitesObject.Hide.Live) {
+            RemoveVideoTypesSettings.Hide.Live = currentWebsitesObject.Hide.Live;
+            shouldSave = true;
+        }
+        // if (RemoveVideoTypesSettings.Hide.Shorts !== currentWebsitesObject.Hide.Shorts) {
+        //     RemoveVideoTypesSettings.Hide.Shorts = currentWebsitesObject.Hide.Shorts;
+        //     shouldSave = true;
+        // }
+        //#region -Remove when moved to RemoveVideoTypes.js
+
         if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
             ShouldDisable(QOLSettings);
         }
@@ -873,6 +925,9 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         QOLRemoveVideoTypesMenuItem.toggled = RemoveVideoTypesSettings.Active;
 
         QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
+
+        // TODO: Remove when moved to RemoveVideoTypes.js
+        if (shouldSave) SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
     });
 
     let oldHref = document.location.href;
