@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.1.3
+// @version      4.1.4
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -1439,6 +1439,7 @@ class WolfermusMenuItem {
         window.addEventListener("pointercancel", this.#closeWolfermusContextMenu);
 
         this.CheckUrls();
+        this.UpdateClasses();
 
         return true;
     }
