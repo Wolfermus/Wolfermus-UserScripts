@@ -630,7 +630,8 @@
                 gottenGroup.style.display = "none";
                 gottenSection.style.display = "";
 
-                menu.attached?.menu?.Hide?.();
+                menu?.attached?.menu?.Hide?.();
+                menu?.attached?.menu?.UnloadItems?.();
 
                 this.#UnloadItems(menu);
                 await this.#SetupItems(menu);
