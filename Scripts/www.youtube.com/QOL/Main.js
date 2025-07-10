@@ -401,9 +401,9 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         Playlist: ["*www.youtube.com/playlist*"],
         Results: ["*www.youtube.com/results*"],
         Channels: {
-            Home: ["*www.youtube.com/@*", "*www.youtube.com/@*/featured"],
-            Videos: ["*www.youtube.com/@*/videos"],
-            Search: ["*www.youtube.com/@*/search*"]
+            Home: ["*www.youtube.com/@*", "*www.youtube.com/@*/featured", "*www.youtube.com/channel/*", "*www.youtube.com/channel/*/featured"],
+            Videos: ["*www.youtube.com/@*/videos", "*www.youtube.com/channel/*/videos"],
+            Search: ["*www.youtube.com/@*/search*", "*www.youtube.com/channel/*/search*"]
         }
     };
     const RemoveVideoTypesUrlsExcludes = {
@@ -413,7 +413,10 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         Playlist: [],
         Results: [],
         Channels: {
-            Home: ["*www.youtube.com/@*/shorts", "*www.youtube.com/@*/streams", "*www.youtube.com/@*/playlists", "*www.youtube.com/@*/posts"],
+            Home: [
+                "*www.youtube.com/@*/shorts", "*www.youtube.com/@*/streams", "*www.youtube.com/@*/playlists", "*www.youtube.com/@*/posts",
+                "*www.youtube.com/channel/*/shorts", "*www.youtube.com/channel/*/streams", "*www.youtube.com/channel/*/playlists", "*www.youtube.com/channel/*/posts"
+            ],
             Videos: [],
             Search: []
         }
