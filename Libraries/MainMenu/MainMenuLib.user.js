@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.1.4
+// @version      4.1.5
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -705,6 +705,7 @@ async function ContrainElementViaPosition(elementToContrain, position, shouldDiv
     } else {
         gotConstrained.x = false;
     }
+    position.x = Math.floor(position.x);
     elementToContrain.style.left = position.x + "px";
 
     if ((position.y - contrainedPadding) < (shouldDivideElementHeightToContrainDimentionByTwo ? elementToContrainHeightDivided2 : 0)) {
@@ -714,6 +715,7 @@ async function ContrainElementViaPosition(elementToContrain, position, shouldDiv
     } else {
         gotConstrained.y = false;
     }
+    position.y = Math.floor(position.y);
     elementToContrain.style.top = position.y + "px";
 
     return gotConstrained;
@@ -817,7 +819,7 @@ class WolfermusMenuItem {
     /**
      * @type {HTMLElement | null}
      */
-    element = null;
+    element = null; // TODO: Change to array of elements
     /**
      * @type {WolfermusMenu}
      */
