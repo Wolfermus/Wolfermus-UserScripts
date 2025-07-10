@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.1.5
+// @version      4.1.6
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -402,17 +402,17 @@ function GetWolfermusFabImageMenuItem() {
             if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
             let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
 
-            if (!(WolfermusMainMenuSettings?.FloatingButton?.ToggleMovement ?? true)) return;
-
             const fabElement = document.getElementById("WolfermusFloatingSnapBtnWrapper");
             if (fabElement === undefined || fabElement === null) return;
 
             if (WolfermusFabImageMenuItem.element === undefined || WolfermusFabImageMenuItem.element === null) return;
 
-            WolfermusFabImageMenuItem.element.setPointerCapture(event.pointerId);
-
             WolfermusFabImageMenuItem.oldPositionX = fabElement.style.left;
             WolfermusFabImageMenuItem.oldPositionY = fabElement.style.top;
+
+            if (!(WolfermusMainMenuSettings?.FloatingButton?.ToggleMovement ?? true)) return;
+
+            WolfermusFabImageMenuItem.element.setPointerCapture(event.pointerId);
 
             WolfermusFabImageMenuItem.ShouldMove = true;
 
