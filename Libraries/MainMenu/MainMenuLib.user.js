@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus Main Menu Library
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      4.1.6
+// @version      4.1.7
 // @description  This script is a main menu library that provides easy means to add menu items and manipulate main menu
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -750,8 +750,15 @@ async function ContrainMainMenu() {
     oldFabElementLeft = fabElement.style.left;
     oldFabElementTop = fabElement.style.top;
 
-    const x = parseInt(fabElement.style.left.match(/\d/g).join(""));
-    const y = parseInt(fabElement.style.top.match(/\d/g).join(""));
+    // TODO: Update StorageManagerLib to handly localStorage only options.
+    if (!localStorage["WolfermusMainMenu"]) localStorage["WolfermusMainMenu"] = "{}";
+    let WolfermusMainMenuSettings = JSON.parse(localStorage["WolfermusMainMenu"]);
+
+    // const x = parseInt(fabElement.style.left.match(/\d/g).join(""));
+    // const y = parseInt(fabElement.style.top.match(/\d/g).join(""));
+
+    const x = WolfermusMainMenuSettings.Left ? WolfermusMainMenuSettings.Left : parseInt(fabElement.style.left.match(/\d/g).join(""));
+    const y = WolfermusMainMenuSettings.Top ? WolfermusMainMenuSettings.Top : parseInt(fabElement.style.top.match(/\d/g).join(""));
 
     ContrainElementViaPosition(fabElement, new Position(x, y));
 }
