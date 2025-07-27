@@ -226,9 +226,10 @@
      * @async
      * @param { string } key
      * @param { any } value
+     * @param { boolean } forceLocal
      */
-    async function SetValue(key, value) {
-        if (IsGMSetValue && IsGMGetValue) {
+    async function SetValue(key, value, forceLocal = false) {
+        if (IsGMSetValue && IsGMGetValue && !forceLocal) {
             // @ts-ignore
             if (IsAdGuardSet) { // TODO: Test removing this
                 // @ts-ignore
@@ -259,11 +260,12 @@
      * @async
      * @param {string} key
      * @param {any} defaultValue
+     * @param {boolean} forceLocal
      * @returns {Promise<any | undefined | null>}
      */
-    async function GetValue(key, defaultValue = undefined) {
+    async function GetValue(key, defaultValue = undefined, forceLocal = false) {
         let retrievedValue;
-        if (IsGMGetValue && IsGMSetValue) {
+        if (IsGMGetValue && IsGMSetValue && !forceLocal) {
             // @ts-ignore
             if (IsAdGuardGet) { // TODO: Test removing this
                 // @ts-ignore
@@ -300,11 +302,11 @@
             if (!wlfValueChangeListeners[listenerId].handledByGM && wlfValueChangeListeners[listenerId].callback !== null) {
                 const key = wlfValueChangeListeners[listenerId].key;
                 const oldValue = wlfValueChangeListeners[listenerId].oldValue;
-                const newValue = await GetValue(key, wlfValueChangeListeners[listenerId].oldValue);
+                const newValue = await GetValue(key, wlfValueChangeListeners[listenerId].oldValue, true);
 
                 if (oldValue !== newValue) {
-                    wlfValueChangeListeners[listenerId].oldValue = newValue;
                     await wlfValueChangeListeners[listenerId].callback(key, oldValue, newValue, true);
+                    wlfValueChangeListeners[listenerId].oldValue = newValue;
                 }
             }
         }
@@ -325,12 +327,14 @@
      *      // remote is a boolean indicating whether the change originated from a different userscript instance
      *  }
      * ```
+     * - A boolean to use local storage
      * @async
      * @param {string} key
      * @param {(key: string, oldValue: any, newValue: any, remote: boolean) => void} callback
+     * @param {boolean} forceLocal
      * @returns {Promise<number>}
      */
-    async function AddValueChangeListener(key, callback) {
+    async function AddValueChangeListener(key, callback, forceLocal = false) {
         let oldValue = await GetValue("key");
 
         let listener = {
@@ -340,7 +344,7 @@
             "handledByGM": false
         };
         let listenerId;
-        if (IsGMAddValueChangeListener) {
+        if (IsGMAddValueChangeListener && !forceLocal) {
             // @ts-ignore
             if (IsGMAddValueChangeListener2) {
                 // @ts-ignore
@@ -370,8 +374,9 @@
      * Removes a listener for changes to the value of a specific key in the userscript's storage.
      * 
      * @param {number} listenerId
+     * @param {boolean} forceLocal
      */
-    async function RemoveValueChangeListener(listenerId) {
+    async function RemoveValueChangeListener(listenerId, forceLocal = false) {
         if (listenerId === undefined || listenerId === null || !wlfValueChangeListeners[listenerId]) {
             await Notify({
                 title: "Error",
@@ -382,7 +387,7 @@
             return;
         }
 
-        if (IsGMRemoveValueChangeListener) {
+        if (IsGMRemoveValueChangeListener && !forceLocal) {
             // @ts-ignore
             if (IsGMRemoveValueChangeListener2) {
                 // @ts-ignore
