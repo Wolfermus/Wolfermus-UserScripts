@@ -226,6 +226,8 @@ async function SetupUtilities(baseURL, baseScriptURL, baseWebsiteScriptURL, bran
     WolfermusGroupMenuItem = mainMenuLibrary["Classes"]["Addons"]["WolfermusGroupMenuItem"];
 
     GetMainMenu = mainMenuLibrary["Menus"]["GetMainMenu"];
+
+    return true;
 }
 
 let wolfermusPreventLoopLock1 = {};
