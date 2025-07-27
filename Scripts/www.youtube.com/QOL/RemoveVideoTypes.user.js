@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus RemoveVideoTypes Test (Beta)
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      3.1.2-beta.2
+// @version      3.1.2-beta.3
 // @description  This script is RemoveVideoTypes script test. (Beta)
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -1190,10 +1190,10 @@ function SetupYTDApp() {
 
     const currentPage = pageManager.currentPage;
 
-    if (!currentPage) return false;
-
-    observerVideosAdded.observe(currentPage, config);
-    wolfermusLoadedPageTypes.push(currentPage);
+    if (currentPage) {
+        observerVideosAdded.observe(currentPage, config);
+        wolfermusLoadedPageTypes.push(currentPage);
+    }
 
     ytdApp.addEventListener("yt-page-data-updated", (event) => {
         if (!ShouldRunCode()) return;
