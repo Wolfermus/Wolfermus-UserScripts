@@ -338,6 +338,7 @@ function ValidateWebsiteEnabledSetting(objectBase, name, defaultActive = true) {
     if (typeof objectBase[name] !== "object") objectBase[name] = {};
 
     objectBase[name].Active ??= defaultActive;
+    objectBase[name].Collapsed ??= false;
 
     if (typeof objectBase[name].Hide !== "object") objectBase[name].Hide = {};
     if (typeof objectBase[name].Background !== "object") objectBase[name].Background = {};
@@ -818,19 +819,22 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
     }
 
     const QOLRemoveVideoTypesPageTypeGroupMenuItem = new WolfermusGroupMenuItem(keysArray.join(" - "));
-    QOLRemoveVideoTypesPageTypeGroupMenuItem.collapsed = true; // TODO Store this
-    // QOLRemoveVideoTypesPageTypeGroupMenuItem.CollapsedAddCallback(async (newCollapsed) => {
-    //     const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
-    //     let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
-    //     if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+    QOLRemoveVideoTypesPageTypeGroupMenuItem.collapsed = currentWebsites.Collapsed;
+    QOLRemoveVideoTypesPageTypeGroupMenuItem.CollapsedAddCallback(async (newCollapsed) => {
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
 
-    //     if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
-    //     let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
+        if (!QOLSettingsInner["RemoveVideoTypes"]) QOLSettingsInner["RemoveVideoTypes"] = {};
 
-    //     RemoveVideoTypesSettingsInner.Collapsed = newCollapsed;
+        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettingsInner);
+        if (currentWebsitesObject === undefined) return;
 
-    //     await SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
-    // });
+        if (currentWebsitesObject.Collapsed === newCollapsed) return;
+        currentWebsitesObject.Collapsed = newCollapsed;
+
+        await SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+    });
     QOLRemoveVideoTypesPageTypeGroupMenuItem.items.push(QOLRemoveVideoTypesTogglePageMenuItem);
     QOLRemoveVideoTypesPageTypeGroupMenuItem.items.push(...Object.values(removeVideoTypesCreatedMenuItems));
     QOLRemoveVideoTypesPageTypeGroupMenuItem.items.push(QOLRemoveVideoTypesPlaylistMenuItem);
