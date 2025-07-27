@@ -221,7 +221,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         if (wolfermusPreventLoopLock1[scriptName].once) return undefined;
         //console.log("Scripts/Main.js - 3");
         try {
-            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}QOL/${scriptName}.js`));
+            const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}QOL/${scriptName}.user.js`));
             await eval(script);
             if (typeof EntryRun !== "function") return undefined;
             const result = EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
@@ -250,8 +250,28 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
 
     SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
 
-    if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining.user");
+    if (TimeRemainingSettings.Active) LoadScriptOnce("TimeRemaining");
 
+    const QOLTimeRemainingMenuItem = new WolfermusToggleButtonMenuItem(`Toggle Time Remaining`);
+    QOLTimeRemainingMenuItem.toggled = TimeRemainingSettings.Active;
+    QOLTimeRemainingMenuItem.ToggledEventAddCallback(async (toggled) => {
+        if (QOLTimeRemainingMenuItem.disabled) return;
+
+        const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
+        let QOLSettingsInner = JSON.parse(YoutubeGottenInner);
+        if (!QOLSettingsInner || typeof QOLSettingsInner !== "object") QOLSettingsInner = {};
+
+        if (!QOLSettingsInner["TimeRemaining"]) QOLSettingsInner["TimeRemaining"] = {};
+        let TimeRemainingSettingsInner = QOLSettingsInner["TimeRemaining"];
+
+        if (TimeRemainingSettingsInner.Active === toggled) return;
+
+        TimeRemainingSettingsInner.Active = toggled;
+
+        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+
+        if (toggled) LoadScriptOnce("TimeRemaining");
+    });
 
     let QOLMenuItem = new WolfermusGroupMenuItem("Quality Of Life");
     QOLMenuItem.collapsed = QOLSettings.Collapsed;
@@ -267,11 +287,11 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     QOLMenuItem.items.push(QOLTimeRemainingMenuItem);
 
 
-    const gottenMenuItem = await LoadScriptOnce("RemoveVideoTypesMenuItems.user");
+    const gottenMenuItem = await LoadScriptOnce("RemoveVideoTypesMenuItems");
     if (gottenMenuItem) QOLMenuItem.items.push(gottenMenuItem);
     else {
         debugger;
-        const message = "Wolfermus ERROR: Youtube QOL - RemoveVideoTypesMenuItems.user - EntryRun - invalid type";
+        const message = "Wolfermus ERROR: Youtube QOL - RemoveVideoTypesMenuItems - EntryRun - invalid type";
         console.error(message);
     }
 
