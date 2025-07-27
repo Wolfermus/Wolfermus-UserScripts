@@ -334,8 +334,12 @@ const wolfermusVideoTypesSettings = {
  */
 function ValidateWebsiteEnabledSetting(objectBase, name, defaultActive = true) {
     if (typeof objectBase[name] !== "object") objectBase[name] = {};
+
     objectBase[name].Active ??= defaultActive;
+
     if (typeof objectBase[name].Hide !== "object") objectBase[name].Hide = {};
+    if (typeof objectBase[name].Background !== "object") objectBase[name].Hide = {};
+    if (typeof objectBase[name].Debug !== "object") objectBase[name].Hide = {};
 
     for (const key in wolfermusVideoTypesSettings) {
         const settingsObject = wolfermusVideoTypesSettings[key];
