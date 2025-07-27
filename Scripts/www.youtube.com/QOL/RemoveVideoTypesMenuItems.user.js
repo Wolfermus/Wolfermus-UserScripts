@@ -557,73 +557,75 @@ function ShouldDisable(json, json2) {
     return localSettings.Disabled;
 }
 
-async function ValueChangedCallback(key, oldValue, newValue, remote) {
-    let QOLSettings = JSON.parse(newValue);
-    if (!QOLSettings || typeof QOLSettings !== "object") QOLSettings = {};
+const removeVideoTypesCreatedMenuItems = {};
 
-    if (!QOLSettings["RemoveVideoTypes"]) QOLSettings["RemoveVideoTypes"] = {};
-    let RemoveVideoTypesSettings = QOLSettings["RemoveVideoTypes"];
+function GenerateValueChangedCallback(QOLRemoveVideoTypesPlaylistMenuItem, QOLRemoveVideoTypesPageTypeGroupMenuItem, QOLRemoveVideoTypesTogglePageMenuItem, QOLRemoveVideoTypesGroupMenuItem, QOLRemoveVideoTypesMenuItem) {
+    return async (key, oldValue, newValue, remote) => {
+        let QOLSettings = JSON.parse(newValue);
+        if (!QOLSettings || typeof QOLSettings !== "object") QOLSettings = {};
 
-    RemoveVideoTypesSettings.Active ??= false;
-    RemoveVideoTypesSettings.Collapsed ??= false;
+        if (!QOLSettings["RemoveVideoTypes"]) QOLSettings["RemoveVideoTypes"] = {};
+        let RemoveVideoTypesSettings = QOLSettings["RemoveVideoTypes"];
 
-    const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettings);
+        RemoveVideoTypesSettings.Active ??= false;
+        RemoveVideoTypesSettings.Collapsed ??= false;
 
-    const keysArray = GetCurrentWebsitesEnabled();
-    if (keysArray.length === 1) {
-        if (keysArray[0] === "Playlist") {
-            QOLRemoveVideoTypesPlaylistMenuItem.disabled = false;
-            if (currentWebsitesObject === undefined) return;
-            if (currentWebsitesObject?.IdsToHide) {
-                let params = new URL(document.location.toString()).searchParams;
-                if (params.has("list")) {
-                    QOLRemoveVideoTypesPlaylistMenuItem.toggled = !currentWebsitesObject.IdsToHide.includes(params.get("list"));
+        const currentWebsitesObject = GetCurrentWebsitesObject(QOLSettings);
+
+        const keysArray = GetCurrentWebsitesEnabled();
+        if (keysArray.length === 1) {
+            if (keysArray[0] === "Playlist") {
+                QOLRemoveVideoTypesPlaylistMenuItem.disabled = false;
+                if (currentWebsitesObject === undefined) return;
+                if (currentWebsitesObject?.IdsToHide) {
+                    let params = new URL(document.location.toString()).searchParams;
+                    if (params.has("list")) {
+                        QOLRemoveVideoTypesPlaylistMenuItem.toggled = !currentWebsitesObject.IdsToHide.includes(params.get("list"));
+                    }
                 }
             }
+            else QOLRemoveVideoTypesPlaylistMenuItem.disabled = true;
+        } else QOLRemoveVideoTypesPlaylistMenuItem.disabled = true;
+
+        if (keysArray.length > 0) {
+            QOLRemoveVideoTypesPageTypeGroupMenuItem.title = keysArray.join(" - ");
+            QOLRemoveVideoTypesPageTypeGroupMenuItem.disabled = false;
+        } else QOLRemoveVideoTypesPageTypeGroupMenuItem.disabled = true;
+
+        if (currentWebsitesObject === undefined) return;
+
+        QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsitesObject.Active;
+
+        let shouldSave = false;
+        for (const key in wolfermusVideoTypesSettings) {
+            const settingsObject = wolfermusVideoTypesSettings[key];
+            if (!settingsObject) continue;
+            if (typeof settingsObject !== "object") continue;
+
+            let keyCopy = key.replace("Wolfermus", "");
+            if (!keyCopy) continue;
+
+            removeVideoTypesCreatedMenuItems[keyCopy].toggled = currentWebsitesObject.Hide[keyCopy];
+
+            if (RemoveVideoTypesSettings.Hide[keyCopy] !== currentWebsitesObject.Hide[keyCopy]) {
+                RemoveVideoTypesSettings.Hide[keyCopy] = currentWebsitesObject.Hide[keyCopy];
+                shouldSave = true;
+            }
         }
-        else QOLRemoveVideoTypesPlaylistMenuItem.disabled = true;
-    } else QOLRemoveVideoTypesPlaylistMenuItem.disabled = true;
 
-    if (keysArray.length > 0) {
-        QOLRemoveVideoTypesPageTypeGroupMenuItem.title = keysArray.join(" - ");
-        QOLRemoveVideoTypesPageTypeGroupMenuItem.disabled = false;
-    } else QOLRemoveVideoTypesPageTypeGroupMenuItem.disabled = true;
+        if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
+            const localYoutubeQOLJson = await GetValue("LocalYoutubeQOL", "{}", true);
+            const localYoutubeQOLParsed = JSON.parse(localYoutubeQOLJson);
 
-    if (currentWebsitesObject === undefined) return;
-
-    QOLRemoveVideoTypesTogglePageMenuItem.toggled = currentWebsitesObject.Active;
-
-    let shouldSave = false;
-    for (const key in wolfermusVideoTypesSettings) {
-        const settingsObject = wolfermusVideoTypesSettings[key];
-        if (!settingsObject) continue;
-        if (typeof settingsObject !== "object") continue;
-
-        let keyCopy = key.replace("Wolfermus", "");
-        if (!keyCopy) continue;
-
-        removeVideoTypesCreatedMenuItems[keyCopy].toggled = currentWebsitesObject.Hide[keyCopy];
-
-        if (RemoveVideoTypesSettings.Hide[keyCopy] !== currentWebsitesObject.Hide[keyCopy]) {
-            RemoveVideoTypesSettings.Hide[keyCopy] = currentWebsitesObject.Hide[keyCopy];
-            shouldSave = true;
+            ShouldDisable(QOLSettings, localYoutubeQOLParsed);
         }
+
+        QOLRemoveVideoTypesGroupMenuItem.collapsed = RemoveVideoTypesSettings.Collapsed;
+        QOLRemoveVideoTypesMenuItem.toggled = RemoveVideoTypesSettings.Active;
+
+        if (shouldSave) SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
     }
-
-    if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
-        const localYoutubeQOLJson = await GetValue("LocalYoutubeQOL", "{}", true);
-        const localYoutubeQOLParsed = JSON.parse(localYoutubeQOLJson);
-
-        ShouldDisable(QOLSettings, localYoutubeQOLParsed);
-    }
-
-    QOLRemoveVideoTypesGroupMenuItem.collapsed = RemoveVideoTypesSettings.Collapsed;
-    QOLRemoveVideoTypesMenuItem.toggled = RemoveVideoTypesSettings.Active;
-
-    if (shouldSave) SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
 }
-
-const removeVideoTypesCreatedMenuItems = {};
 
 /**
  * @async
@@ -887,7 +889,9 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
         if (shouldSave) SetValue("LocalYoutubeQOL", JSON.stringify(localYoutubeQOLParsed), true);
     });
 
-    await AddValueChangeListener("YoutubeQOL", ValueChangedCallback);
+    const valueChangedCallback = GenerateValueChangedCallback(QOLRemoveVideoTypesPlaylistMenuItem, QOLRemoveVideoTypesPageTypeGroupMenuItem, QOLRemoveVideoTypesTogglePageMenuItem, QOLRemoveVideoTypesGroupMenuItem, QOLRemoveVideoTypesMenuItem);
+
+    await AddValueChangeListener("YoutubeQOL", valueChangedCallback);
 
     let oldHref = document.location.href;
     const observeUrlChange = async () => {
@@ -895,7 +899,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
         oldHref = document.location.href;
 
         const YoutubeGottenInner = await GetValue("YoutubeQOL", "{}");
-        ValueChangedCallback("YoutubeQOL", undefined, YoutubeGottenInner, false);
+        valueChangedCallback("YoutubeQOL", undefined, YoutubeGottenInner, false);
     };
 
     window.addEventListener("yt-navigate-finish", observeUrlChange);
