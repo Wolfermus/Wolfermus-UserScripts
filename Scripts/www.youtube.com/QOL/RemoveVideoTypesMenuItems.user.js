@@ -523,7 +523,7 @@ function GetLocalSettings(json) {
  * @param { object } json2
  * @returns { boolean }
  */
-function ShouldDisable(json, json2) {
+async function ShouldDisable(json, json2) {
     const currentWebsitesObject = GetCurrentWebsitesObject(json);
     if (typeof json2 !== "object") {
         throw new Error(`Wolfermus ERROR: RemoveVideoTypesMenuItems - json2 is invalid`);
@@ -552,7 +552,7 @@ function ShouldDisable(json, json2) {
         localSettings.Disabled = true;
     }
 
-    if (shouldSave) SetValue("LocalYoutubeQOL", JSON.stringify(json2), true);
+    if (shouldSave) await SetValue("LocalYoutubeQOL", JSON.stringify(json2), true);
 
     return localSettings.Disabled;
 }
@@ -617,13 +617,13 @@ function GenerateValueChangedCallback(QOLRemoveVideoTypesPlaylistMenuItem, QOLRe
             const localYoutubeQOLJson = await GetValue("LocalYoutubeQOL", "{}", true);
             const localYoutubeQOLParsed = JSON.parse(localYoutubeQOLJson);
 
-            ShouldDisable(QOLSettings, localYoutubeQOLParsed);
+            await ShouldDisable(QOLSettings, localYoutubeQOLParsed);
         }
 
         QOLRemoveVideoTypesGroupMenuItem.collapsed = RemoveVideoTypesSettings.Collapsed;
         QOLRemoveVideoTypesMenuItem.toggled = RemoveVideoTypesSettings.Active;
 
-        if (shouldSave) SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
+        if (shouldSave) await SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
     }
 }
 
@@ -691,7 +691,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
 
         RemoveVideoTypesSettingsInner.Active = toggled;
 
-        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+        await SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
 
         if (toggled) LoadScriptOnce("RemoveVideoTypes");
     });
@@ -714,7 +714,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
         if (currentWebsitesObject.Active === toggled) return;
         currentWebsitesObject.Active = toggled;
 
-        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+        await SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
 
     debugger;
@@ -757,13 +757,13 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
 
             RemoveVideoTypesSettingsInner.Hide[keyCopy] = toggled;
 
-            SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+            await SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
         });
 
         removeVideoTypesCreatedMenuItems[keyCopy] = newQOLRemoveVideoTypesMenuItem;
     }
 
-    SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
+    await SetValue("YoutubeQOL", JSON.stringify(QOLSettings));
 
     const QOLRemoveVideoTypesPlaylistMenuItem = new WolfermusToggleButtonMenuItem(`Toggle This Playlist`);
     QOLRemoveVideoTypesPlaylistMenuItem.disabled = true;
@@ -807,7 +807,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
             shouldSave = true;
         }
 
-        if (shouldSave) SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+        if (shouldSave) await SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
     const keysArray = GetCurrentWebsitesEnabled();
     if (keysArray.length === 1) {
@@ -826,7 +826,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
 
     //     RemoveVideoTypesSettingsInner.Collapsed = newCollapsed;
 
-    //     SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+    //     await SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     // });
     QOLRemoveVideoTypesPageTypeGroupMenuItem.items.push(QOLRemoveVideoTypesTogglePageMenuItem);
     QOLRemoveVideoTypesPageTypeGroupMenuItem.items.push(...Object.values(removeVideoTypesCreatedMenuItems));
@@ -844,7 +844,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
 
         RemoveVideoTypesSettingsInner.Collapsed = newCollapsed;
 
-        SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
+        await SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
     });
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesMenuItem);
     QOLRemoveVideoTypesGroupMenuItem.items.push(QOLRemoveVideoTypesPageTypeGroupMenuItem);
@@ -860,7 +860,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
         const localYoutubeQOLJson = await GetValue("LocalYoutubeQOL", "{}", true);
         const localYoutubeQOLParsed = JSON.parse(localYoutubeQOLJson);
 
-        ShouldDisable(QOLSettings, localYoutubeQOLParsed);
+        await ShouldDisable(QOLSettings, localYoutubeQOLParsed);
         LoadScriptOnce("RemoveVideoTypes");
     }
 
@@ -881,12 +881,12 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
             let RemoveVideoTypesSettingsInner = QOLSettingsInner["RemoveVideoTypes"];
 
             if (RemoveVideoTypesSettingsInner.Active) {
-                ShouldDisable(QOLSettingsInner, localYoutubeQOLParsed);
+                await ShouldDisable(QOLSettingsInner, localYoutubeQOLParsed);
                 LoadScriptOnce("RemoveVideoTypes");
             }
         }
         if (localYoutubeQOL.Disabled !== disabled) shouldSave = false;
-        if (shouldSave) SetValue("LocalYoutubeQOL", JSON.stringify(localYoutubeQOLParsed), true);
+        if (shouldSave) await SetValue("LocalYoutubeQOL", JSON.stringify(localYoutubeQOLParsed), true);
     });
 
     const valueChangedCallback = GenerateValueChangedCallback(QOLRemoveVideoTypesPlaylistMenuItem, QOLRemoveVideoTypesPageTypeGroupMenuItem, QOLRemoveVideoTypesTogglePageMenuItem, QOLRemoveVideoTypesGroupMenuItem, QOLRemoveVideoTypesMenuItem);
