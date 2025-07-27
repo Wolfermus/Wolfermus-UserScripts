@@ -243,7 +243,7 @@ async function LoadScriptOnce(scriptName, baseURL, baseScriptURL, baseWebsiteScr
         const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}QOL/${scriptName}.user.js`));
         eval(script);
         if (typeof EntryRun !== "function") return undefined;
-        const result = EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
+        const result = await EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
         if (!result) return undefined;
         wolfermusPreventLoopLock1[scriptName].once = true;
         return result;
