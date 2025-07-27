@@ -1,4 +1,15 @@
-async (path) => {
+/**
+ * @async
+ * @param { string } baseURL
+ * @param { string } baseScriptURL
+ * @param { string } baseWebsiteScriptURL
+ * @param { string } branch 
+ * @returns { Promise<WolfermusGroupMenuItem | undefined> }
+ */
+const EntryRun = async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
+    debugger;
+
+    // TODO: Refactor and move function out of this function
     /**
  * @param {number | undefined} ms
  */
@@ -119,7 +130,7 @@ async (path) => {
 
     /**
      * @async
-     * @type {(key: string, defaultValue: any) => Promise<any | undefined | null>}
+     * @type {(key: string, defaultValue: any, forceLocal: boolean) => Promise<any | undefined | null>}
     */
     const GetValue = storageManagerLibrary["GetValue"];
 
@@ -854,3 +865,6 @@ async (path) => {
         // wlfPreviewToolTipTimeRemainingElementLeft.style.display = "none";
     }, 200);
 };
+
+// Uncomment below if running in console.
+// EntryRun("");
