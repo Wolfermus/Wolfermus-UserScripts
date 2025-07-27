@@ -626,6 +626,8 @@ async function UpdateWolfermusMainMenuStyle() {
         branch = "beta";
     }
 
+    branch = "RemoveVideoTypes-Script"; // TODO: Temp for this branch
+
     async function GetCSS() {
         const baseResourcesURL = `https://raw.githubusercontent.com/Wolfermus/Wolfermus-UserScripts/refs/heads/${branch}/Resources/`;
         const css = wolfermusBypassScriptPolicy.createScript(await MakeGetRequest(`${baseResourcesURL}Libraries/MainMenu/MainMenuLib.css`));
