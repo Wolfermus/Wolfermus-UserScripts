@@ -1226,7 +1226,8 @@ async function SetupEvents() {
  * @param { string } path 
  * @returns { Promise<boolean> }
  */
-const EntryRun = async (path) => {
+async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
+    // const EntryRun = async (path) => {
     'use strict';
 
     debugger;

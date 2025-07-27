@@ -624,7 +624,8 @@ const removeVideoTypesCreatedMenuItems = {};
  * @param { string } branch 
  * @returns { Promise<WolfermusGroupMenuItem | undefined> }
  */
-const EntryRun = async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
+async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
+    // const EntryRun = async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     const startTime = performance.now();
 
     const removeVideoTypesModule = WolfermusGetModule("YouTubeQOLRemoveVideoTypes", true);

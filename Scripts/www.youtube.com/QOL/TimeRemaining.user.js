@@ -6,7 +6,8 @@
  * @param { string } branch 
  * @returns { Promise<WolfermusGroupMenuItem | undefined> }
  */
-const EntryRun = async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
+async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
+    // const EntryRun = async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
     debugger;
 
     // TODO: Refactor and move function out of this function
