@@ -230,26 +230,29 @@ async function SetupUtilities(baseURL, baseScriptURL, baseWebsiteScriptURL, bran
 }
 
 let wolfermusPreventLoopLock1 = {};
-async function LoadScriptOnce(scriptName) {
+async function LoadScriptOnce(scriptName, baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
     if (!wolfermusPreventLoopLock1[scriptName]) {
         wolfermusPreventLoopLock1[scriptName] = {
             once: false,
             value: 10
         }
     }
-    if (wolfermusPreventLoopLock1[scriptName].once) return;
+    if (wolfermusPreventLoopLock1[scriptName].once) return undefined;
     //console.log("Scripts/Main.js - 3");
     try {
         const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}QOL/${scriptName}.user.js`));
-        // TODO: Allow scripts to return an object detailing to only load script once, a menuitem.
-        await eval(script)(baseScriptURL);
+        eval(script);
+        if (typeof EntryRun !== "function") return undefined;
+        const result = EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
+        if (!result) return undefined;
         wolfermusPreventLoopLock1[scriptName].once = true;
+        return result;
     } catch (error) {
-        if (!wolfermusPreventLoopLock1[scriptName]) return;
-        if (wolfermusPreventLoopLock1[scriptName].value <= 0) return;
+        if (!wolfermusPreventLoopLock1[scriptName]) return undefined;
+        if (wolfermusPreventLoopLock1[scriptName].value <= 0) return undefined;
         wolfermusPreventLoopLock1[scriptName].value--;
         await Sleep(100);
-        await LoadScriptOnce(scriptName);
+        await LoadScriptOnce(scriptName, baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
     }
 }
 
@@ -693,7 +696,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
 
         await SetValue("YoutubeQOL", JSON.stringify(QOLSettingsInner));
 
-        if (toggled) LoadScriptOnce("RemoveVideoTypes");
+        if (toggled) LoadScriptOnce("RemoveVideoTypes", baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
     });
 
     const currentWebsites = GetCurrentWebsitesObject(QOLSettings);
@@ -861,7 +864,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
         const localYoutubeQOLParsed = JSON.parse(localYoutubeQOLJson);
 
         await ShouldDisable(QOLSettings, localYoutubeQOLParsed);
-        LoadScriptOnce("RemoveVideoTypes");
+        LoadScriptOnce("RemoveVideoTypes", baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
     }
 
     QOLRemoveVideoTypesGroupMenuItem.DisabledEventAddCallback(async (disabled) => {
@@ -882,7 +885,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
 
             if (RemoveVideoTypesSettingsInner.Active) {
                 await ShouldDisable(QOLSettingsInner, localYoutubeQOLParsed);
-                LoadScriptOnce("RemoveVideoTypes");
+                LoadScriptOnce("RemoveVideoTypes", baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
             }
         }
         if (localYoutubeQOL.Disabled !== disabled) shouldSave = false;
