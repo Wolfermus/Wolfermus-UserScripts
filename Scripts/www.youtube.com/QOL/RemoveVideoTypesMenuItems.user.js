@@ -548,14 +548,14 @@ async function ShouldDisable(json, json2) {
                 }
             }
         }
-        if (localSettings.Disabled !== shouldEnable) shouldSave = true;
+        //if (localSettings.Disabled !== shouldEnable) shouldSave = true;
         localSettings.Disabled = shouldEnable;
     } else {
-        if (localSettings.Disabled !== true) shouldSave = true;
+        //if (localSettings.Disabled !== true) shouldSave = true;
         localSettings.Disabled = true;
     }
 
-    if (shouldSave) await SetValue("YoutubeQOLLocal", JSON.stringify(json2), true);
+    await SetValue("YoutubeQOLLocal", JSON.stringify(json2), true);
 
     return localSettings.Disabled;
 }
