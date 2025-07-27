@@ -222,7 +222,7 @@ async (baseURL, baseScriptURL, baseWebsiteScriptURL, branch) => {
         //console.log("Scripts/Main.js - 3");
         try {
             const script = bypassScriptPolicyMainMenuMain.createScript(await MakeGetRequest(`${baseWebsiteScriptURL}QOL/${scriptName}.user.js`));
-            await eval(script);
+            eval(script);
             if (typeof EntryRun !== "function") return undefined;
             const result = EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch);
             if (!result) return undefined;
