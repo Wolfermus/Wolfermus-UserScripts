@@ -555,7 +555,7 @@ async function ShouldDisable(json, json2) {
         localSettings.Disabled = true;
     }
 
-    if (shouldSave) await SetValue("LocalYoutubeQOL", JSON.stringify(json2), true);
+    if (shouldSave) await SetValue("YoutubeQOLLocal", JSON.stringify(json2), true);
 
     return localSettings.Disabled;
 }
@@ -617,7 +617,7 @@ function GenerateValueChangedCallback(QOLRemoveVideoTypesPlaylistMenuItem, QOLRe
         }
 
         if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
-            const localYoutubeQOLJson = await GetValue("LocalYoutubeQOL", "{}", true);
+            const localYoutubeQOLJson = await GetValue("YoutubeQOLLocal", "{}", true);
             const localYoutubeQOLParsed = JSON.parse(localYoutubeQOLJson);
 
             await ShouldDisable(QOLSettings, localYoutubeQOLParsed);
@@ -860,7 +860,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
 
 
     if (RemoveVideoTypesSettings.Active && !QOLRemoveVideoTypesGroupMenuItem.disabled) {
-        const localYoutubeQOLJson = await GetValue("LocalYoutubeQOL", "{}", true);
+        const localYoutubeQOLJson = await GetValue("YoutubeQOLLocal", "{}", true);
         const localYoutubeQOLParsed = JSON.parse(localYoutubeQOLJson);
 
         await ShouldDisable(QOLSettings, localYoutubeQOLParsed);
@@ -868,7 +868,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
     }
 
     QOLRemoveVideoTypesGroupMenuItem.DisabledEventAddCallback(async (disabled) => {
-        const localYoutubeQOLJson = await GetValue("LocalYoutubeQOL", "{}", true);
+        const localYoutubeQOLJson = await GetValue("YoutubeQOLLocal", "{}", true);
         const localYoutubeQOLParsed = JSON.parse(localYoutubeQOLJson);
         const localYoutubeQOL = GetLocalSettings(localYoutubeQOLParsed);
 
@@ -889,7 +889,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
             }
         }
         if (localYoutubeQOL.Disabled !== disabled) shouldSave = false;
-        if (shouldSave) await SetValue("LocalYoutubeQOL", JSON.stringify(localYoutubeQOLParsed), true);
+        if (shouldSave) await SetValue("YoutubeQOLLocal", JSON.stringify(localYoutubeQOLParsed), true);
     });
 
     const valueChangedCallback = GenerateValueChangedCallback(QOLRemoveVideoTypesPlaylistMenuItem, QOLRemoveVideoTypesPageTypeGroupMenuItem, QOLRemoveVideoTypesTogglePageMenuItem, QOLRemoveVideoTypesGroupMenuItem, QOLRemoveVideoTypesMenuItem);
