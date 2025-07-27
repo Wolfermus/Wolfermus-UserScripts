@@ -342,9 +342,12 @@ function ValidateWebsiteEnabledSetting(objectBase, name, defaultActive = true) {
         if (!settingsObject) continue;
         if (typeof settingsObject !== "object") continue;
 
-        objectBase[name].Hide[key] ??= settingsObject.hide;
-        objectBase[name].Background[key] ??= settingsObject.background;
-        objectBase[name].Debug[key] ??= settingsObject.debug;
+        let keyCopy = key.replace("Wolfermus", "");
+        if (!keyCopy) continue;
+
+        objectBase[name].Hide[keyCopy] ??= settingsObject.hide;
+        objectBase[name].Background[keyCopy] ??= settingsObject.background;
+        objectBase[name].Debug[keyCopy] ??= settingsObject.debug;
     }
 }
 
@@ -592,6 +595,7 @@ async function ValueChangedCallback(key, oldValue, newValue, remote) {
         const settingsObject = wolfermusVideoTypesSettings[key];
         if (!settingsObject) continue;
         if (typeof settingsObject !== "object") continue;
+
         let keyCopy = key.replace("Wolfermus", "");
         if (!keyCopy) continue;
 
@@ -716,6 +720,7 @@ async function EntryRun(baseURL, baseScriptURL, baseWebsiteScriptURL, branch) {
         const settingsObject = wolfermusVideoTypesSettings[key];
         if (!settingsObject) continue;
         if (typeof settingsObject !== "object") continue;
+
         let keyCopy = key.replace("Wolfermus", "");
         if (!keyCopy) continue;
 
