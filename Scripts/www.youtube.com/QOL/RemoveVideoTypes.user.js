@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus RemoveVideoTypes Test (Beta)
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      3.1.2-beta.6
+// @version      3.1.2-beta.7
 // @description  This script is RemoveVideoTypes script test. (Beta)
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -1223,7 +1223,7 @@ async function SetupEvents() {
     if (!localYoutubeQOLJson || typeof localYoutubeQOLJson !== "string") localYoutubeQOLJson = "{}";
 
     await AddValueChangeListener("YoutubeQOL", ValueChangedCallback);
-    await AddValueChangeListener("YoutubeQOLLocal", ValueChangedCallback, true, true);
+    await AddValueChangeListener("YoutubeQOLLocal", ValueChangedCallback, true);
 
     ValueChangedCallback("YoutubeQOLLocal", undefined, localYoutubeQOLJson, false);
     ValueChangedCallback("YoutubeQOL", undefined, YoutubeGotten, false);
