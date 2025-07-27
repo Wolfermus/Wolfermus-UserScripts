@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus RemoveVideoTypes Test (Beta)
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      3.1.2-beta.3
+// @version      3.1.2-beta.4
 // @description  This script is RemoveVideoTypes script test. (Beta)
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -178,8 +178,9 @@ let GetValue = undefined;
  * @async
  * @param {string} key
  * @param {(key: string, oldValue: any, newValue: any, remote: boolean) => void} callback
- * @param {boolean} forceLocal
- * @type {(key: string, callback: ((key: string, oldValue: any, newValue: any, remote: boolean) => void, forceLocal: boolean)) => Promise<number>}
+ * @param {boolean} [forceLocal = false]
+ * @param {boolean} [ignoreEqual = false]
+ * @type {(key: string, callback: ((key: string, oldValue: any, newValue: any, remote: boolean) => void, forceLocal?: boolean, ignoreEqual?: boolean)) => Promise<number>}
  * @returns {Promise<number>}
  */
 let AddValueChangeListener = undefined;
@@ -1221,7 +1222,7 @@ async function SetupEvents() {
     ValueChangedCallback("YoutubeQOL", undefined, YoutubeGotten, false);
 
     await AddValueChangeListener("YoutubeQOL", ValueChangedCallback);
-    await AddValueChangeListener("YoutubeQOLLocal", ValueChangedCallback, true);
+    await AddValueChangeListener("YoutubeQOLLocal", ValueChangedCallback, true, true);
 }
 
 /**
