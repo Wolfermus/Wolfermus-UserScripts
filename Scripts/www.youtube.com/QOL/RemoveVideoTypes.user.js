@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Wolfermus RemoveVideoTypes Test (Beta)
 // @namespace    https://greasyfork.org/en/users/900467-feb199
-// @version      3.1.2-beta
+// @version      3.1.2-beta.2
 // @description  This script is RemoveVideoTypes script test. (Beta)
 // @author       Feb199/Dannysmoka
 // @homepageURL  https://github.com/Wolfermus/Wolfermus-UserScripts
@@ -323,6 +323,7 @@ function ProcessSettings(settings) {
         const settingsObject = wolfermusVideoTypesSettings[key];
         if (!settingsObject) continue;
         if (typeof settingsObject !== "object") continue;
+
         let keyCopy = key.replace("Wolfermus", "");
         if (!keyCopy) continue;
 
@@ -1208,6 +1209,8 @@ function SetupYTDApp() {
             console.log("yt-page-data-updated");
         }
     });
+
+    return true;
 }
 
 async function SetupEvents() {
