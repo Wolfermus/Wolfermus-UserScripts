@@ -304,7 +304,7 @@
                 const oldValue = wlfValueChangeListeners[listenerId].oldValue;
                 const newValue = await GetValue(key, wlfValueChangeListeners[listenerId].oldValue, true);
 
-                if (oldValue !== newValue) {
+                if (oldValue !== newValue || wlfValueChangeListeners[listenerId].ignoreEqual) {
                     await wlfValueChangeListeners[listenerId].callback(key, oldValue, newValue, true);
                     wlfValueChangeListeners[listenerId].oldValue = newValue;
                 }
@@ -331,17 +331,19 @@
      * @async
      * @param {string} key
      * @param {(key: string, oldValue: any, newValue: any, remote: boolean) => void} callback
-     * @param {boolean} forceLocal
+     * @param {boolean} [forceLocal = false]
+     * @param {boolean} [ignoreEqual = false]
      * @returns {Promise<number>}
      */
-    async function AddValueChangeListener(key, callback, forceLocal = false) {
+    async function AddValueChangeListener(key, callback, forceLocal = false, ignoreEqual = false) {
         let oldValue = await GetValue(key);
 
         let listener = {
             "key": key,
             "oldValue": oldValue,
             "callback": callback,
-            "handledByGM": false
+            "handledByGM": false,
+            "ignoreEqual": ignoreEqual
         };
         let listenerId;
         if (IsGMAddValueChangeListener && !forceLocal) {
