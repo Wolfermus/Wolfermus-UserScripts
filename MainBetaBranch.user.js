@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Wolfermus Main Menu (Beta)
+// @name         Wolfermus Main Menu (RemoveVideoTypes-Script)
 // @namespace    https://greasyfork.org/en/users/900467-feb199
 // @version      2.1.2-beta
 // @description  This script is a main menu that loads displays all scripts and allows you to enable them. (Beta)
